@@ -1,0 +1,40 @@
+---
+import { t, img, url, Container, Button, EditUrlPill } from "webto/variant";
+
+interface Props {
+  heading?: string;
+  subheading?: string;
+  features?: Array<{ title: string; description: string; icon?: string }>;
+  /** Tampilkan nomor urut */
+  numbered?: boolean;
+}
+
+const {
+  heading = "Kenapa memilih kami",
+  subheading = "Tiga alasan pelanggan kembali lagi.",
+  features = [],
+  numbered = true,
+} = Astro.props;
+const n = features.length;
+const cols = n >= 3 ? "md:grid-cols-3" : n === 2 ? "md:grid-cols-2" : "max-w-md mx-auto";
+---
+<section class="py-20 sm:py-28 bg-background text-foreground">
+  <Container>
+    <div class="max-w-2xl mb-12">
+      <h2 class="text-3xl sm:text-4xl font-bold tracking-tight" style="font-family: var(--font-heading);">
+        <span data-edit-field="heading">{heading}</span>
+      </h2>
+      {subheading && <p data-edit-field="subheading" class="mt-4 text-lg text-muted-foreground">{subheading}</p>}
+    </div>
+    <div class:list={["grid gap-6", cols]}>
+      {features.map((f, i) => (
+        <div class="rounded-lg border border-border bg-card p-6">
+          {numbered && <span aria-hidden="true" class="text-sm font-mono text-primary">{String(i + 1).padStart(2, "0")}</span>}
+          {f.icon && <span data-edit-icon={`features.${i}.icon`} class="block text-2xl mt-2">{f.icon}</span>}
+          <h3 data-edit-field={`features.${i}.title`} class="mt-3 text-lg font-semibold">{f.title}</h3>
+          <p data-edit-field={`features.${i}.description`} class="mt-2 text-muted-foreground">{f.description}</p>
+        </div>
+      ))}
+    </div>
+  </Container>
+</section>

@@ -1,0 +1,10 @@
+{
+  "heading": "Kenapa memilih kami",
+  "subheading": "Tiga alasan pelanggan kembali lagi.",
+  "numbered": true,
+  "features": [
+    { "title": "Biji lokal", "description": "Dipetik dari petani mitra di Temanggung.", "icon": "🌱" },
+    { "title": "Roasting sendiri", "description": "Setiap pekan, profil sangrai disesuaikan musim.", "icon": "🔥" },
+    { "title": "Barista bersertifikat", "description": "Setiap cangkir lewat tangan yang terlatih.", "icon": "☕" }
+  ]
+}

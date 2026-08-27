@@ -1,0 +1,37 @@
+---
+import { t, img, url, Container, Button, EditUrlPill } from "webto/variant";
+
+interface Props {
+  headline?: string;
+  subheadline?: string;
+  ctaText?: string;
+  ctaUrl?: string;
+  images?: Array<{ url: string; alt?: string }>;
+}
+
+const { headline, subheadline, ctaText = "Mulai Sekarang", ctaUrl = "#", images = [] } = Astro.props;
+const image = img(images[0]?.url, 960);
+---
+<section class="py-20 sm:py-28 bg-background">
+  <Container>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <div>
+        <h1 class="text-4xl font-bold tracking-tight sm:text-5xl" style="font-family: var(--font-heading);">
+          <span data-edit-field="headline">{headline}</span>
+        </h1>
+        {subheadline && <p data-edit-field="subheadline" class="mt-6 text-lg text-muted-foreground">{subheadline}</p>}
+        {ctaText && (
+          <Button href={url(ctaUrl)} size="lg" class="relative mt-8">
+            <span data-edit-field="ctaText">{ctaText}</span>
+            <EditUrlPill field="ctaUrl" value={ctaUrl} />
+          </Button>
+        )}
+      </div>
+      {image ? (
+        <img src={image} alt={images[0]?.alt ?? ""} data-edit-image="images.0.url" class="w-full object-cover border border-border" style="border-radius: var(--radius);" />
+      ) : (
+        <div data-edit-image="images.0.url" class="w-full aspect-[4/3] bg-muted" style="border-radius: var(--radius);"></div>
+      )}
+    </div>
+  </Container>
+</section>
