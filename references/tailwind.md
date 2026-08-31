@@ -24,6 +24,18 @@ Opacity modifiers work on tokens: `bg-primary/10`, `text-foreground/70`, `border
 
 Everything structural: spacing (`p-6 gap-8 space-y-4`), flex/grid, sizing, typography scale and weight (`text-4xl font-bold tracking-tight`), position, overflow, shadows (`shadow-sm shadow-xl`), transitions/animations, responsive prefixes (`sm: md: lg:`), states (`hover: focus: group-hover:`), arbitrary values (`[mask-image:…]`). The default palette (`bg-slate-900`, `text-amber-500`) also compiles — but using it for anything the theme should control is a lint warning; reserve it for truly semantic colors (a green "success" tick, a red "sold out").
 
+## Heading sizes belong to the site
+
+`h1`-`h4` get their `font-size` from the site's theme (the owner's Style tab), through a rule the site keeps **outside** every cascade layer. Variant CSS lives in `@layer wvf`, and an unlayered declaration beats a layered one regardless of specificity - so `text-3xl` on an `<h2>` compiles, ships, and does nothing (the compiler warns: `heading-size-inert`). This is the same deal the platform's own variants have; it is what keeps a buyer's site on one heading scale. The preview shell mirrors it exactly, so what you see is what a site shows.
+
+When an element's size is part of the design and must not be rescaled (a member name that must stay small, a stat number that must not blow out of its card): use `!text-base` (any `!text-*`). The `!` prefix is **honored everywhere** - the platform never rewrites it, neither the theme's heading scale nor a site owner's per-section body-size override touches it. It stays rem-based, so it only follows the site-wide base body size; an inline `style="font-size: ..."` pins a size absolutely.
+
+When a heading merely shouldn't use the heading scale but *should* scale with body text, use a non-heading tag (`<p>`, `<span>`) with a plain `text-*` - plain `text-*` follows the owner's body-size settings, and works everywhere except `h1`-`h4`.
+
+## Negative utilities
+
+`-mt-16`, `-translate-y-2`, `-inset-1`, `-z-10` compile like any other utility (compiler ≥ 0.1.2; 0.1.0 dropped them silently). Any class token the compiler cannot accept — for example `[&>*]:mt-2` — now raises a `tailwind-skipped` warning instead of vanishing; `--strict` fails on it. Rewrite such tokens (arbitrary values like `mt-[-4rem]` are fine) or move the rule into `<style>`.
+
 ## Rules the compiler enforces
 
 - Class names must be **literal strings** in the file: in `class="…"`, in `class:list={["a b", cond && "c", { d: flag }]}`, in `const cols = "md:grid-cols-2"`. A class built from content (`"bg-" + color`) is never compiled.

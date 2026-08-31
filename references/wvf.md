@@ -151,7 +151,7 @@ Tailwind v4 is compiled at upload from the class strings found in your file (sta
 | `import` `props` `props-type` `types` `astro` `ts-cast` `statement` | error | frontmatter |
 | `parse` `component` `spread` `arrow-block` `forbidden` `unknown-id` | error | template/expressions |
 | `tag` `attr` `attr-handler` `url` `style-url` `fixed` | error | HTML |
-| `img-alt`* `dead-text`* `hardcoded-image`* `hardcoded-color`* `hardcoded-radius`* `hardcoded-font`* `id-attr` | warning | HTML/CSS quality |
+| `img-alt`* `dead-text`* `hardcoded-image`* `hardcoded-color`* `hardcoded-radius`* `hardcoded-font`* `tailwind-skipped`* `heading-size-inert` `id-attr` | warning | HTML/CSS quality |
 | `style-global` `style-define-vars` `style-size` `css-import` `css-font-face` `css-expression` `css-behavior` `css-url` `css-parse` `css-size` | error | CSS (`css-url` is a warning for unsplash/pexels hosts) |
 | `css-root` | warning | selector rewritten to root |
 | `script-inline` `script-src` `script-define-vars` `script-type` `script-size` `script-syntax` `script-obfuscation` `script-with` `script-import` `script-debugger` `script-forbidden` `script-html` `script-loop` `script-count` | error | JavaScript |
