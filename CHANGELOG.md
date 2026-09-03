@@ -35,7 +35,7 @@
 
 - `references/tailwind.md`: **Sources built on another CSS framework** — leftover
   framework classes (`btn btn-primary`) are candidate-shaped, so Tailwind silently
-  emits nothing; rewrite completely. The compiler (≥ 0.1.5) warns `unknown-class`,
+  emits nothing; rewrite completely. The compiler CLI (≥ 0.1.6) warns `unknown-class`,
   deliberately sparing `group`/`peer` markers, `js-*`/`wv-*` script hooks, and any
   class the variant's own `<style>`/`<script>` mentions; advisory, not strict-fatal.
 - `references/wvf.md`: `unknown-class` added to the lint-code table.
