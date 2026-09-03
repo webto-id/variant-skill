@@ -30,3 +30,12 @@
   0.1.5): a nested `&` means the parent rule (standard semantics), a top-level `&`
   is still the variant root; nested `@media`/`@supports` are hoisted. This is the
   fix for hover:/before:/after: being dead on live sites.
+
+## 0.1.3 — 2026-09-03
+
+- `references/tailwind.md`: **Sources built on another CSS framework** — leftover
+  framework classes (`btn btn-primary`) are candidate-shaped, so Tailwind silently
+  emits nothing; rewrite completely. The compiler (≥ 0.1.5) warns `unknown-class`,
+  deliberately sparing `group`/`peer` markers, `js-*`/`wv-*` script hooks, and any
+  class the variant's own `<style>`/`<script>` mentions; advisory, not strict-fatal.
+- `references/wvf.md`: `unknown-class` added to the lint-code table.

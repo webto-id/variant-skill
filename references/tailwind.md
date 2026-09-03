@@ -44,6 +44,16 @@ When a heading merely shouldn't use the heading scale but *should* scale with bo
 - Forbidden in CSS: `@import`, `@font-face`, `url()` to any host except `data:image/svg+xml` (and unsplash/pexels with a warning), `expression()`, `behavior`, `position: fixed`.
 - Compiled CSS (Tailwind + yours) must stay under 64 KB — the Tailwind output is per-variant, so avoid huge arbitrary-value lists.
 
+## Sources built on another CSS framework
+
+A source that uses Bootstrap/Bulma/BEM classes (or a framework's compiled output) must be rewritten **completely** — a leftover `btn btn-primary` is candidate-shaped, so Tailwind silently emits nothing for it and the element renders unstyled. The compiler warns `unknown-class` for such tokens, with three deliberate silences — do not "fix" the warning by deleting these:
+
+- `group` / `peer` (and `group/name`): Tailwind marker classes that emit no CSS by design.
+- `js-*` / `wv-*` prefixes: script-hook classes by convention. A class that exists only for your `<script>` to find belongs under `js-`.
+- Any class your own `<style>` or `<script>` mentions — it is doing its job.
+
+The warning is advisory (`--strict` still passes): the heuristics cannot see every legitimate hook. Treat it as a checklist of "did I finish converting this?", and confirm in `preview.html`.
+
 ## Converting a raw HTML/CSS design
 
 1. Replace every hardcoded color with the closest token (brand → `primary`, secondary brand → `secondary`, warm highlight → `accent`, greys → `muted`/`border`/`muted-foreground`).
