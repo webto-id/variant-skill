@@ -57,3 +57,12 @@
   data before render. Render `price` verbatim (pre-formatted), survive the
   empty list, keep `url` optional, never hide `source`; pagination is the
   page's job, not the section's.
+
+## 0.1.6 — 2026-09-04
+
+- `@webto-id/variant-check` **0.1.7** validates chrome types: `--type navbar` /
+  `banner` / `footer` now work (the bundled base schemas carry all 24 types).
+- `references/wvf.md` §4b clarified: `siteName` is an ORDINARY editable base
+  field — the renderer only injects a fallback; the true context props are
+  `pages`, `currentSlug`, `linkPrefix`, `colorMode` (+ `footerPages`,
+  `imageCredits` on footers).
