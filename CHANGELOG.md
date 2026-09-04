@@ -39,3 +39,12 @@
   deliberately sparing `group`/`peer` markers, `js-*`/`wv-*` script hooks, and any
   class the variant's own `<style>`/`<script>` mentions; advisory, not strict-fatal.
 - `references/wvf.md`: `unknown-class` added to the lint-code table.
+
+## 0.1.4 — 2026-09-04
+
+- `references/wvf.md` §4b: **site chrome** (navbar/banner/footer) may now be WVF.
+  Renderer-injected context props (`pages`, `currentSlug`, `linkPrefix`,
+  `siteName`, `colorMode`; footer also `footerPages`/`imageCredits`) are read
+  from Props and never become editor fields. Roots must stay in normal flow:
+  `position: fixed` is now a compile error for every type — the platform makes
+  the section wrapper sticky (a `u:` navbar gets "bar" mode automatically).

@@ -128,6 +128,15 @@ Allowed and typical: `root.querySelector(All)`, `addEventListener`, `classList`,
 
 Review rule: a variant **with** a script needs admin review before it can be sold; a new version that changes the script goes back to review.
 
+## 4b. Site chrome (navbar / banner / footer)
+
+Chrome types compile like any other variant, with two extra rules:
+
+- **Context props are injected by the renderer, never edited by the owner.** Declare them in `interface Props` to read them; the compiler keeps them out of the editor schema: `pages?: Array<{ title: string; slug: string }>` (the site's nav pages, already filtered — a one-page site gets `[]`), `currentSlug?: string` (for active-link styling), `linkPrefix?: string` (prepend to every internal href: `url(linkPrefix + (p.slug ? "/" + p.slug : "/"))` — this keeps editor previews navigable), `siteName?: string`, `colorMode?: "light"|"dark"|"system"`; footers additionally get `footerPages` and `imageCredits`. Everything else you declare is ordinary content.
+- **The root stays in normal flow — `position: fixed` is a compile error everywhere.** The platform positions the section WRAPPER: a `u:` navbar automatically gets wrapper-sticky "bar" mode (pinned solid bar). Do not try to stick or fix anything yourself; give the bar a real height and let the wrapper do the pinning. Mobile menus: a `<details>`/class-toggle drawer via the script (remember `aria-hidden` on the closed state so the overlay never traps clicks).
+
+A navbar renders on EVERY page of a buyer's site — review is strict about it; test with 1 page (empty `pages`), many pages, and long titles.
+
 ## 5. Macros and helpers
 
 - `<Container class?>` → `<div class="mx-auto w-full px-6 …" style="max-width: var(--site-max-width, 72rem);">`.
