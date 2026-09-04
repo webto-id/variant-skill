@@ -62,6 +62,8 @@
 
 - `@webto-id/variant-check` **0.1.7** validates chrome types: `--type navbar` /
   `banner` / `footer` now work (the bundled base schemas carry all 24 types).
+- products/blog: the compiler now GUARANTEES the `source` (manual/database)
+  switch stays visible in the editor even when the variant never reads it.
 - `references/wvf.md` §4b clarified: `siteName` is an ORDINARY editable base
   field — the renderer only injects a fallback; the true context props are
   `pages`, `currentSlug`, `linkPrefix`, `colorMode` (+ `footerPages`,

@@ -144,7 +144,7 @@ A navbar renders on EVERY page of a buyer's site — review is strict about it; 
 - `products?: Array<{ title: string; price: string; image?: string; description?: string; url?: string; category?: string }>` — `price` arrives PRE-FORMATTED ("Rp 150.000" or a range); render it verbatim, never parse or re-format it.
 - `posts?: Array<{ title: string; excerpt: string; image?: string; date?: string; author?: string; url?: string }>`.
 
-In manual mode the owner edits the list in the editor; in database mode the platform fills the array from the site's real products/posts before render (same shape). Rules: handle the EMPTY list (a fresh database mode has no rows yet — render the heading, not a broken grid); `url` is optional (no link → no `<a>`); do not hide `source` via hiddenFields (it is how the owner switches modes); pagination is rendered by the page OUTSIDE your section — ignore it.
+In manual mode the owner edits the list in the editor; in database mode the platform fills the array from the site's real products/posts before render (same shape). Rules: handle the EMPTY list (a fresh database mode has no rows yet — render the heading, not a broken grid); `url` is optional (no link → no `<a>`); `source` stays visible in the editor automatically (the compiler never hides it, even when your variant does not read it) - it is how the owner switches modes; pagination is rendered by the page OUTSIDE your section — ignore it.
 
 ## 5. Macros and helpers
 
