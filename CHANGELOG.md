@@ -48,3 +48,12 @@
   from Props and never become editor fields. Roots must stay in normal flow:
   `position: fixed` is now a compile error for every type — the platform makes
   the section wrapper sticky (a `u:` navbar gets "bar" mode automatically).
+
+## 0.1.5 — 2026-09-04
+
+- `references/wvf.md` §4c: **DB-driven sections** (products/blog) — a variant
+  renders the same base card arrays in both source modes (`manual` |
+  `database`); the platform fills `products[]`/`posts[]` from the site's real
+  data before render. Render `price` verbatim (pre-formatted), survive the
+  empty list, keep `url` optional, never hide `source`; pagination is the
+  page's job, not the section's.

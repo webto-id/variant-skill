@@ -137,6 +137,15 @@ Chrome types compile like any other variant, with two extra rules:
 
 A navbar renders on EVERY page of a buyer's site — review is strict about it; test with 1 page (empty `pages`), many pages, and long titles.
 
+## 4c. DB-driven sections (products / blog)
+
+`products` and `blog` sections have two data modes the OWNER picks (`source: "manual" | "database"`); a variant sees no difference — it always renders the same base fields:
+
+- `products?: Array<{ title: string; price: string; image?: string; description?: string; url?: string; category?: string }>` — `price` arrives PRE-FORMATTED ("Rp 150.000" or a range); render it verbatim, never parse or re-format it.
+- `posts?: Array<{ title: string; excerpt: string; image?: string; date?: string; author?: string; url?: string }>`.
+
+In manual mode the owner edits the list in the editor; in database mode the platform fills the array from the site's real products/posts before render (same shape). Rules: handle the EMPTY list (a fresh database mode has no rows yet — render the heading, not a broken grid); `url` is optional (no link → no `<a>`); do not hide `source` via hiddenFields (it is how the owner switches modes); pagination is rendered by the page OUTSIDE your section — ignore it.
+
 ## 5. Macros and helpers
 
 - `<Container class?>` → `<div class="mx-auto w-full px-6 …" style="max-width: var(--site-max-width, 72rem);">`.
