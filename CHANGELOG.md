@@ -87,3 +87,13 @@
 - `--out` previews embed the platform effect runtime, so `data-wv-effect`
   motion is visible locally before upload.
 
+## CLI 0.1.9 — 2026-09-06
+
+- **Fix (High)**: the runtime script wrapper listed `eval`/`Function` as
+  parameter names under `"use strict"` — a strict-mode PARSE error, so every
+  script-carrying variant's script died before its first line. Both are now
+  out of the shadow list (the `script-forbidden` lint already rejects those
+  identifiers in author code; no protection lost). `--out` previews emit the
+  fixed wrapper; wvf.md 4 snippet corrected (13 shadowed globals). Thanks to
+  the seller report that came with a minimal control experiment.
+

@@ -107,13 +107,13 @@ The compiler adds no root element. At render the host wraps your nodes in `<div 
 Exactly **one** `<script is:inline>` block (no `src`, no `define:vars`, `type` bare/`text/javascript`/`module`), ≤ 8 KB UTF-8. The compiler stores the raw body; the runtime wraps it:
 
 ```js
-(function(fetch,XMLHttpRequest,WebSocket,EventSource,eval,Function,localStorage,sessionStorage,indexedDB,postMessage,open,importScripts,navigator,cookieStore,caches){"use strict";
+(function(fetch,XMLHttpRequest,WebSocket,EventSource,localStorage,sessionStorage,indexedDB,postMessage,open,importScripts,navigator,cookieStore,caches){"use strict";
 var root=document.querySelector('[data-wv-inst="<uid>"]');if(!root)return;
 /* your code */
 })();
 ```
 
-So: `root` is pre-declared (query inside it: `root.querySelector(...)`), strict mode is on, the 15 shadowed globals are `undefined`, bare `return` is legal, and each instance on a page gets its own `root`. Scripts are re-executed when the editor swaps a section, so idempotent init is required (guard with a `data-*` flag on `root`).
+So: `root` is pre-declared (query inside it: `root.querySelector(...)`), strict mode is on, the 13 shadowed globals are `undefined` (`eval`/`Function` are blocked by lint instead — they are illegal as strict-mode parameter names), bare `return` is legal, and each instance on a page gets its own `root`. Scripts are re-executed when the editor swaps a section, so idempotent init is required (guard with a `data-*` flag on `root`).
 
 Rejected (all `error`):
 
