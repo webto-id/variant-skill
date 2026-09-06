@@ -68,3 +68,15 @@
   field — the renderer only injects a fallback; the true context props are
   `pages`, `currentSlug`, `linkPrefix`, `colorMode` (+ `footerPages`,
   `imageCredits` on footers).
+
+## 2026-09-06
+
+- New reference section **wvf.md 5b: platform effect library** — declarative
+  `data-wv-effect` motion (reveal-up/down/left/right, fade, stagger, counter,
+  parallax-soft, zoom-hover) animated by the platform's audited runtime, so
+  effect-using variants carry no script and skip the script-review queue.
+  Params `data-wv-delay` (100ms steps, 0-10) / `data-wv-duration`
+  (100-5000ms) / `data-wv-strength`; unknown values are lint error
+  `effect-unknown`; reduced-motion is honored centrally. `variant-check
+  --out` previews include the runtime.
+

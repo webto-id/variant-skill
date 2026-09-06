@@ -146,6 +146,20 @@ A navbar renders on EVERY page of a buyer's site — review is strict about it; 
 
 In manual mode the owner edits the list in the editor; in database mode the platform fills the array from the site's real products/posts before render (same shape). Rules: handle the EMPTY list (a fresh database mode has no rows yet — render the heading, not a broken grid); `url` is optional (no link → no `<a>`); `source` stays visible in the editor automatically (the compiler never hides it, even when your variant does not read it) - it is how the owner switches modes; pagination is rendered by the page OUTSIDE your section — ignore it.
 
+## 5b. Platform effect library (data-wv-effect)
+
+Declarative motion WITHOUT writing a script (so no script-review queue): mark elements and the platform's audited runtime animates them on the live site.
+
+```astro
+<div data-wv-effect="reveal-up" data-wv-delay="1">...</div>
+<ul data-wv-effect="stagger" data-wv-delay="1">...</ul>
+<span data-wv-effect="counter" data-wv-duration="1500">128</span>
+```
+
+Effects (closed enum — anything else is lint error `effect-unknown`): `reveal-up` / `reveal-down` / `reveal-left` / `reveal-right` (fade + 22px slide in the named FROM-direction, once, on viewport entry), `fade`, `stagger` (direct children reveal sequentially; `data-wv-delay` = step between children), `counter` (first number in the text counts up when visible), `parallax-soft` (gentle translateY scrub; `data-wv-strength="soft"|"medium"`), `zoom-hover` (images inside scale 1.03 on hover — give the container `overflow-hidden`).
+
+Params: `data-wv-delay` = whole steps of 100ms, 0-10; `data-wv-duration` = ms, 100-5000. Rules the platform enforces so you don't have to: `prefers-reduced-motion` disables everything centrally (never write your own fallback), elements are only hidden after the runtime loads (no-JS/crawlers/thumbnails always see content), effects are OFF inside the editor. Don't put an effect on a `data-edit-field` element (warning `effect-on-editable`) — wrap it instead. `variant-check --out` previews include the runtime, so test the motion locally.
+
 ## 5. Macros and helpers
 
 - `<Container class?>` → `<div class="mx-auto w-full px-6 …" style="max-width: var(--site-max-width, 72rem);">`.
