@@ -97,3 +97,12 @@
   fixed wrapper; wvf.md 4 snippet corrected (13 shadowed globals). Thanks to
   the seller report that came with a minimal control experiment.
 
+## 2026-09-07
+
+- **Effect runtime rescan** (seller bug report): sections swapped in after
+  page load (variant chips, editor apply, DB pagination) are now rescanned
+  automatically via one MutationObserver — previously only elements present
+  at load animated. wvf.md 5b notes the guarantee: never write your own
+  IntersectionObserver for these effects. Ships in the platform runtime and
+  in `variant-check@0.1.9` previews.
+
