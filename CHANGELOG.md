@@ -80,3 +80,10 @@
   `effect-unknown`; reduced-motion is honored centrally. `variant-check
   --out` previews include the runtime.
 
+## CLI 0.1.8 — 2026-09-06
+
+- Effect-library lint shipped in `@webto-id/variant-check@0.1.8`:
+  `effect-unknown` / `effect-param` (errors), `effect-on-editable` (warning).
+- `--out` previews embed the platform effect runtime, so `data-wv-effect`
+  motion is visible locally before upload.
+
