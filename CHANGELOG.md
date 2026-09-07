@@ -111,3 +111,15 @@
 - CLI `@webto-id/variant-check@0.1.10` is the first npm release containing
   the rescan runtime AND this lint (published 0.1.9 predates both) — use
   CLI ≥ 0.1.10.
+
+## 0.1.11 — 2026-09-07
+
+- `t()` is documented as a CLOSED enum of platform term keys (`address`,
+  `email`, `phone`, `hours`, `menu`, `readMore`, ... — see §5 helpers), never
+  display text: `t("Alamat")` used to crash the section at render while the
+  preview's identity `t` showed nothing wrong. New compiler lint `t-unknown`
+  (fails `--strict`) checks every literal `t()` argument, and the live
+  renderer now echoes unknown keys instead of throwing. A visible label with
+  no matching term key must be an optional content field with a default.
+- `--strict` now also fails on `edit-image-missing` (0.1.10 introduced the
+  lint but it never escalated under strict, contrary to the docs).
