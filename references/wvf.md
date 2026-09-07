@@ -113,6 +113,8 @@ var root=document.querySelector('[data-wv-inst="<uid>"]');if(!root)return;
 })();
 ```
 
+**Every `<img>` whose src comes from a content field MUST carry `data-edit-image` with that field's path** (`data-edit-image="imageLeft"`; in a loop, `data-edit-image={\`items.\${i}.image\`}`) — without it the owner cannot swap the image inline. Lint `edit-image-missing` (fails `--strict`) enforces this.
+
 So: `root` is pre-declared (query inside it: `root.querySelector(...)`), strict mode is on, the 13 shadowed globals are `undefined` (`eval`/`Function` are blocked by lint instead — they are illegal as strict-mode parameter names), bare `return` is legal, and each instance on a page gets its own `root`. Scripts are re-executed when the editor swaps a section, so idempotent init is required (guard with a `data-*` flag on `root`).
 
 Rejected (all `error`):

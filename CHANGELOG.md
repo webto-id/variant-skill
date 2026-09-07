@@ -106,3 +106,11 @@
   IntersectionObserver for these effects. Ships in the platform runtime and
   in `variant-check@0.1.9` previews.
 
+## 2026-09-07 (b)
+
+- New lint **`edit-image-missing`** (fails `--strict`): every `<img>` whose
+  src comes from a content field must carry `data-edit-image` with that
+  field's path, or the owner cannot swap the image inline. wvf.md 4 states
+  the contract. From a seller field report of AI-authored variants shipping
+  uneditable images.
+
