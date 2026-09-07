@@ -114,3 +114,10 @@
   the contract. From a seller field report of AI-authored variants shipping
   uneditable images.
 
+## CLI 0.1.10 — 2026-09-07
+
+- Version housekeeping: the published 0.1.9 predates two later additions
+  that shipped under the same number in-repo. 0.1.10 is the first npm
+  release containing the **effect runtime rescan** (previews animate
+  late-added nodes) and the **`edit-image-missing`** lint. Use ≥ 0.1.10.
+
