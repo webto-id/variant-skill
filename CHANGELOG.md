@@ -69,7 +69,7 @@
   `pages`, `currentSlug`, `linkPrefix`, `colorMode` (+ `footerPages`,
   `imageCredits` on footers).
 
-## 2026-09-06
+## 0.1.7 — 2026-09-06
 
 - New reference section **wvf.md 5b: platform effect library** — declarative
   `data-wv-effect` motion (reveal-up/down/left/right, fade, stagger, counter,
@@ -77,47 +77,37 @@
   effect-using variants carry no script and skip the script-review queue.
   Params `data-wv-delay` (100ms steps, 0-10) / `data-wv-duration`
   (100-5000ms) / `data-wv-strength`; unknown values are lint error
-  `effect-unknown`; reduced-motion is honored centrally. `variant-check
-  --out` previews include the runtime.
+  `effect-unknown`; reduced-motion is honored centrally.
+- CLI `@webto-id/variant-check@0.1.8`: the effect lints, and `--out`
+  previews embed the effect runtime so motion is visible locally.
 
-## CLI 0.1.8 — 2026-09-06
-
-- Effect-library lint shipped in `@webto-id/variant-check@0.1.8`:
-  `effect-unknown` / `effect-param` (errors), `effect-on-editable` (warning).
-- `--out` previews embed the platform effect runtime, so `data-wv-effect`
-  motion is visible locally before upload.
-
-## CLI 0.1.9 — 2026-09-06
+## 0.1.8 — 2026-09-06
 
 - **Fix (High)**: the runtime script wrapper listed `eval`/`Function` as
   parameter names under `"use strict"` — a strict-mode PARSE error, so every
   script-carrying variant's script died before its first line. Both are now
   out of the shadow list (the `script-forbidden` lint already rejects those
-  identifiers in author code; no protection lost). `--out` previews emit the
-  fixed wrapper; wvf.md 4 snippet corrected (13 shadowed globals). Thanks to
-  the seller report that came with a minimal control experiment.
+  identifiers in author code; no protection lost). wvf.md 4 snippet
+  corrected (13 shadowed globals). Thanks to the seller report that came
+  with a minimal control experiment.
+- CLI `@webto-id/variant-check@0.1.9` ships the fixed wrapper in `--out`
+  previews.
 
-## 2026-09-07
+## 0.1.9 — 2026-09-07
 
 - **Effect runtime rescan** (seller bug report): sections swapped in after
   page load (variant chips, editor apply, DB pagination) are now rescanned
   automatically via one MutationObserver — previously only elements present
   at load animated. wvf.md 5b notes the guarantee: never write your own
-  IntersectionObserver for these effects. Ships in the platform runtime and
-  in `variant-check@0.1.9` previews.
+  IntersectionObserver for these effects.
 
-## 2026-09-07 (b)
+## 0.1.10 — 2026-09-07
 
 - New lint **`edit-image-missing`** (fails `--strict`): every `<img>` whose
   src comes from a content field must carry `data-edit-image` with that
   field's path, or the owner cannot swap the image inline. wvf.md 4 states
   the contract. From a seller field report of AI-authored variants shipping
   uneditable images.
-
-## CLI 0.1.10 — 2026-09-07
-
-- Version housekeeping: the published 0.1.9 predates two later additions
-  that shipped under the same number in-repo. 0.1.10 is the first npm
-  release containing the **effect runtime rescan** (previews animate
-  late-added nodes) and the **`edit-image-missing`** lint. Use ≥ 0.1.10.
-
+- CLI `@webto-id/variant-check@0.1.10` is the first npm release containing
+  the rescan runtime AND this lint (published 0.1.9 predates both) — use
+  CLI ≥ 0.1.10.
