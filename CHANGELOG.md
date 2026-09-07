@@ -123,3 +123,8 @@
   no matching term key must be an optional content field with a default.
 - `--strict` now also fails on `edit-image-missing` (0.1.10 introduced the
   lint but it never escalated under strict, contrary to the docs).
+- Chrome `linkPrefix` contract corrected: it is a PATH prefix (today always
+  `""` for uploaded chrome) — emit plain site-relative hrefs and never build
+  query strings; preview/dev params are re-attached by a platform script.
+  (The previous wording made prepending the preview query string look right,
+  which sent every navbar link back to the current page in preview.)
