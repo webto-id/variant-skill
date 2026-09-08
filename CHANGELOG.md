@@ -128,3 +128,11 @@
   query strings; preview/dev params are re-attached by a platform script.
   (The previous wording made prepending the preview query string look right,
   which sent every navbar link back to the current page in preview.)
+
+## 0.1.12 — 2026-09-08
+
+- Chrome footers: `imageCredits` is no longer injected and a footer variant
+  never needs to render photo/icon credits — the platform renders required
+  attribution (Unsplash/Pexels photos, CC BY icons) in its own strip below
+  whatever footer the site uses. `footerPages` remains the footer's extra
+  context prop.
