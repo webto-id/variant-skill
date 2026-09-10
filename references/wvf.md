@@ -28,7 +28,18 @@ Required (`interface Props { … }` or `type Props = { … }`). `extends` → er
 | `{ a: string; b?: number }` (nested ok) | object |
 | `\| undefined` / `\| null` | stripped |
 
-Anything else (`Date`, `Record`, `unknown`, named interfaces, non-literal unions) → `error` `props-type`. A `/** … */` comment right before a field becomes its editor description (extension fields only).
+Anything else (`Date`, `Record`, `unknown`, named interfaces, non-literal unions) → `error` `props-type`.
+
+**`/** … */` doc comments are the AI's prompt for that field, never an editor label** — the editor derives its label from the key name and never reads this text. Nested fields keep their own doc too (`facts?: Array<{ /** … */ label: string }>` — `label`'s comment survives independently of `facts`'s). Write it as an instruction: what the text is, how long, one concrete example.
+
+```astro
+/** Profession line under the name, ≤4 words. @example Konsultan Pajak */
+roleTitle?: string;
+/** Quick facts under the buttons. @max 4 */
+facts?: Array<{ /** Fact label, e.g. Pengalaman */ label: string; /** Fact value, e.g. 8+ tahun */ value: string }>;
+```
+
+Recognized tags (folded into the stored schema, stripped from the prose): `@example <text>`, `@max <n>` / `@min <n>` (array → item count; string → character count), `@default <text>` (metadata only — does not seed a value; a scalar's default stays the destructuring default below), `@title <text>`. An extension field with no doc at all, or a doc under 15 characters with no example signal (`@example`, "e.g.", "mis.", "contoh", or a quoted example), is flagged — `ext-field-undocumented` (promoted to error under `--strict`) or `ext-field-doc-thin` (warning always).
 
 ### 1.3 Destructuring and consts
 
@@ -47,7 +58,7 @@ Runtime evaluation is sandboxed: own properties only (no `__proto__`/`constructo
 
 ### 1.5 Schema derivation
 
-`base` = the section type's content schema (see `schema.md`). For each `Props` field: if the name exists in the base → it is a **base field** (`usedFields`; the editor uses the base type; a type mismatch is warning `props-type-mismatch`). Otherwise → **extension field** shown in the editor under "Pengaturan Variant". A key destructured but not declared → warning `props-undeclared` (added as string). `hiddenFields` = base fields the variant never reads — they disappear from the editor for this variant.
+`base` = the section type's content schema (see `schema.md`). For each `Props` field: if the name exists in the base → it is a **base field** (`usedFields`; the editor uses the base type; a type mismatch is warning `props-type-mismatch` — checked all the way down, so `features?: string[]` against a base of `Array<{text: string}>` is flagged even though both are "array" at the top level, and a key inside a base array item that the base item shape doesn't have is `props-unknown-item-key`, since the editor's field UI for that array is generated from the base item schema and would never populate it). Otherwise → **extension field** shown in the editor under "Pengaturan Variant" (see §1.2 for its doc-comment rules). A key destructured but not declared → warning `props-undeclared` (added as string). `hiddenFields` = base fields the variant never reads — they disappear from the editor for this variant.
 
 ## 2. Template
 
@@ -191,7 +202,9 @@ Tailwind v4 is compiled at upload from the class strings found in your file (sta
 | `css-root` | warning | selector rewritten to root |
 | `script-inline` `script-src` `script-define-vars` `script-type` `script-size` `script-syntax` `script-obfuscation` `script-with` `script-import` `script-debugger` `script-forbidden` `script-html` `script-loop` `script-count` | error | JavaScript |
 | `tailwind` `ir-size` | error | build limits |
-| `props-optional`* `props-type-mismatch` `props-undeclared` | warning | schema |
+| `props-optional`* `props-type-mismatch` `props-undeclared` `props-unknown-item-key` | warning | schema |
+| `ext-field-undocumented`* `ext-field-doc-thin` | warning | extension field docs (§1.2) |
+| `content-type` `content-required` `content-unknown-key` `content-min-items` `content-max-items` `content-enum` `content-invalid` | error | `--content` validated against the base schema (§9) — always an error, `--strict` or not |
 
 `*` = becomes an **error** in strict mode (`--strict`, and always when submitting for review).
 
@@ -204,4 +217,4 @@ Tailwind v4 is compiled at upload from the class strings found in your file (sta
 ```
 npx @webto-id/variant-check <file.astro> --type <sectionType> [--strict] [--content sample.json] [--out preview.html] [--theme light|dark|warm] [--json]
 ```
-Exit 0 = clean, 1 = errors, 2 = usage. Run with `--strict` before submitting.
+Exit 0 = clean, 1 = errors, 2 = usage. Run with `--strict` before submitting. `--content` is checked against the base schema too (`content-*` codes above) — a required nested field left empty or a base array item shaped wrong fails here, not only on upload.

@@ -52,7 +52,7 @@ Not supported as WVF (site chrome / system): `navbar banner footer post`.
 ## How the compiler classifies your `Props`
 
 1. Name matches a base field → **base field**. Keep the base type (string stays string, arrays keep the item shape). The editor form, AI generation and existing site content all work unchanged.
-2. Name is new → **extension field**, shown under "Pengaturan Variant". Allowed types: `string`, `number`, `boolean`, `"a" | "b"`, arrays of those, arrays/objects of primitives. Put a `/** Label */` doc comment on it — that's the editor label.
+2. Name is new → **extension field**, shown under "Pengaturan Variant". Allowed types: `string`, `number`, `boolean`, `"a" | "b"`, arrays of those, arrays/objects of primitives. The editor label is derived from the key name — it never reads the doc comment. The doc comment is the **AI's instruction for filling this field**, so write it as one: say what the text is, how long, and give a concrete example (`@example` tag or "e.g. …" inline). A field with no doc comment, or one with no example, is flagged by `variant-check` (`ext-field-undocumented` / `ext-field-doc-thin`) — see `wvf.md` §1.2 for the exact syntax.
 3. Base field you never read → **hidden** for this variant (fine; it means the design has no slot for it).
 
 ## Field-design rules that reviewers check

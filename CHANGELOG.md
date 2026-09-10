@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.1.13 — 2026-09-10
+
+- Extension-field doc comments are the model's fill-in instructions, never an
+  editor label — the editor derives its label from the key name and never
+  reads this text (a long-standing wording bug: earlier versions of this
+  skill and the compiler itself claimed the opposite). Rewritten guidance in
+  `SKILL.md`, `schema.md`, and `wvf.md` §1.2: say what the text is, how long,
+  and give a concrete example, using `@example`/`@max`/`@min`/`@default`/
+  `@title` tags (folded into the stored schema) or plain prose. Nested item
+  fields (`facts?: Array<{ /** … */ label: string }>`) now keep their own doc
+  independently of the array field's doc — previously the compiler dropped
+  or clobbered them.
+- New lint codes: `ext-field-undocumented` (no doc comment at all — error
+  under `--strict`), `ext-field-doc-thin` (doc too short / no example
+  signal — warning always), `props-unknown-item-key` (a key inside a base
+  array item the base item shape doesn't declare).
+- `--content` (compiler ≥ variant-check 0.1.12) now actually validates sample
+  content against the base schema — a required nested field left empty or a
+  base array item shaped wrong is caught here (`content-*` codes), not only
+  on upload.
+
 ## 0.1.0 — 2026-08-27
 
 - First public release, matching `@webto-id/variant-check@0.1.x` (compiler 0.1.0).
