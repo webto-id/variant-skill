@@ -36,7 +36,7 @@ interface Props {
   heading?: string;
   subheading?: string;
   features?: Array<{ title: string; description: string; icon?: string }>;
-  /** Tampilkan nomor urut */
+  /** Show a numbered prefix (1, 2, 3…) before each feature title, e.g. "01". */
   numbered?: boolean;
 }
 

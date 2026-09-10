@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.1.14 — 2026-09-10
+
+- Fixed a doc-comment example in `SKILL.md`'s own skeleton (`/** Tampilkan
+  nomor urut */`) that contradicted the English-prose rule 0.1.13 just
+  established — left over from before that rule existed.
+- `wvf.md`: new §1.2b **Which language, where** — a single table settling
+  where English prose belongs (doc comments; catalog `description`/`fits`/
+  `mood`) versus Bahasa Indonesia (destructuring/sample defaults) versus
+  "not your decision" (the buyer's actual generated content, governed by
+  `site.language` regardless of anything in this file). Written because the
+  rule was previously scattered across four files with no single place that
+  stated it plainly — and some of those places' own examples disagreed.
+
 ## 0.1.13 — 2026-09-10
 
 - Extension-field doc comments are the model's fill-in instructions, never an

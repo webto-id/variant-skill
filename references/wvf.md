@@ -41,6 +41,19 @@ facts?: Array<{ /** Fact label, e.g. Pengalaman */ label: string; /** Fact value
 
 Recognized tags (folded into the stored schema, stripped from the prose): `@example <text>`, `@max <n>` / `@min <n>` (array → item count; string → character count), `@default <text>` (metadata only — does not seed a value; a scalar's default stays the destructuring default below), `@title <text>`. An extension field with no doc at all, or a doc under 15 characters with no example signal (`@example`, "e.g.", "mis.", "contoh", or a quoted example), is flagged — `ext-field-undocumented` (promoted to error under `--strict`) or `ext-field-doc-thin` (warning always).
 
+### 1.2b Which language, where
+
+Four different pieces of text live in one file, each read by a different consumer — mixing them up is the most common review bounce:
+
+| Text | Language | Read by |
+|---|---|---|
+| `/** … */` doc comment on a field | **English prose** — same convention as every base field's own description and every built-in variant's `description`/`fits`/`mood` (`schema.md` §"How the compiler classifies") | The AI, as its instruction for filling this field |
+| `@example …` / `e.g. …` value *inside* a doc comment | Illustrative only — Indonesian is fine, it's just a sample value | The AI, as one concrete example to imitate; not a language directive |
+| Destructuring default (`heading = "Kenapa memilih kami"`) | **Bahasa Indonesia**, short, replaceable (`design.md` §"sample copy") | The buyer, in the marketplace preview before any real content is filled in |
+| Final generated site content (the JSON the wizard eventually writes into this field) | The buyer's own site language — Bahasa Indonesia by default, or whatever `site.language` is | Nothing here decides this — it's a platform-wide prompt rule applied uniformly, independent of any doc comment or default in this file |
+
+Nothing compiles differently for an Indonesian doc comment — the compiler doesn't check language — but it breaks the one convention every base field and every built-in variant already follows, and a template reviewer will bounce it back to English. The same rule applies to a bundle variant's own `description`/`fits`/`mood` when writing a `template.json` (see the template skill's `manifest.md`).
+
 ### 1.3 Destructuring and consts
 
 - Only `const { a, b = "default", key: local } = Astro.props;`. Rest `...x`, nested patterns → error `props`.
