@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.1.16 — 2026-09-11
+
+- New `@pairWith <field>` doc tag (compiler 0.1.8, `@webto-id/variant-check`
+  0.1.15) — §1.2c: pairs a NEW extension array with a base (or sibling
+  extension) array so the editor keeps their add/remove/reorder in
+  lockstep. This is the supported replacement for putting extra keys
+  directly on a base array's item shape (`stepsMeta[]` alongside `steps[]`
+  instead of adding `company`/`period` onto `steps[]` itself) — the latter
+  is only ever lint-warned (now `--strict`-promoted) and the platform
+  silently discards the extra keys at save time regardless. Does not merge
+  the two arrays into one card visually; it only keeps their indices
+  aligned. Validation (`pair-with-unknown` / `pair-with-not-array`) is
+  always an error, not gated by `--strict`.
+
 ## 0.1.15 — 2026-09-11
 
 - CLI `@webto-id/variant-check` 0.1.14: compiler bumped to **0.1.7** —

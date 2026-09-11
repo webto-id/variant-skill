@@ -54,6 +54,29 @@ Four different pieces of text live in one file, each read by a different consume
 
 Nothing compiles differently for an Indonesian doc comment — the compiler doesn't check language — but it breaks the one convention every base field and every built-in variant already follows, and a template reviewer will bounce it back to English. The same rule applies to a bundle variant's own `description`/`fits`/`mood` when writing a `template.json` (see the template skill's `manifest.md`).
 
+### 1.2c `@pairWith` — keep a sibling array index-aligned with a base array
+
+Real designs often carry richer per-item metadata than a base array's fixed item shape allows — a timeline's `steps[]` has `title`/`description`/`icon`, but the source also wants `company`/`period` per step. **Do not add those keys directly onto a base array's item shape** — the compiler only warns (`props-unknown-item-key`, now promoted to error under `--strict`, §7) and the platform then silently strips them at save time; nothing stores that data.
+
+The supported pattern: declare a **separate extension array** with its own item shape, and tag it `@pairWith <targetField>` naming the base (or another extension) array it rides alongside:
+
+```astro
+interface Props {
+  steps?: Array<{ title: string; description: string; icon?: string }>; // base field, untouched
+  /** Extra detail for each step — same length and order as steps. @pairWith steps */
+  stepsMeta?: Array<{
+    /** Company name for this step, e.g. PT Sinar Jaya */
+    company?: string;
+    /** Period covered, e.g. 2019-2021 */
+    period?: string;
+  }>;
+}
+```
+
+The editor renders `steps` and `stepsMeta` as two separate array cards (this does **not** merge them into one card — that would need actual compiler/schema changes, out of scope), but keeps them **index-locked**: adding, removing, or reordering an item in either one applies the identical operation to every other field in the pairing group, so item *N* of `stepsMeta` always describes item *N* of `steps`. The AI wizard's variant catalog is told the same constraint (`describeVariantFields` appends "must have the same length and order as steps") so generated content doesn't drift out of alignment either.
+
+Validation (always an error, not gated by `--strict`): `pair-with-unknown` if the named target field doesn't exist (typo-check your target name), `pair-with-not-array` if either side isn't an array. The target can be the base field itself, or another extension array declared anywhere in the same file (order doesn't matter). Several extension arrays may all `@pairWith` the same target — they all sync together.
+
 ### 1.3 Destructuring and consts
 
 - Only `const { a, b = "default", key: local } = Astro.props;`. Rest `...x`, nested patterns → error `props`.
@@ -240,6 +263,7 @@ Tailwind v4 is compiled at upload from the class strings found in your file (sta
 | `tailwind` `ir-size` | error | build limits |
 | `props-optional`* `props-unknown-item-key`* `props-type-mismatch` `props-undeclared` | warning | schema |
 | `ext-field-undocumented`* `ext-field-doc-thin` | warning | extension field docs (§1.2) |
+| `pair-with-unknown` `pair-with-not-array` | error | `@pairWith` (§1.2c) — always an error, `--strict` or not |
 | `content-type` `content-required` `content-unknown-key` `content-min-items` `content-max-items` `content-enum` `content-invalid` | error | `--content` validated against the base schema (§9) — always an error, `--strict` or not |
 
 `*` = becomes an **error** in strict mode (`--strict`, and always when submitting for review).
