@@ -75,7 +75,11 @@ interface Props {
 
 The editor renders `steps` and `stepsMeta` as two separate array cards (this does **not** merge them into one card — that would need actual compiler/schema changes, out of scope), but keeps them **index-locked**: adding, removing, or reordering an item in either one applies the identical operation to every other field in the pairing group, so item *N* of `stepsMeta` always describes item *N* of `steps`. The AI wizard's variant catalog is told the same constraint (`describeVariantFields` appends "must have the same length and order as steps") so generated content doesn't drift out of alignment either.
 
-Validation (always an error, not gated by `--strict`): `pair-with-unknown` if the named target field doesn't exist (typo-check your target name), `pair-with-not-array` if either side isn't an array. The target can be the base field itself, or another extension array declared anywhere in the same file (order doesn't matter). Several extension arrays may all `@pairWith` the same target — they all sync together.
+**Naming is compiler-enforced, not a suggestion.** Since the two cards can never be visually merged, the field's name is the buyer's only clue the two cards move together — `steps` + `avatars` reads as two unrelated lists that happen to change in lockstep (confusing, not obviously a feature); `steps` + `stepsAvatars` or `stepsDetails` reads as linked at a glance. The paired field's name **must start with its target's name at a real camelCase word boundary** (`stepsDetails` ✓, `stepsx` ✗ — that's not a word boundary) — enforced as `pair-with-bad-name`. `Details` is a good default suffix when nothing more specific fits (`Meta`/`Data` read as developer jargon to a buyer); a more descriptive suffix is fine too as long as the prefix matches (`stepsTimeline` is a legitimate name for `@pairWith steps`).
+
+**The paired field must be array-of-OBJECT, never a primitive array** (`stepsAvatars?: Array<{ url: string }>`, not `stepsAvatars?: string[]`) — enforced as `pair-with-not-object`. This isn't just style: a primitive array renders through a different editor component (`PrimitiveArrayEditor`) that the structural sync was never wired to, so a `@pairWith` on one would compile clean and silently never actually sync in the editor. Wrap even a single value in an object.
+
+Validation (always an error, not gated by `--strict`): `pair-with-unknown` if the named target field doesn't exist (typo-check your target name), `pair-with-not-array` if either side isn't an array, `pair-with-bad-name` if the name doesn't start with the target's, `pair-with-not-object` if the paired field's items aren't an object. The target can be the base field itself, or another extension array declared anywhere in the same file (order doesn't matter). Several extension arrays may all `@pairWith` the same target — they all sync together.
 
 ### 1.3 Destructuring and consts
 
@@ -263,7 +267,7 @@ Tailwind v4 is compiled at upload from the class strings found in your file (sta
 | `tailwind` `ir-size` | error | build limits |
 | `props-optional`* `props-unknown-item-key`* `props-type-mismatch` `props-undeclared` | warning | schema |
 | `ext-field-undocumented`* `ext-field-doc-thin` | warning | extension field docs (§1.2) |
-| `pair-with-unknown` `pair-with-not-array` | error | `@pairWith` (§1.2c) — always an error, `--strict` or not |
+| `pair-with-unknown` `pair-with-not-array` `pair-with-bad-name` `pair-with-not-object` | error | `@pairWith` (§1.2c) — always an error, `--strict` or not |
 | `content-type` `content-required` `content-unknown-key` `content-min-items` `content-max-items` `content-enum` `content-invalid` | error | `--content` validated against the base schema (§9) — always an error, `--strict` or not |
 
 `*` = becomes an **error** in strict mode (`--strict`, and always when submitting for review).

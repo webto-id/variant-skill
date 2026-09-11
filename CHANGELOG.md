@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.1.17 — 2026-09-11
+
+- `@pairWith` gained two more always-error validations (compiler 0.1.9,
+  same day as the feature itself — before any real template used it in
+  the wild): the paired field's name must start with its target's, at a
+  real camelCase word boundary (`pair-with-bad-name` — `stepsDetails`
+  valid, `stepsx` is not); and the paired field's items must be an
+  object, never a primitive array (`pair-with-not-object`). Naming
+  matters because the editor can never merge the two cards visually —
+  the name is the only signal a buyer gets that they move together
+  (`steps` + `avatars` reads as unrelated; `steps` + `stepsDetails`
+  reads as linked). The object-shape rule closes a real gap: a
+  primitive array renders through a different editor component that
+  the structural sync was never wired to, so it would previously
+  validate clean and silently never actually sync.
+
 ## 0.1.16 — 2026-09-11
 
 - New `@pairWith <field>` doc tag (compiler 0.1.8, `@webto-id/variant-check`
