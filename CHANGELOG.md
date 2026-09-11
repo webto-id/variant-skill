@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.1.15 — 2026-09-11
+
+- CLI `@webto-id/variant-check` 0.1.14: compiler bumped to **0.1.7** —
+  `sm:!text-2xl`, `md:!mt-4` (a variant-prefixed `!important` utility) now
+  actually compile. Previously `!` was only recognized as the very first
+  character of a class token, so the bare `!text-2xl` form worked but the
+  responsive form silently compiled to nothing (`tailwind-skipped`) — the
+  one documented escape hatch for the theme's heading-size rule didn't work
+  once a breakpoint was involved. `wvf.md`/`tailwind.md` candidate-token
+  regex corrected to match.
+- `props-unknown-item-key` promoted to `--strict` (was warning-only): an
+  extra key inside a base array's item shape is silently stripped by Zod at
+  save time on the platform (not "rejected", as some skill guidance implied)
+  — a warning let a variant ship whose extra per-item data vanished on the
+  first real save with no error anywhere. Now caught before submission.
+- `wvf.md` §3.1 (new): documented CSS scroll-driven animation
+  (`animation-timeline: view()`, `animation-range`) — no lint restricts it,
+  it already compiles and ships today, it was simply never written down.
+  Requires a `prefers-reduced-motion` fallback (not enforced by the
+  compiler).
+
 ## 0.1.14 — 2026-09-10
 
 - Fixed a doc-comment example in `SKILL.md`'s own skeleton (`/** Tampilkan

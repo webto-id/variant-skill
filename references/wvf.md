@@ -126,6 +126,29 @@ The compiler adds no root element. At render the host wraps your nodes in `<div 
 - Scoping: every selector gets the root prefix; a top-level `&` = root (`&:hover` → `root:hover`); CSS nesting inside a rule is flattened with the standard meaning (`.card { &:hover {…} .title {…} }` → `root .card:hover`, `root .card .title`; a nested `@media` is hoisted around the rule); `@media @supports @container @layer @scope` recurse; `@keyframes @property @page @counter-style` stay verbatim (name keyframes uniquely).
 - Output = scoped Tailwind CSS + scoped author CSS, total ≤ 64 KB.
 
+### 3.1 Scroll-driven animation (no script, no review queue)
+
+CSS scroll-driven animation (`animation-timeline: view()` / `animation-timeline: scroll()`, `animation-range`) is allowed — the lint has no opinion on it, same as any other `animation-*`/`@keyframes` property. This is real capability, not an accident to route around: a timeline progress bar, a parallax layer, or a scroll-triggered reveal can all be built in `<style>` alone, with zero JavaScript and therefore no admin review.
+
+```css
+.wv-progress-line {
+  animation: wv-grow linear both;
+  animation-timeline: view();
+  animation-range: entry 0% cover 45%;
+}
+@keyframes wv-grow-<variant> { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+```
+
+Always pair it with a `prefers-reduced-motion` fallback — the compiler does not enforce this, it is on you:
+
+```css
+@media (prefers-reduced-motion: reduce) {
+  .wv-progress-line { animation: none; transform: scaleX(1); }
+}
+```
+
+Browser support is Chromium-only as of this writing (Safari/Firefox ignore `animation-timeline` and simply show the animation's end state, which is an acceptable fallback on its own — but the reduced-motion rule above is still required).
+
 ## 4. JavaScript
 
 Exactly **one** `<script is:inline>` block (no `src`, no `define:vars`, `type` bare/`text/javascript`/`module`), ≤ 8 KB UTF-8. The compiler stores the raw body; the runtime wraps it:
@@ -200,7 +223,7 @@ Params: `data-wv-delay` = whole steps of 100ms, 0-10; `data-wv-duration` = ms, 1
 
 ## 6. Tailwind at upload
 
-Tailwind v4 is compiled at upload from the class strings found in your file (static attributes, string/template literals, const initializers, prop defaults). Classes must be **literal** — never assembled from content values. Available: the full default utility set (spacing, flex/grid, typography, palette, breakpoints, `hover:`/`focus:`/`md:`, arbitrary values) **plus** theme tokens: `bg-|text-|border-|fill-|stroke-|ring-|from-|to-|via-` × `background foreground card card-foreground primary primary-foreground secondary secondary-foreground muted muted-foreground accent accent-foreground border input ring`, and `rounded-sm|md|lg|xl` (radius follows the site theme). `dark:` keys off `[data-theme="dark"]` on an ancestor (not `.dark`, not `prefers-color-scheme`). Candidate tokens ≤ 96 chars matching `^[!@]?[A-Za-z0-9_][\w:/\[\].%#(),-]*$`.
+Tailwind v4 is compiled at upload from the class strings found in your file (static attributes, string/template literals, const initializers, prop defaults). Classes must be **literal** — never assembled from content values. Available: the full default utility set (spacing, flex/grid, typography, palette, breakpoints, `hover:`/`focus:`/`md:`, arbitrary values) **plus** theme tokens: `bg-|text-|border-|fill-|stroke-|ring-|from-|to-|via-` × `background foreground card card-foreground primary primary-foreground secondary secondary-foreground muted muted-foreground accent accent-foreground border input ring`, and `rounded-sm|md|lg|xl` (radius follows the site theme). `dark:` keys off `[data-theme="dark"]` on an ancestor (not `.dark`, not `prefers-color-scheme`). Candidate tokens ≤ 96 chars matching `^[!@]?-?[A-Za-z0-9_][\w:/\[\].%#(),!-]*$` — `!` and `-` are both accepted anywhere after the leading character too, not only at the very front, so `sm:!text-2xl` and `hover:-translate-y-1` both compile.
 
 ## 7. Lint code table
 
@@ -215,7 +238,7 @@ Tailwind v4 is compiled at upload from the class strings found in your file (sta
 | `css-root` | warning | selector rewritten to root |
 | `script-inline` `script-src` `script-define-vars` `script-type` `script-size` `script-syntax` `script-obfuscation` `script-with` `script-import` `script-debugger` `script-forbidden` `script-html` `script-loop` `script-count` | error | JavaScript |
 | `tailwind` `ir-size` | error | build limits |
-| `props-optional`* `props-type-mismatch` `props-undeclared` `props-unknown-item-key` | warning | schema |
+| `props-optional`* `props-unknown-item-key`* `props-type-mismatch` `props-undeclared` | warning | schema |
 | `ext-field-undocumented`* `ext-field-doc-thin` | warning | extension field docs (§1.2) |
 | `content-type` `content-required` `content-unknown-key` `content-min-items` `content-max-items` `content-enum` `content-invalid` | error | `--content` validated against the base schema (§9) — always an error, `--strict` or not |
 
