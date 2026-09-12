@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.18 — 2026-09-12
+
+- Deliverable changed from a bare `.astro` file to a small folder: `variant.json` (new manifest — `sectionType`, `name`, `description`, `mood`, `fits`) + the `.astro` + `.sample.json` + optional `asset:<filename>` images, matching how `html-to-webto-template` bundles already work. New `references/catalog.md` documents the manifest shape, the `mood` enum, and the three legal image forms. Both bundled examples now ship a matching `.variant.json`.
+- Why: the platform's "Variant Baru" upload never had a way to set `mood`/`fits` at all, and an empty `description` was allowed — the AI wizard's catalog silently degrades any variant missing them to an opaque, unpickable id instead of erroring. `description`/`mood` aren't required to save a draft, only to submit it for review.
+- Step 1: chrome section types (`navbar`/`banner`/`footer`) are no longer blanket-forbidden — they've been legal platform-wide since 2026-09-04, same as bundles.
+
 ## 0.1.17 — 2026-09-11
 
 - `@pairWith` gained two more always-error validations (compiler 0.1.9,

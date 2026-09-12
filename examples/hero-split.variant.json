@@ -1,0 +1,7 @@
+{
+  "sectionType": "hero",
+  "name": "Hero Split",
+  "description": "Two-column hero with a headline and CTA on the left, a single large photo on the right.",
+  "mood": ["minimal", "corporate"],
+  "fits": "short headline + one strong photo"
+}

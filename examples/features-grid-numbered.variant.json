@@ -1,0 +1,7 @@
+{
+  "sectionType": "features-grid",
+  "name": "Features Grid Numbered",
+  "description": "Feature cards in a responsive grid, each with an optional numbered prefix and an optional icon above the title.",
+  "mood": ["editorial", "precise"],
+  "fits": "3-6 short feature blurbs, no long paragraphs"
+}

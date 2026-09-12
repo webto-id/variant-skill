@@ -13,18 +13,19 @@ You are producing **one `.astro` file** in the Webto Variant Format: a restricte
 - `references/schema.md` — section types and their base content fields; how `interface Props` is classified into base / extension / hidden fields.
 - `references/tailwind.md` — theme tokens (`bg-primary`, `text-muted-foreground`, `rounded-lg`, `var(--font-heading)`), what compiles, what is flagged.
 - `references/design.md` — what makes a variant good: structural distinctiveness, content-shape robustness (1 item … max items, missing optionals), mobile, both themes, the zero-dead-text discipline.
-- `examples/hero-split.astro` — a complete, passing variant to mimic.
+- `references/catalog.md` — the `variant.json` manifest you deliver alongside the `.astro` (mood enum, description rules, `asset:<filename>` images). **Read this before step 8.**
+- `examples/hero-split.astro` (+ its `.sample.json` and `.variant.json`) — a complete, passing variant to mimic, manifest included.
 
 ## Workflow
 
-1. **Pick the section type.** Map the input to one id from `schema.md` (`hero`, `features-grid`, `testimonials`, `cta`, `faq`, `stats`, `steps`, `pricing`, `team`, `gallery`, …). Never `navbar`/`banner`/`footer`. If the input spans several sections, produce several files — one type each.
+1. **Pick the section type.** Map the input to one id from `schema.md` (`hero`, `features-grid`, `testimonials`, `cta`, `faq`, `stats`, `steps`, `pricing`, `team`, `gallery`, `navbar`, `banner`, `footer`, …). If the input spans several sections, produce several files — one type each.
 2. **Translate content → fields.** Every visible string becomes a base field (reuse the base names) or an optional extension field. Write its `/** … */` doc comment as an **instruction for the AI** that fills it, not an editor label (the editor labels from the key name and never reads this text) — say what the text is, how long, and a concrete example: `/** Profession line under the name, ≤4 words. @example Konsultan Pajak */`. Images → image fields. Links → label field + `EditUrlPill`. Put sensible Indonesian sample copy in the destructuring defaults.
 3. **Translate styling → tokens.** Colors → `primary/secondary/accent/muted/foreground/background/border` tokens; radius → `rounded-*`; fonts → `var(--font-heading)`; drop external CSS/fonts/icon libraries (inline SVG instead). Keep a `<style>` block only for keyframes/masks/pseudo-elements.
 4. **Translate behavior → one `<script is:inline>`** (optional, ≤ 8 KB): query inside `root`, `addEventListener`, `classList`, `IntersectionObserver`, `setTimeout(fn, ms)`. No `fetch`, storage, `innerHTML` with variables, `on*` attributes. Make init idempotent (`if (root.dataset.wvInit) return; root.dataset.wvInit = "1";`).
 5. **Write the file** following the skeleton below. Zero dead text: literal words only inside `t("…")`, `data-edit-field` elements, or `aria-hidden="true"` decoration.
 6. **Check.** Run `npx @webto-id/variant-check <file>.astro --type <type> --strict --content sample.json --out preview.html`. Fix every `✖` and `▲` (strict turns quality warnings into errors — that is the marketplace's submit gate). Open `preview.html`; try `--theme dark`.
 7. **Stress the content shape** by editing `sample.json`: 1 item and the max, no images, no optional fields, long headline. Fix layouts that break.
-8. **Deliver**: the `.astro` file, a `sample.json`, and a 1–2 sentence factual description + suggested name for the marketplace listing (see `design.md` §9).
+8. **Deliver a folder, not a bare file** (see `references/catalog.md`): `variant.json` (`sectionType`, `name`, `description`, `mood`, `fits`) + the `.astro` + the `sample.json`, uploaded together at Marketplace → Variant Saya → Variant Baru. `name` must be the English Title Case form of the `.astro` file's basename; `description`/`mood` are what the AI wizard's catalog reads — write them per `catalog.md`'s rules, not as editor-facing copy.
 
 ## Skeleton
 
@@ -80,3 +81,4 @@ const cols = n >= 3 ? "md:grid-cols-3" : n === 2 ? "md:grid-cols-2" : "max-w-md 
 - Every visible word editable or `t()`; every `<img>` has `alt`; no hardcoded colors/fonts/radius.
 - One `<script is:inline>` ≤ 8 KB obeying the reject list; scripts trigger admin review.
 - Run `variant-check --strict` and get `0 error(s)` before handing over.
+- Deliver `variant.json` alongside the `.astro`/`.sample.json` (`references/catalog.md`) — `description`/`mood` aren't checked by the CLI, but a variant missing them is invisible to AI generation no matter how good the design is.
