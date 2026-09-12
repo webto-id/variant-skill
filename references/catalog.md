@@ -35,5 +35,5 @@ Uploaded at webto.id → Marketplace → Variant Saya → Variant Baru (or Updat
 Same three legal forms the `html-to-webto-template` skill documents for bundles:
 
 - `"asset:<filename>"` — your OWN photography/art (never someone else's stock library or icon pack). Ship the file (PNG/WebP/JPG, ≤ 2 MB, filename `[A-Za-z0-9._-]` only, ≤ 20 files / 8 MB per variant) alongside `variant.json`. SVG is not accepted yet. Use this when a specific real photo/graphic is what makes the design — most variants don't need it at all.
-- `"__IMG__:<english search query>"` — resolved to a distinct Unsplash photo per occurrence at upload. The usual default for `sample.json` content.
+- `"__IMG__:<english search query>"` — resolved to a distinct Unsplash photo per occurrence at upload. The usual default for `sample.json` content. Note "per occurrence" is literal: the same query used twice (e.g. once in a bundle's `template.json` and once in this variant's `sample.json`) resolves to two DIFFERENT photos of the same subject. Use `asset:<filename>` when a slot must show the identical image in both places.
 - A direct `https://images.unsplash.com/...` or pexels URL.

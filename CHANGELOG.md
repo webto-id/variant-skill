@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.19 — 2026-09-12
+
+- Documented that `__IMG__:<query>` resolves to a DIFFERENT photo per occurrence — the same query used in a bundle's `template.json` and in this variant's `sample.json` yields two different pictures of the same subject. Use `asset:<filename>` when a slot must be identical in both. (Platform-side, sample content now gets its sentinels resolved at upload at all — previously only the manifest half ever did.)
+
 ## 0.1.18 — 2026-09-12
 
 - Deliverable changed from a bare `.astro` file to a small folder: `variant.json` (new manifest — `sectionType`, `name`, `description`, `mood`, `fits`) + the `.astro` + `.sample.json` + optional `asset:<filename>` images, matching how `html-to-webto-template` bundles already work. New `references/catalog.md` documents the manifest shape, the `mood` enum, and the three legal image forms. Both bundled examples now ship a matching `.variant.json`.
