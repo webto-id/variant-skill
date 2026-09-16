@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.24 — 2026-09-16
+
+Two seller reports, one release. `@webto-id/variant-check` 0.1.20, compiler 0.1.12.
+
+- **Correction to 0.1.23:** `data-edit-url` on an anchor no longer counts as a CTA — only `data-edit-field` does. The seller measured 0.1.23 across their 66 variants: for every 5 contact links it rescued it swept in **16 social icons and 1 photographer credit**, putting "follow us on Instagram" in the same bucket as "Pesan Sekarang". The distinction the rule was always about is whether the link's TEXT is buyer content, not whether its destination is configurable — and `data-edit-url` is how a variant spells an icon-only social link, since the pill is the only way to edit an `<svg>`-only link inline. The platform's own `SocialIcons` tracks none of them, so a seller footer now agrees with a platform footer on the same page. `mailto:`/`tel:` written the natural way stay tracked; that fix is intact.
+- New **`data-track="none"`** — opts a link out and leaves no attribute in the output, for a link that does carry an editable field but is not a conversion (a photo credit, a social handle shown as text).
+- **Bug fix: an apostrophe inside a NESTED doc comment no longer kills `interface Props`.** `/** Photo beside this step's panel */` inside an `Array<{ … }>` produced `✗ [props-type] unbalanced object type` pointed at the interface's own line, ten lines from the cause — the type scanner read the comment's prose as code and the apostrophe opened a phantom string. It bit on the first use of the nested-doc style this skill recommends, with English possessive being the natural way to write a field instruction. The same skip also fixes `"`, a backtick and stray `{}`/`<>` inside a doc comment, which the reporter flagged as untested and which were the same bug. Top-level docs were never affected.
+- A type error now **names the prop it came from**, so `unbalanced object type` no longer leaves a manual bisect as the only way to find the offending field.
+
 ## 0.1.23 — 2026-09-16
 
 - **Bug fix (platform, compiler 0.1.11):** `data-track="cta"` is now added to an `<a href>` whose `data-edit-field` sits on the **anchor itself**, not only on a descendant. That shape is the natural one for contact links — `<a href={url("mailto:" + email)} data-edit-field="email">{email}</a>`, where the link text IS the field value and the href derives from the same field — and it was silently going untracked while the `<span>`-wrapped equivalent was tracked. Reported by a seller acting on 0.1.22's own advice, who found 5 such links across 3 bundles. It hits the conversion a service site cares about most: a tapped phone number, not the hero button that was already counted. Nothing errored, nothing warned — the numbers were just missing. **A variant compiled before 0.1.11 keeps the markup it was uploaded with; re-upload to pick this up.** A hand-written `data-track` is still respected and never duplicated.

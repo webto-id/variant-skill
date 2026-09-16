@@ -163,14 +163,14 @@ Text emitted by `t("…")` is fixed UI chrome and is not marker-processed — co
 
 ### 2.6 Host-level behaviours a variant opts into
 
-Some things the SITE does centrally: the variant only marks elements and gets the behaviour for free — no script of its own, so no script-review queue. This is the complete list as of compiler 0.1.11.
+Some things the SITE does centrally: the variant only marks elements and gets the behaviour for free — no script of its own, so no script-review queue. This is the complete list as of compiler 0.1.12.
 
 | Behaviour | What the variant writes | Where it runs | Live in the marketplace preview? |
 |---|---|---|---|
 | Power-word markers | nothing — automatic on every `[data-edit-field]` | HTMLRewriter over the page | **no** (§2.5) |
 | Motion effects | `data-wv-effect` (+ `data-wv-delay` / `-duration` / `-strength`) | platform runtime injected by the layout | yes, and in `--out` previews (§5b) |
 | **Image lightbox** | `data-lightbox` on the `<img>` | one lightbox in the layout, delegated click on `document` | **no** |
-| CTA click tracking | nothing when the link holds an editable field; `data-track="cta"` by hand otherwise | analytics listener in the layout | no |
+| CTA click tracking | nothing when the link holds an editable **field**; `data-track="cta"` by hand otherwise, `data-track="none"` to opt out | analytics listener in the layout | no |
 | Site-name type scale (chrome only) | `data-site-name` on the brand text | layout CSS + the editor's live preview | n/a |
 
 **Image lightbox.** Click-to-enlarge is the de-facto standard for photo sections here — 11 of the platform's 12 gallery components have it, so a seller gallery without it reads as the broken one when a buyer puts them side by side. It costs four attributes:
@@ -197,7 +197,11 @@ Some things the SITE does centrally: the variant only marks elements and gets th
 
 Before 0.1.11 only descendants counted, so exactly these links went untracked — and for a service site a tapped phone number IS the conversion, not the hero button that was already tracked. A variant compiled earlier keeps the markup it was uploaded with; re-upload to pick this up.
 
-Still NOT covered, deliberately: a link whose label is fixed chrome (`t(…)`) or hardcoded — that is navigation, not a call to action — and a link wrapping only an image or icon (a linked photo card, a logo cloud), where counting every one as a CTA would inflate the buyer's conversion rate rather than measure it. If such a link really is a call to action, write `data-track="cta"` on it yourself; a hand-written one is always respected and never duplicated.
+Only `data-edit-field` counts, **not `data-edit-url`**: the first means the link's TEXT is buyer content, the second only means its destination is configurable — which is exactly how a variant spells an icon-only social link (the pill is the only way to edit an `<svg>`-only link inline). Social icons are therefore NOT counted, matching the platform's own `SocialIcons`, so a seller footer and a platform footer on the same page agree.
+
+Still NOT counted, deliberately: a link whose label is fixed chrome (`t(…)`) or hardcoded — that is navigation — and a link wrapping only an image or icon (a linked photo card, a logo cloud). Counting every one of those would inflate the buyer's conversion rate rather than measure it. If such a link really is a call to action, write `data-track="cta"` on it yourself; a hand-written one is always respected and never duplicated.
+
+Going the other way, **`data-track="none"`** opts a link out and leaves no attribute behind (compiler ≥ 0.1.12) — for the link that does carry an editable field but is not a conversion: a photographer credit, a social handle shown as text.
 
 **`data-site-name`** is chrome-only (§4b): the site-name font-size setting is applied through `[data-site-name]`, so a navbar variant that prints the site name without that attribute ignores the owner's Style-tab setting and does not update live while they drag it.
 
