@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.25 — 2026-09-16
+
+Two editor fixes from a seller wiring `testimonialsAvatars @pairWith testimonials` on a live template. Platform-side, no CLI change — `wvf.md` §1.2c documents both.
+
+- **A paired array now always has exactly one slot per base item.** The editor pads it with blank objects up to the base's length (clamped by its own `@max`) and truncates when the base shrinks; its card offers no add button and no per-item delete, so a slot disappears only when its base item does. The structural sync only ever fired on an EDIT EVENT, so a section that already had 3 testimonials and 0 avatars stayed that way, and deleting one avatar silently shifted every later one onto the wrong testimonial. The seller's actual goal — an avatar on the 1st and the last testimonial only — was not expressible at all, because index 4 needs 0-3 to exist and nothing could make a blank slot. **Leaving a slot empty is now the supported way to skip an item.** Keep reading it defensively (`(avatars[i] ?? {}).url`): content saved before this may still be short.
+- **`…Avatars[].url` gets the image uploader in the side panel**, not a plain URL box with the link picker. Inline edit goes by the explicit `data-edit-image` marker and was always right; the panel guesses from the NAME and only knew images/image/photo/gallery, so "avatar" — a pattern it recognises everywhere else — fell through, and the two surfaces disagreed about one field. Now any image-ish array name counts. One deliberate exception, so logo-cloud keeps working: when the item shape ALSO has a real image field (`logos[].image` + `logos[].url`), the `url` is that item's LINK, not its picture.
+
 ## 0.1.24 — 2026-09-16
 
 Two seller reports, one release. `@webto-id/variant-check` 0.1.20, compiler 0.1.12.
