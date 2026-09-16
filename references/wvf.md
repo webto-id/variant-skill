@@ -144,6 +144,22 @@ URL attributes (`href src action formaction poster data-lightbox-src xlink:href`
 
 The compiler adds no root element. At render the host wraps your nodes in `<div data-wv-root data-wv-inst="<uid>">`; CSS is scoped to `[data-wv-inst="<uid>"]`; the script's `root` variable is that wrapper. Defense in depth at serialization: `script iframe object embed form input textarea select link meta base style template frame frameset applet noscript html head body` are never emitted even if present in IR.
 
+### 2.5 Power-word markers (automatic — but a split field kills them)
+
+Site owners mark up fragments of ordinary text fields with paired delimiters, stored as plain strings in the content JSON:
+
+`**bold**` · `*italic*` · `==highlight==` · `%%block highlight%%` · `@@circled@@` · `++brush underline++` · `__underline__` · `^^accent^^` · `[text](url)`
+
+**You never parse or render these.** The site turns them into HTML in ONE central place — an HTMLRewriter pass over every `[data-edit-field]` element — so no variant component knows about markers. Write `<span data-edit-field="headline">{headline}</span>` as usual and it just works. (`set:html` is rejected by the compiler anyway.)
+
+Three consequences worth designing around:
+
+- **A marker pair must live inside ONE text node.** Separate text nodes are processed independently by design, so a field whose value you split across elements loses its markers silently — the buyer types `==diskon==` and the page shows a literal `==diskon==`. The usual way to trip this is per-word animation: `{headline.split(" ").map((w) => <span class="word">{w}</span>)}`. If a design needs that effect, apply it to a field you accept will never carry markers (a short eyebrow/label), not to the headline.
+- **Nothing inside the field element may interrupt the text**, for the same reason: `<span data-edit-field="x">{a}<br />{b}</span>` is two text nodes.
+- **Markers do NOT render in the marketplace preview** — the standalone variant preview page and the dashboard's in-browser preview both bypass that rewriter. So keep markers out of `sample.json`: they would show as raw `==…==` in your own listing and read as a bug. They belong in real site content, not showcase fixtures.
+
+Text emitted by `t("…")` is fixed UI chrome and is not marker-processed — correct, and nothing to do about it.
+
 ## 3. CSS
 
 - Any number of `<style>` blocks (concatenated, scoped). `is:global` / `define:vars` → error. Each block ≤ 64 KB.

@@ -52,6 +52,8 @@ Semantic elements (`<section>`, `<h2>` for the section heading — the page's `<
 
 Every visible word is either a content field (`data-edit-field`) or a fixed chrome label via `t("…")`. Decorative characters (`✓`, `→`, `01`) are `aria-hidden="true"`. Sample copy lives in **defaults** (`const { heading = "Kenapa memilih kami" } = Astro.props;`) — Indonesian, short, replaceable — never in JSX literals.
 
+A buyer can also emphasize fragments of any of those fields (`==diskon==`, `**tebal**`) — the site renders those centrally, you do nothing. But a marker pair only survives inside ONE text node, so splitting a field's value across elements (per-word animation being the usual temptation) silently kills them for that field. See `wvf.md` §2.5.
+
 ## 8. The thumbnail test
 
 The marketplace shows a 4:3 screenshot of the section with sample content. If the idea is not readable at 320 px wide, simplify: fewer competing elements, one focal point, clear hierarchy.

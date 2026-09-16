@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.20 — 2026-09-16
+
+- New `wvf.md` §2.5 **Power-word markers**: site owners emphasize fragments of ordinary text fields (`**bold**`, `==highlight==`, `%%block%%`, `@@circled@@`, `++brush++`, `__underline__`, `^^accent^^`, `[text](url)`) and the site renders them centrally over every `[data-edit-field]` — a variant does nothing to support them. Never documented here before, which mattered because two ordinary authoring choices silently break them: a marker pair only survives inside ONE text node, so splitting a field's value across elements (per-word span animation) kills it for that field, as does any `<br />`/child element interrupting the text. Also: markers do NOT render in either preview surface, so they don't belong in `sample.json`.
+- `design.md` §7 and the Hard rules list gained the one-line consequence.
+
 ## 0.1.19 — 2026-09-12
 
 - Documented that `__IMG__:<query>` resolves to a DIFFERENT photo per occurrence — the same query used in a bundle's `template.json` and in this variant's `sample.json` yields two different pictures of the same subject. Use `asset:<filename>` when a slot must be identical in both. (Platform-side, sample content now gets its sentinels resolved at upload at all — previously only the manifest half ever did.)
