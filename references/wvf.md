@@ -8,7 +8,8 @@ One `.astro` file: a `---` frontmatter block containing `interface Props`, then 
 
 - No frontmatter → `error` `frontmatter`: "file must start with a `---` frontmatter block containing `interface Props`".
 - No markup → `error` `empty`.
-- Source upload limit **128 KB**; compiled IR ≤ **256 KB**; compiled CSS ≤ **64 KB**; script ≤ **8 KB**.
+- Source upload limit **128 KB**; `*.sample.json` ≤ **16 KB** (measured as its RE-SERIALIZED JSON, so pretty-printing costs nothing); compiled IR ≤ **256 KB**; compiled CSS ≤ **64 KB**; script ≤ **8 KB**. `variant-check` ≥ 0.1.17 enforces the first two locally (`source-size`, `content-size`) — older CLIs reported `0 error(s)` for a file the uploader then rejected.
+- Per ACCOUNT: **300 standalone variants**. Variants that came from a template bundle belong to that template and do NOT count against it (they have their own per-template ceiling) — so authoring variants for templates never eats this budget.
 
 ## 1. Frontmatter
 
@@ -280,7 +281,7 @@ Tailwind v4 is compiled at upload from the class strings found in your file (sta
 | `style-global` `style-define-vars` `style-size` `css-import` `css-font-face` `css-expression` `css-behavior` `css-url` `css-parse` `css-size` | error | CSS (`css-url` is a warning for unsplash/pexels hosts) |
 | `css-root` | warning | selector rewritten to root |
 | `script-inline` `script-src` `script-define-vars` `script-type` `script-size` `script-syntax` `script-obfuscation` `script-with` `script-import` `script-debugger` `script-forbidden` `script-html` `script-loop` `script-count` | error | JavaScript |
-| `tailwind` `ir-size` | error | build limits |
+| `tailwind` `ir-size` `source-size` `content-size` | error | build/upload limits (the last two are CLI-side, ≥ 0.1.17) |
 | `props-optional`* `props-unknown-item-key`* `props-type-mismatch` `props-undeclared` | warning | schema |
 | `ext-field-undocumented`* `ext-field-doc-thin` | warning | extension field docs (§1.2) |
 | `pair-with-unknown` `pair-with-not-array` `pair-with-bad-name` `pair-with-not-object` | error | `@pairWith` (§1.2c) — always an error, `--strict` or not |

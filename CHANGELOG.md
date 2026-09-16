@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.21 — 2026-09-16
+
+- **`variant-check` ≥ 0.1.17 now catches the two upload size limits locally** (`source-size`, `content-size`). Both live on the platform's upload path, not in the compiler, so until now the CLI happily reported `0 error(s)` for a file the uploader would reject outright — the one failure this tool exists to prevent. Measured exactly the way the server measures: the `.astro` in BYTES against **128 KB**, and the `.sample.json` as the length of its RE-SERIALIZED JSON against **16 KB** (so pretty-printing the file costs nothing).
+- `wvf.md` §0 now states the **16 KB `*.sample.json`** cap (it only ever listed the 128 KB source cap and the compiled IR/CSS/script ones) and the per-account budget: **300 standalone variants**, which variants belonging to a template bundle do NOT count against — authoring variants for a template never eats it. The old flat "100 per account" number is gone from the platform entirely.
+
 ## 0.1.20 — 2026-09-16
 
 - New `wvf.md` §2.5 **Power-word markers**: site owners emphasize fragments of ordinary text fields (`**bold**`, `==highlight==`, `%%block%%`, `@@circled@@`, `++brush++`, `__underline__`, `^^accent^^`, `[text](url)`) and the site renders them centrally over every `[data-edit-field]` — a variant does nothing to support them. Never documented here before, which mattered because two ordinary authoring choices silently break them: a marker pair only survives inside ONE text node, so splitting a field's value across elements (per-word span animation) kills it for that field, as does any `<br />`/child element interrupting the text. Also: markers do NOT render in either preview surface, so they don't belong in `sample.json`.
