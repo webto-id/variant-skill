@@ -15,7 +15,7 @@ One `.astro` file: a `---` frontmatter block containing `interface Props`, then 
 
 ### 1.1 Imports
 
-Canonical: `import { t, img, url, Container, Button, EditUrlPill, ViewMoreLink, AddImageButton } from "webto/variant";` — import only what you use. Legacy aliases also accepted: `sanitizeUrl` (= `url`), `withUnsplashWidth` (= `img`), `sectionT`. Relative platform paths (`../lib/sanitize`, `../ui/Button.astro`, …) are tolerated. Any other module → `error` `import`. Unknown name → `error` `import`. `import type` is ignored.
+Canonical: `import { t, img, url, video, Container, Button, EditUrlPill, ViewMoreLink, AddImageButton } from "webto/variant";` — import only what you use. Legacy aliases also accepted: `sanitizeUrl` (= `url`), `withUnsplashWidth` (= `img`), `resolveVideoSource` (= `video`), `sectionT`. Relative platform paths (`../lib/sanitize`, `../ui/Button.astro`, …) are tolerated. Any other module → `error` `import`. Unknown name → `error` `import`. `import type` is ignored.
 
 ### 1.2 `interface Props`
 
@@ -93,7 +93,7 @@ Literals (strings, template literals, numbers, `true/false/null/undefined`), ide
 
 Rejected: spread (`spread`), `new class function await yield import this super delete void in instanceof` (`forbidden`), `**`, bitwise ops, assignments.
 
-Identifiers in scope: props, consts, imports, arrow params, and builtins `t img url editChrome Math String Number Boolean Array undefined`. Anything else → `error` `unknown-id`.
+Identifiers in scope: props, consts, imports, arrow params, and builtins `t img url video editChrome Math String Number Boolean Array undefined`. Anything else → `error` `unknown-id`.
 
 Runtime evaluation is sandboxed: own properties only (no `__proto__`/`constructor`); `Math.{min,max,floor,ceil,round,abs,trunc,sign,sqrt,pow}`; `Array.isArray`/`Array.from`; array methods `map filter slice join includes indexOf some every find findIndex flat concat at`; string methods `slice substring includes startsWith endsWith trim toUpperCase toLowerCase split replace replaceAll indexOf padStart padEnd charAt at repeat`; number `toFixed toLocaleString toString`. Other methods return `undefined`. Arrays > 5000 items throw; 200 000 evaluation steps per render.
 
@@ -160,6 +160,71 @@ Three consequences worth designing around:
 - **Markers do NOT render in the marketplace preview** — the standalone variant preview page and the dashboard's in-browser preview both bypass that rewriter. So keep markers out of `sample.json`: they would show as raw `==…==` in your own listing and read as a bug. They belong in real site content, not showcase fixtures.
 
 Text emitted by `t("…")` is fixed UI chrome and is not marker-processed — correct, and nothing to do about it.
+
+### 2.6 Host-level behaviours a variant opts into
+
+Some things the SITE does centrally: the variant only marks elements and gets the behaviour for free — no script of its own, so no script-review queue. This is the complete list as of compiler 0.1.10.
+
+| Behaviour | What the variant writes | Where it runs | Live in the marketplace preview? |
+|---|---|---|---|
+| Power-word markers | nothing — automatic on every `[data-edit-field]` | HTMLRewriter over the page | **no** (§2.5) |
+| Motion effects | `data-wv-effect` (+ `data-wv-delay` / `-duration` / `-strength`) | platform runtime injected by the layout | yes, and in `--out` previews (§5b) |
+| **Image lightbox** | `data-lightbox` on the `<img>` | one lightbox in the layout, delegated click on `document` | **no** |
+| CTA click tracking | usually nothing — the compiler adds it; see below | analytics listener in the layout | no |
+| Site-name type scale (chrome only) | `data-site-name` on the brand text | layout CSS + the editor's live preview | n/a |
+
+**Image lightbox.** Click-to-enlarge is the de-facto standard for photo sections here — 11 of the platform's 12 gallery components have it, so a seller gallery without it reads as the broken one when a buyer puts them side by side. It costs four attributes:
+
+```astro
+<div data-lightbox-group class="grid gap-4 sm:grid-cols-3">
+  {images.map((im, i) => (
+    <img src={img(im.url, 800)} data-lightbox data-lightbox-src={img(im.url, 1600)}
+         data-edit-image={`images.${i}.url`} data-caption={im.alt} alt={im.alt ?? ""} loading="lazy" />
+  ))}
+</div>
+```
+
+- `data-lightbox` makes the image enlargeable; `data-lightbox-src` is the full-resolution version (falls back to the `src`, so a small thumbnail can still open at 1600px); `data-caption` shows under the big image; `data-lightbox-group` bounds prev/next — the search never escapes that container, which is exactly what keeps one gallery from paging into another.
+- Free with it: close button, backdrop click, prev/next arrows, `Escape`, and a counter.
+- In the editor the lightbox **stands down** (it would stack over the image-upload dialog), and it is **not active on the marketplace preview page**, which renders without the layout. Both are expected — do not pull the attributes back out because the preview looks inert.
+- Use it on anything that shows off photographs (gallery, portfolio, bento, before/after) unless the image is purely decorative background.
+
+**CTA click tracking.** The compiler already adds `data-track="cta"` to any `<a href>` that contains an editable descendant and is not inside a `<Button>`, so an ordinary editable CTA is covered without you doing anything. What is NOT covered: a link whose label is hardcoded, or one wrapping only an image or icon. If such a link is a real call to action, write `data-track="cta"` on it yourself — otherwise the buyer's analytics silently under-counts their own conversions.
+
+**`data-site-name`** is chrome-only (§4b): the site-name font-size setting is applied through `[data-site-name]`, so a navbar variant that prints the site name without that attribute ignores the owner's Style-tab setting and does not update live while they drag it.
+
+### 2.7 Video: one field, two shapes
+
+`videoUrl` is **polymorphic**. The editor's own help text says so — *"paste a YouTube/Vimeo URL, or upload a video file (MP4/WebM, max 50 MB)"* — and both land in the same string. A variant that assumes one shape breaks on the other: `<video src={videoUrl}>` shows a dead player for a pasted link, and a bare outbound link wastes a file the buyer took the trouble to upload.
+
+Do not try to clone the platform's `VideoLightbox` — four separate rules close it, permanently and on purpose:
+
+| It uses | WVF status |
+|---|---|
+| `<iframe>` | `error` `tag`, never emitted even if present in the IR, and `createElement('iframe')` is rejected too |
+| `position: fixed` for the overlay | `error` `fixed`, everywhere, CSS and utilities alike |
+| `define:vars` | `error` `script-define-vars` |
+| `<dialog>` / `showModal()` | both on the reject list |
+
+The supported pattern is to branch, with `video()` (§5) doing the sniffing:
+
+```astro
+const v = video(videoUrl);   // { kind: "file" | "embed" | "", src, poster }
+...
+{v.kind === "file" && (
+  <video controls playsinline preload="none" poster={img(posterImage, 1600)} src={v.src}
+         class="aspect-video w-full rounded-lg object-cover"></video>
+)}
+{v.kind === "embed" && (
+  <a href={v.src} target="_blank" rel="noopener" class="relative block overflow-hidden rounded-lg">
+    <img src={v.poster || img(posterImage, 1600)} data-edit-image="posterImage" alt="" loading="lazy" class="aspect-video w-full object-cover" />
+    <span data-edit-field="watchText" class="absolute bottom-4 left-4 …">{watchText}</span>
+    <EditUrlPill field="videoUrl" value={videoUrl} anchor="below" />
+  </a>
+)}
+```
+
+`video()` needs `variant-check` ≥ 0.1.18 (compiler 0.1.10); on an older CLI the identifier is simply unknown. The tags `video audio source track` and the attributes `controls autoplay muted loop playsinline poster preload` have always been on the allowlists — an uploaded video plays **inside** your variant, with no script and therefore no admin review. An embed can only ever be linked out to; that is the whole reason `v.src` is the watch URL and not a player URL. When a section's entire point IS an embedded YouTube player, stop authoring and use the built-in `video` section type (`schema.md`) — it owns the iframe and its own lightbox.
 
 ## 3. CSS
 
@@ -263,6 +328,7 @@ Params: `data-wv-delay` = whole steps of 100ms, 0-10; `data-wv-duration` = ms, 1
 - `t(key)` → localized fixed UI label (30 languages) — for chrome words only, never for content. **`key` is a CLOSED enum of platform term keys, never display text** — `t("Alamat")` is wrong (lint `t-unknown`, fails --strict; it used to crash the section at render, and the preview's identity `t` will not catch it for you). The ones sections typically need: `address` `email` `phone` `hours` `operatingHours` `today` `closed` `menu` `readMore` `contactUs` `price` `all` `close` `noResults` `openInMaps` `locationLabel` `customerReviews` `specialOffer` `freeLabel` `soldOut` `days` `minutes` `seconds` `minRead` `nextPage` `prevPage` `download` `questions` (the CLI validates the full list). A visible label with no matching term key is NOT a t() call — make it an optional content field with a default (`socialHeading = "Sosial"` + `data-edit-field`).
 - `img(url, width = 960)` → sanitizes and sizes Unsplash/Pexels URLs (`w=`), passes other hosts through, returns `undefined` for empty input (attribute omitted). Use 480 for thumbnails, 960 for split images, 1600 for full-bleed backgrounds.
 - `url(u)` → sanitizer (`javascript:` etc. → `#`); empty → `#`.
+- `video(videoUrl)` → `{ kind, src, poster }` for the polymorphic video field (§2.7). `kind` is `"file"` (an uploaded `.mp4`/`.webm` — play it inline), `"embed"` (a recognized YouTube/Vimeo link — poster + link out; a variant may never embed it) or `""` (empty or unrecognized — render nothing rather than a broken player). `src` is sanitized, and for an embed it is the **watch** URL, never a player URL. `poster` is a free YouTube still frame, `""` for Vimeo and files — so write `v.poster || img(posterImage, 1600)` and keep your own poster field as the fallback. You cannot write this yourself: matching the extension needs a regex literal and reading the YouTube id needs `new URL`, and neither is in the expression subset (§1.4).
 - `editChrome` → `true` inside the editor (only for editing affordances, never content).
 
 ## 6. Tailwind at upload
