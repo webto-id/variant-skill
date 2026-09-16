@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.23 — 2026-09-16
+
+- **Bug fix (platform, compiler 0.1.11):** `data-track="cta"` is now added to an `<a href>` whose `data-edit-field` sits on the **anchor itself**, not only on a descendant. That shape is the natural one for contact links — `<a href={url("mailto:" + email)} data-edit-field="email">{email}</a>`, where the link text IS the field value and the href derives from the same field — and it was silently going untracked while the `<span>`-wrapped equivalent was tracked. Reported by a seller acting on 0.1.22's own advice, who found 5 such links across 3 bundles. It hits the conversion a service site cares about most: a tapped phone number, not the hero button that was already counted. Nothing errored, nothing warned — the numbers were just missing. **A variant compiled before 0.1.11 keeps the markup it was uploaded with; re-upload to pick this up.** A hand-written `data-track` is still respected and never duplicated.
+- Still deliberately NOT tracked, and now stated as a decision rather than an omission: a link whose label is fixed chrome (`t(…)`) or hardcoded — that is navigation — and a link wrapping only an image or icon. Counting every linked photo card or logo-cloud tile as a CTA would inflate the buyer's conversion rate instead of measuring it, so those stay opt-in: write `data-track="cta"` yourself when such a link really is one.
+
 ## 0.1.22 — 2026-09-16
 
 From a seller proposal, every claim verified against the platform first.

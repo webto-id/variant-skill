@@ -59,7 +59,7 @@ A buyer can also emphasize fragments of any of those fields (`==diskon==`, `**te
 A few behaviours are already implemented centrally; the variant only marks elements and inherits them, with no script and no review queue. `wvf.md` §2.6 is the full list — two of them are design decisions, not plumbing:
 
 - **A section that shows off photographs opens them.** Gallery, portfolio, bento, before/after: put `data-lightbox` on the images (and wrap the set in `data-lightbox-group`) unless the picture is purely decorative background. Eleven of the platform's twelve gallery components do this, so a variant without it is the one that looks broken in the comparison the buyer actually makes.
-- **A call to action that has no editable text inside it needs `data-track="cta"` written by hand.** The compiler adds it automatically only when the link contains an editable field, so an icon link or a hardcoded button silently drops out of the buyer's own conversion numbers.
+- **A call to action with no editable field in it needs `data-track="cta"` written by hand.** The compiler adds it automatically whenever the link carries an editable field — on the anchor itself or inside it, so `mailto:`/`tel:` links are covered — but an icon link, a linked photo card or a fixed-chrome label is not, and silently drops out of the buyer's own conversion numbers.
 
 ## 8. The thumbnail test
 

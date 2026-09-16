@@ -163,14 +163,14 @@ Text emitted by `t("…")` is fixed UI chrome and is not marker-processed — co
 
 ### 2.6 Host-level behaviours a variant opts into
 
-Some things the SITE does centrally: the variant only marks elements and gets the behaviour for free — no script of its own, so no script-review queue. This is the complete list as of compiler 0.1.10.
+Some things the SITE does centrally: the variant only marks elements and gets the behaviour for free — no script of its own, so no script-review queue. This is the complete list as of compiler 0.1.11.
 
 | Behaviour | What the variant writes | Where it runs | Live in the marketplace preview? |
 |---|---|---|---|
 | Power-word markers | nothing — automatic on every `[data-edit-field]` | HTMLRewriter over the page | **no** (§2.5) |
 | Motion effects | `data-wv-effect` (+ `data-wv-delay` / `-duration` / `-strength`) | platform runtime injected by the layout | yes, and in `--out` previews (§5b) |
 | **Image lightbox** | `data-lightbox` on the `<img>` | one lightbox in the layout, delegated click on `document` | **no** |
-| CTA click tracking | usually nothing — the compiler adds it; see below | analytics listener in the layout | no |
+| CTA click tracking | nothing when the link holds an editable field; `data-track="cta"` by hand otherwise | analytics listener in the layout | no |
 | Site-name type scale (chrome only) | `data-site-name` on the brand text | layout CSS + the editor's live preview | n/a |
 
 **Image lightbox.** Click-to-enlarge is the de-facto standard for photo sections here — 11 of the platform's 12 gallery components have it, so a seller gallery without it reads as the broken one when a buyer puts them side by side. It costs four attributes:
@@ -189,7 +189,15 @@ Some things the SITE does centrally: the variant only marks elements and gets th
 - In the editor the lightbox **stands down** (it would stack over the image-upload dialog), and it is **not active on the marketplace preview page**, which renders without the layout. Both are expected — do not pull the attributes back out because the preview looks inert.
 - Use it on anything that shows off photographs (gallery, portfolio, bento, before/after) unless the image is purely decorative background.
 
-**CTA click tracking.** The compiler already adds `data-track="cta"` to any `<a href>` that contains an editable descendant and is not inside a `<Button>`, so an ordinary editable CTA is covered without you doing anything. What is NOT covered: a link whose label is hardcoded, or one wrapping only an image or icon. If such a link is a real call to action, write `data-track="cta"` on it yourself — otherwise the buyer's analytics silently under-counts their own conversions.
+**CTA click tracking.** The compiler adds `data-track="cta"` to any `<a href>` outside a `<Button>` that carries editable content — the `data-edit-field` / `data-edit-url` may be **on the anchor itself or on a descendant**, both count (compiler ≥ 0.1.11). That matters because the anchor-itself shape is the natural one for contact links, where the text IS the field value and the href derives from it:
+
+```astro
+<a href={url("mailto:" + email)} data-edit-field="email" class="underline">{email}</a>
+```
+
+Before 0.1.11 only descendants counted, so exactly these links went untracked — and for a service site a tapped phone number IS the conversion, not the hero button that was already tracked. A variant compiled earlier keeps the markup it was uploaded with; re-upload to pick this up.
+
+Still NOT covered, deliberately: a link whose label is fixed chrome (`t(…)`) or hardcoded — that is navigation, not a call to action — and a link wrapping only an image or icon (a linked photo card, a logo cloud), where counting every one as a CTA would inflate the buyer's conversion rate rather than measure it. If such a link really is a call to action, write `data-track="cta"` on it yourself; a hand-written one is always respected and never duplicated.
 
 **`data-site-name`** is chrome-only (§4b): the site-name font-size setting is applied through `[data-site-name]`, so a navbar variant that prints the site name without that attribute ignores the owner's Style-tab setting and does not update live while they drag it.
 
