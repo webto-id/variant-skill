@@ -351,6 +351,28 @@ Params: `data-wv-delay` = whole steps of 100ms, 0-10; `data-wv-duration` = ms, 1
 
 Tailwind v4 is compiled at upload from the class strings found in your file (static attributes, string/template literals, const initializers, prop defaults). Classes must be **literal** — never assembled from content values. Available: the full default utility set (spacing, flex/grid, typography, palette, breakpoints, `hover:`/`focus:`/`md:`, arbitrary values) **plus** theme tokens: `bg-|text-|border-|fill-|stroke-|ring-|from-|to-|via-` × `background foreground card card-foreground primary primary-foreground secondary secondary-foreground muted muted-foreground accent accent-foreground border input ring`, and `rounded-sm|md|lg|xl` (radius follows the site theme). `dark:` keys off `[data-theme="dark"]` on an ancestor (not `.dark`, not `prefers-color-scheme`). Candidate tokens ≤ 96 chars matching `^[!@]?-?[A-Za-z0-9_][\w:/\[\].%#(),!-]*$` — `!` and `-` are both accepted anywhere after the leading character too, not only at the very front, so `sm:!text-2xl` and `hover:-translate-y-1` both compile.
 
+### 6.1 Surfaces: which token is a background, and which only looks like one
+
+The palette has five authored colors (`primary`, `secondary`, `accent`, `background`, `foreground`); everything else is DERIVED from them, and the derivation is what decides whether a token is safe to put text on.
+
+| Token | How it is produced | Text on it |
+|---|---|---|
+| `bg-background` | authored | `text-foreground` |
+| `bg-card` | background mixed **2%** toward foreground | `text-foreground` / `text-muted-foreground` |
+| `bg-muted` | background mixed **6%** toward foreground | `text-foreground` / `text-muted-foreground` |
+| `bg-primary` `bg-secondary` `bg-accent` | authored **brand colors** | ONLY `text-*-foreground` (auto-computed for contrast) |
+| `bg-accent/10` and other `/NN` tints | the brand color at low alpha **over the page background** | normal text is fine |
+
+**`accent` is not a light tint — it only is in your file.** A converted template usually has something like `#f0f0f8` there, so `bg-accent text-foreground` looks perfect while you build it. Every palette the platform ships puts a saturated brand color in that slot (teal `#0d9488`, amber `#d97706`, blue `#2563eb`, yellow `#fbbf24`); the buyer opens the Style tab, picks one, and your section's text is unreadable — with nothing changed in the variant, and no warning anywhere on the site. `accent-foreground` exists precisely because it is recomputed for contrast against whatever `accent` becomes.
+
+So:
+
+- A section band that should read as "a shade off the page" is **`bg-muted`** (or `bg-card` for something subtler). Both are mixed FROM the background, so they stay a shade off it in light and dark, under every palette. This is what almost every converted `bg-gray-50` / `bg-[#f7f8fa]` section actually wants.
+- `bg-accent` is for a **highlight** — a badge, a pill, a callout, a hover state, one emphasised card — and it takes `text-accent-foreground`.
+- Need a whisper of brand in a full-width band? `bg-accent/8` over the page background, with normal text.
+
+Lint `surface-foreground` (warning) catches the explicit contradiction — `bg-accent` together with `text-foreground`/`text-muted-foreground` on the same element — from `variant-check` 0.1.21. It is deliberately narrow: a tint (`bg-accent/10`) and a correctly paired surface are silent, and it cannot see a foreground inherited from an ancestor, so **a `bg-accent` band with no `text-*` at all is the same bug and will not be reported.** Check those by eye.
+
 ## 7. Lint code table
 
 | code | level | meaning |
@@ -364,6 +386,7 @@ Tailwind v4 is compiled at upload from the class strings found in your file (sta
 | `css-root` | warning | selector rewritten to root |
 | `script-inline` `script-src` `script-define-vars` `script-type` `script-size` `script-syntax` `script-obfuscation` `script-with` `script-import` `script-debugger` `script-forbidden` `script-html` `script-loop` `script-count` | error | JavaScript |
 | `tailwind` `ir-size` `source-size` `content-size` | error | build/upload limits (the last two are CLI-side, ≥ 0.1.17) |
+| `surface-foreground` | warning | a brand surface (`bg-accent`/`bg-primary`/`bg-secondary`) paired with a foreign text token — §6.1 |
 | `props-optional`* `props-unknown-item-key`* `props-type-mismatch` `props-undeclared` | warning | schema |
 | `ext-field-undocumented`* `ext-field-doc-thin` | warning | extension field docs (§1.2) |
 | `pair-with-unknown` `pair-with-not-array` `pair-with-bad-name` `pair-with-not-object` | error | `@pairWith` (§1.2c) — always an error, `--strict` or not |

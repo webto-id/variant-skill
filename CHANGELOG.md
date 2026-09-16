@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.26 — 2026-09-17
+
+- New `wvf.md` **§6.1 Surfaces** — which palette tokens are safe to put text on, and why. Only five colors are authored (`primary` `secondary` `accent` `background` `foreground`); `card` and `muted` are DERIVED, mixed 2% and 6% from the background toward the foreground, which is what makes them safe under every palette and in dark mode. **`accent` is not a light tint.** A converted template usually has something like `#f0f0f8` there, so `bg-accent text-foreground` reads perfectly while you build — and then the buyer picks any palette the platform ships (teal `#0d9488`, amber `#d97706`, blue `#2563eb`, yellow `#fbbf24`) and the band goes unreadable, with nothing changed in the variant. A converted `bg-gray-50` section band is **`bg-muted`** (or `bg-card`); `bg-accent` is a highlight and only ever carries `text-accent-foreground`; `bg-accent/8` over the page background is the way to get a whisper of brand in a full-width band.
+- New lint **`surface-foreground`** (warning, `variant-check` 0.1.21 / compiler 0.1.13): one element setting `bg-accent`/`bg-primary`/`bg-secondary` together with a text token belonging to a different surface. Scope picked by measurement — static class strings, full-strength surfaces, explicit foreign foreground — because that version fires on **zero** of the 85+ sections the platform ships, while looser rules flagged 7-10 of its own components. Warning, not an error under `--strict`, so variants already carrying the pattern keep uploading while their authors fix them.
+- Worth knowing what it cannot do: the lint reads one element's own classes, so it cannot see a foreground **inherited** from an ancestor. A `bg-accent` band with no `text-*` on it at all is the same bug and will not be reported — check those by eye.
+- `design.md` §1 states the rule where the palette is introduced.
+
 ## 0.1.25 — 2026-09-16
 
 Two editor fixes from a seller wiring `testimonialsAvatars @pairWith testimonials` on a live template. Platform-side, no CLI change — `wvf.md` §1.2c documents both.
