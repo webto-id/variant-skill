@@ -91,9 +91,18 @@ Validation (always an error, not gated by `--strict`): `pair-with-unknown` if th
 - Only `const { a, b = "default", key: local } = Astro.props;`. Rest `...x`, nested patterns → error `props`.
 - `const x = <expr>` with the expression subset below (a TS annotation on the const is ignored). `let`/`var`/`function`/`if`/`for`/`return`/`await`/`export` → error `statement`. `as` casts → error `ts-cast`. `Astro.*` other than `Astro.props` → error `astro`. Two special forms are allowed: `const t = sectionT(Astro.locals)` and `const editChrome = (Astro.locals as {…})?.editChrome === true`.
 
-**Defaults may be multi-paragraph** (compiler 0.1.15). A plain string takes JavaScript escapes -- `"Satu.
+**Defaults may be multi-paragraph** (compiler 0.1.15). A plain string takes JavaScript escapes, and a template literal may span lines and hold commas, semicolons, backslashes and `${...}`:
 
-Dua, tiga."` -- and a template literal may span lines and hold commas, semicolons, backslashes and `${...}`. Before 0.1.15 the first died as `unterminated string` and the second as `unterminated template literal` on its first comma, which made a multi-paragraph `text-block` default impossible to write; if you worked around it with a one-paragraph default and the full text only in `template.json`, you can now put the real text back.
+```astro
+const {
+  content = "Satu.\n\nDua, tiga.",
+  alt = `Paragraf satu, ada koma.
+
+Paragraf dua, ada juga.`,
+} = Astro.props;
+```
+
+The first form needs the escape, not a raw line break -- a raw newline inside a plain string is still (correctly) `unterminated string`. Before 0.1.15 the escaped form died the same way and the template literal died as `unterminated template literal` on its first comma, which made a multi-paragraph `text-block` default impossible to write; if you worked around it with a one-paragraph default and the full text only in `template.json`, you can now put the real text back.
 
 ### 1.4 Expression subset (frontmatter and `{}` in template)
 
