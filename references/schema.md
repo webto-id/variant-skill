@@ -21,7 +21,7 @@ What the upload dry-run insists on at the top level of a section's `content` -- 
 | `faq` | `heading`, `items` |
 | `features-grid` | `features`, `heading` |
 | `footer` | — |
-| `form` | `fields` |
+| `form` | `fields` — and the variant renders the form through `<FormFields />` (`wvf.md` §5c), never its own tags |
 | `gallery` | `heading`, `images` |
 | `hero` | `headline` |
 | `logo-cloud` | `logos` |

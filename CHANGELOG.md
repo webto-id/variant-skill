@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.33 — 2026-09-17
+
+- **New macro `<FormFields />`** (`@webto-id/variant-check` 0.1.24, compiler 0.1.16; the site needs a deploy) — a `form` section variant can now place the platform's whole form block inside its own layout and style it with six static class props (`class fieldClass labelClass submitClass wrapClass successClass`). The form tags stay banned for authors; the platform renders fields (every type incl. product refs and the address group), honeypot, Turnstile slot, bump, submit, error and success, and ONE site-level runtime binds submission — inbox, WhatsApp, WhatsApp+Order, Send&Checkout, lead tracking — so the variant carries no script and never enters script review. Forms were the one section a converted template could not restyle; from a seller proposal where 3 of 9 templates had the form as the only off-brand section. `wvf.md` §5c.
+- Form keys the author never destructures (`formName`, `successRedirectUrl`, the bump group, ...) are read from the section content and stay **visible** in the editor — using the macro marks them as used. Lint `form-fields-type` (error outside a `form` section) and `form-fields-no-fields` (warning).
+- Stated limits: native `<select>` for now (the platform's custom listbox is not ported yet); previews render the block but swallow submit.
+
 ## 0.1.32 — 2026-09-17
 
 - **`scripts/check-docs.mjs` crashed when the skill lives in a folder with a space in its path** — `ENOENT … webto%20variant%20format` before checking a single file, so the release step introduced in 0.1.31 never ran on such a machine. `URL.pathname` keeps percent-encoding; the script now uses `fileURLToPath`, which decodes it and handles the Windows drive letter. Reported with a side-by-side run from a spaced folder. Verified the same way: from a copy under `cek docs spasi`, `clean: 8 file(s)`, exit 0.

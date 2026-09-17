@@ -126,7 +126,7 @@ HTML: `a abbr address article aside b bdi bdo blockquote br button caption cite 
 
 SVG: `svg path circle rect line polyline polygon g defs linearGradient radialGradient stop clipPath mask text tspan ellipse symbol pattern filter feGaussianBlur feOffset feBlend feColorMatrix feMerge feMergeNode title desc`
 
-Everything else → `error` `tag` — including `iframe form input select textarea object embed link meta base template noscript canvas dialog`. `<Fragment>`/`<>` flatten. Capitalized tags must be one of the four macros (`component` error otherwise). `<style>` and `<script>` are raw blocks (cannot be self-closing).
+Everything else → `error` `tag` — including `iframe form input select textarea object embed link meta base template noscript canvas dialog`. `<Fragment>`/`<>` flatten. Capitalized tags must be one of the four macros (`component` error otherwise). `<style>` and `<script>` are raw blocks (cannot be self-closing). A form section still gets a real form: place `<FormFields />` (§5c) inside your layout and the platform renders the form tags for you — the ban is on AUTHORING them, not on having one.
 
 ### 2.2 Attributes
 
@@ -354,11 +354,58 @@ Params: `data-wv-delay` = whole steps of 100ms, 0-10; `data-wv-duration` = ms, 1
 - `<EditUrlPill field="ctaUrl" value={ctaUrl} anchor="below|above|right|left" />` → hidden pill the editor reveals; its `<a>` ancestor needs `class="relative"`.
 - `<ViewMoreLink url={viewMoreUrl} text={viewMoreText} style="outline|link|solid" align="left|center|right" />` → renders nothing when `url` is empty; emits an editable label + pill + `data-track="cta"`.
 - `<AddImageButton path={`images.${images.length}.url`} visible={images.length < 20} label? mode="inline|floating" />` → the editor's "Tambah Gambar" pill for an image list; renders nothing on the live site. Put it at the list's bottom seam (after the grid, before `<ViewMoreLink>`); `path` is the **next** index of the list, `visible` gates on the list's max. `floating` pins it bottom-right of a full-bleed section, which then needs `class="relative"`. Every list of pictures with `data-edit-image` items should have one — a gallery without it has no way to add a photo in the editor (the platform appends a fallback pill at the section's end when a variant has none, but that placement is a guess).
+- `<FormFields class? fieldClass? labelClass? submitClass? wrapClass? successClass? />` → the platform's whole form block (§5c), for `form` sections only.
 - `t(key)` → localized fixed UI label (30 languages) — for chrome words only, never for content. **`key` is a CLOSED enum of platform term keys, never display text** — `t("Alamat")` is wrong (lint `t-unknown`, fails --strict; it used to crash the section at render, and the preview's identity `t` will not catch it for you). The ones sections typically need: `address` `email` `phone` `hours` `operatingHours` `today` `closed` `menu` `readMore` `contactUs` `price` `all` `close` `noResults` `openInMaps` `locationLabel` `customerReviews` `specialOffer` `freeLabel` `soldOut` `days` `minutes` `seconds` `minRead` `nextPage` `prevPage` `download` `questions` (the CLI validates the full list). A visible label with no matching term key is NOT a t() call — make it an optional content field with a default (`socialHeading = "Sosial"` + `data-edit-field`).
 - `img(url, width = 960)` → sanitizes and sizes Unsplash/Pexels URLs (`w=`), passes other hosts through, returns `undefined` for empty input (attribute omitted). Use 480 for thumbnails, 960 for split images, 1600 for full-bleed backgrounds.
 - `url(u)` → sanitizer (`javascript:` etc. → `#`); empty → `#`.
 - `video(videoUrl)` → `{ kind, src, poster }` for the polymorphic video field (§2.7). `kind` is `"file"` (an uploaded `.mp4`/`.webm` — play it inline), `"embed"` (a recognized YouTube/Vimeo link — poster + link out; a variant may never embed it) or `""` (empty or unrecognized — render nothing rather than a broken player). `src` is sanitized, and for an embed it is the **watch** URL, never a player URL. `poster` is a free YouTube still frame, `""` for Vimeo and files — so write `v.poster || img(posterImage, 1600)` and keep your own poster field as the fallback. You cannot write this yourself: matching the extension needs a regex literal and reading the YouTube id needs `new URL`, and neither is in the expression subset (§1.4).
 - `editChrome` → `true` inside the editor (only for editing affordances, never content).
+
+### 5c. `<FormFields />` — a form section that follows your design
+
+Forms used to be the one section a template could not restyle: `form input select textarea` are banned (§2.1) and always will be, because submission, the honeypot, Turnstile, WhatsApp routing, the checkout hand-off and the visitor's personal data are the platform's responsibility. So a converted template's contact form stayed on one of ten platform looks while every other section followed the design. `<FormFields />` is the same trust shape as `video()`, `data-lightbox` and power words: **the platform writes the risky part once; the variant writes the layout around it.**
+
+```astro
+---
+import { Container, FormFields } from "webto/variant";
+
+interface Props {
+  /** Section heading, two lines at most. @example Ceritakan proyek Anda */
+  heading?: string;
+  fields?: Array<{ name: string; label: string; type: string; required?: boolean; placeholder?: string; options?: string[] }>;
+  submitText?: string;
+  submitMode?: string;
+  whatsappNumber?: string;
+  successMessage?: string;
+}
+const { heading = "Ceritakan proyek Anda", fields = [], submitText = "Kirim", submitMode = "inbox", whatsappNumber = "", successMessage = "Terima kasih!" } = Astro.props;
+---
+<section class="relative isolate overflow-hidden bg-background py-20 text-foreground">
+  <span aria-hidden="true" class="absolute inset-x-0 top-1/2 -z-10 h-[50%] border-t-2 border-foreground bg-primary/15"></span>
+  <Container>
+    <div class="mx-auto max-w-3xl rounded-lg border-2 border-foreground bg-background p-10">
+      <h2 class="!text-4xl font-black"><span data-edit-field="heading">{heading}</span></h2>
+      <FormFields
+        fieldClass="w-full border-0 border-b-2 border-foreground bg-transparent px-0 py-3 focus:outline-none focus:border-primary"
+        labelClass="mb-1 block text-xs font-bold uppercase tracking-widest"
+        submitClass="mt-4 inline-flex rounded-lg border-2 border-foreground bg-primary px-6 py-3 font-bold text-primary-foreground shadow-[4px_4px_0_0_var(--foreground)]"
+      />
+    </div>
+  </Container>
+</section>
+```
+
+**What it renders.** `<form data-form-section>` with the section's `fields` (text/email/tel/number/textarea/select/product and the Indonesian address group, each with the same `type`, `autocomplete`, `data-wilayah` and quantity bounds the platform's own forms use), the `_hp` honeypot, the hidden `_form` name, the bump checkbox when enabled, the `[data-turnstile]` slot, the submit button (`data-edit-field="submitText"`), the error line (`t("formError")`), and the `[data-success]` block after the form. The site's ONE submit runtime binds it exactly like a platform form: inbox, WhatsApp, WhatsApp+Order and Send&Checkout all work, Turnstile is verified, leads are tracked. Your variant carries **no script** for any of this, so it never enters script review.
+
+**Where the content comes from.** Every form base key — `fields submitText submitMode whatsappNumber whatsappGreeting formName bumpEnabled bumpLabel bumpPrice bumpDescription successRedirectUrl successMessage submitColor submitTextColor` — is read in this order: an explicit prop on the macro, else your destructured local of the same key (so its default applies), else the section's raw content. Using the macro marks all of them as USED, so none of them disappear from the editor — the owner keeps the full fields/submit/WhatsApp/bump UI, because the section type is still `form`. Do declare `fields` in `Props` (lint `form-fields-no-fields` warns if you don't).
+
+**What you style.** Six class props, all static Tailwind strings (picked up at upload like any class): `class` (the `<form>`), `fieldClass` (every input/textarea/select), `labelClass`, `submitClass`, `wrapClass` (per-field wrapper), `successClass`. They replace the defaults wholesale; `fieldClass` gets ` resize-y` appended on textareas. A submit colour the owner picked in the editor still wins as an inline style, as it does on platform forms.
+
+**Limits, stated plainly.**
+- `form` sections only — anywhere else is `error` `form-fields-type`.
+- The dropdown is a **native `<select>`** styled by `fieldClass`; the platform's custom listbox (`FormSelect.astro`) is not ported yet, so a `u:` form's select looks slightly different from a platform form's until it is.
+- No multi-step, no sidebar-info blocks — those are layouts, and layout is now yours to build around the macro.
+- The marketplace preview and `--out` render the block but carry no runtime; submit is swallowed there. That is expected.
 
 ## 6. Tailwind at upload
 
@@ -415,6 +462,8 @@ The predicate itself stays as narrow as it was: full-strength surfaces only (`bg
 | `tailwind` `ir-size` `source-size` `content-size` | error | build/upload limits (the last two are CLI-side, ≥ 0.1.17) |
 | `surface-foreground` | warning | a brand surface (`bg-accent`/`bg-primary`/`bg-secondary`) paired with a foreign text token — §6.1 |
 | `content-required` | error | `--content` lacks a top-level field the section type requires AND this variant renders (hidden fields are exempt) — §9 |
+| `form-fields-type` | error | `<FormFields />` outside a `form` section — §5c |
+| `form-fields-no-fields` | warning | `<FormFields />` used but `fields` is not read from `Astro.props` — §5c |
 | `props-optional`* `props-unknown-item-key`* `props-type-mismatch` `props-undeclared` | warning | schema |
 | `ext-field-undocumented`* `ext-field-doc-thin` | warning | extension field docs (§1.2) |
 | `pair-with-unknown` `pair-with-not-array` `pair-with-bad-name` `pair-with-not-object` | error | `@pairWith` (§1.2c) — always an error, `--strict` or not |
