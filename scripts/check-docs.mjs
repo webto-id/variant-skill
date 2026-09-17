@@ -18,8 +18,13 @@
  */
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 
-const root = new URL("..", import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1");
+// fileURLToPath, not URL.pathname: pathname keeps percent-encoding, so a
+// folder with a space became `webto%20variant%20format` and readdirSync
+// died with ENOENT before checking a single file (reported 2026-09-17).
+// It also handles the Windows drive letter, so no regex is needed.
+const root = fileURLToPath(new URL("..", import.meta.url));
 const files = [];
 (function walk(dir) {
   for (const name of readdirSync(dir)) {

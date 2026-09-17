@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.32 — 2026-09-17
+
+- **`scripts/check-docs.mjs` crashed when the skill lives in a folder with a space in its path** — `ENOENT … webto%20variant%20format` before checking a single file, so the release step introduced in 0.1.31 never ran on such a machine. `URL.pathname` keeps percent-encoding; the script now uses `fileURLToPath`, which decodes it and handles the Windows drive letter. Reported with a side-by-side run from a spaced folder. Verified the same way: from a copy under `cek docs spasi`, `clean: 8 file(s)`, exit 0.
+
 ## 0.1.31 — 2026-09-17
 
 - **Docs fix:** the 0.1.29 example for multi-paragraph defaults, and the 0.1.29 changelog bullet describing the bug, both had their escape sequences DECODED on the way into the file — `\n` became two raw line breaks, `\t` a TAB, `\r` a line break. Copied verbatim, the example failed with `unterminated string`, the very error it announced as fixed. Reported with a copy-paste repro. The example now sits in a fenced `astro` block in `wvf.md` §1.3 with the escapes intact, next to the reminder that a RAW newline in a plain string is still rejected.
