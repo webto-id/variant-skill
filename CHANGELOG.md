@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.30 — 2026-09-17
+
+- **Correction to 0.1.29, platform only (no CLI change):** the hidden-field exemption at upload was true for the **dry-run** but not for the actual **Update** — phase B rewrites `u:@key` refs to real `u:<id>` refs and validates again through a path the fix had not reached, so the Update failed *after* the variants were written with the very `"heading" wajib diisi` the dry-run had stopped producing. Both phases now carry each variant's `hiddenFields` (keyed by the real id in phase B). Needs an `apps/server` deploy; nothing to change in any bundle.
+
 ## 0.1.29 — 2026-09-17
 
 Four gaps between `variant-check` and the platform, from one seller conversion (8 variants). `@webto-id/variant-check` **0.1.23**, compiler **0.1.15**.
@@ -8,7 +12,8 @@ Four gaps between `variant-check` and the platform, from one seller conversion (
 - **Platform: a hidden base field is no longer required at upload.** A testimonials design with no title had to grow one, because the base's `required` applied regardless of what the variant renders while the editor hid the field for that variant — two rules cancelling each other. Bundle validation now exempts each variant's `hiddenFields`. Stop reading a field in `Props` and neither the CLI nor the upload will ask the buyer for it.
 - **Multi-paragraph defaults are possible again.** `"Satu.
 
-Dua, tiga."` died as `unterminated string` (the escaped newline was decoded and then caught by the raw-newline check, while `	` and `\"` passed), and a template-literal default died as `unterminated template literal` on its first comma (the destructuring splitter tracked quotes but not backticks). Both fixed; `` decodes too. §1.3 says so.
+Dua, tiga."` died as `unterminated string` (the escaped newline was decoded and then caught by the raw-newline check, while `	` and `\"` passed), and a template-literal default died as `unterminated template literal` on its first comma (the destructuring splitter tracked quotes but not backticks). Both fixed; `
+` decodes too. §1.3 says so.
 - **The `--out` preview resets what the site resets.** Only `h1-h4 p ul ol` had their margin zeroed; the live site runs Tailwind preflight, which also zeroes `blockquote dl dd figure figcaption h5 h6 hr pre fieldset`. A `figure` + `blockquote` testimonial kept 40px per side per element in the preview and read as a real defect at 390px — the parity check in template-skill step 9 would have "fixed" it with `m-0` everywhere. Now identical.
 
 ## 0.1.28 — 2026-09-17
