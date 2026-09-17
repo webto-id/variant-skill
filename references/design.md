@@ -14,7 +14,9 @@ A variant is **one band of a page you will never see**, rendered with content yo
 
 A variant that differs from existing ones only by color or radius does not differ at all once the theme is applied. **Distinctiveness must be structural**: one clear idea (asymmetry, overlap, oversized numerals, hairline grid, marquee, stagger, diagonal, a single hero item with the rest small) — commit to it.
 
-**One palette rule outranks the rest: `accent` is a brand color, not a light tint.** Your source's soft grey band is `bg-muted` (or `bg-card`), which is mixed from the page background and stays a shade off it under every palette and in dark mode. `bg-accent` is a highlight, and only ever carries `text-accent-foreground`. Getting this wrong is invisible while you work — a converted theme usually has a near-white accent — and then the buyer picks a platform palette, accent becomes teal or amber, and your section's text disappears. See `wvf.md` §6.1.
+**One palette rule outranks the rest: `accent` is a brand color, not a light tint.** Your source's soft grey band is `bg-muted` (or `bg-card`), which is mixed from the page background and stays a shade off it under every palette and in dark mode. Getting this wrong is invisible while you work — a converted theme usually has a near-white accent — and then the buyer picks a platform palette, accent becomes teal or amber, and your section's text disappears. See `wvf.md` §6.1.
+
+**This is not a ban on accent bands.** A full-width `bg-accent` paired with `text-accent-foreground` stays readable under every palette, because that foreground is recomputed for whatever accent becomes; what changes is the section's WEIGHT — a whisper in your theme, a saturated brand band in theirs. That is a design decision to make deliberately, not a defect to remove. The defect is only ever a brand surface under a FOREIGN foreground. Do not sweep legitimate accent bands into `bg-muted` on sight; you will flatten every template you convert into the same grey.
 
 ## 2. Content-shape robustness (the real brief)
 

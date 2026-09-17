@@ -365,13 +365,28 @@ The palette has five authored colors (`primary`, `secondary`, `accent`, `backgro
 
 **`accent` is not a light tint — it only is in your file.** A converted template usually has something like `#f0f0f8` there, so `bg-accent text-foreground` looks perfect while you build it. Every palette the platform ships puts a saturated brand color in that slot (teal `#0d9488`, amber `#d97706`, blue `#2563eb`, yellow `#fbbf24`); the buyer opens the Style tab, picks one, and your section's text is unreadable — with nothing changed in the variant, and no warning anywhere on the site. `accent-foreground` exists precisely because it is recomputed for contrast against whatever `accent` becomes.
 
+**The source's band tint has no slot anywhere, and that is the point.** `muted` and `card` are derived, so there is nowhere to store the specific beige your source used: `#e9e2d7` becomes a derived warm grey. You are trading one exact color for a band that is guaranteed to stay a shade off the page under every palette the buyer can pick, in light and in dark. Take the trade — there is no version of this where the literal tint survives re-theming.
+
 So:
 
 - A section band that should read as "a shade off the page" is **`bg-muted`** (or `bg-card` for something subtler). Both are mixed FROM the background, so they stay a shade off it in light and dark, under every palette. This is what almost every converted `bg-gray-50` / `bg-[#f7f8fa]` section actually wants.
-- `bg-accent` is for a **highlight** — a badge, a pill, a callout, a hover state, one emphasised card — and it takes `text-accent-foreground`.
+- `bg-accent` is for a **highlight** — a badge, a pill, a callout, one emphasised card — and it takes `text-accent-foreground`.
+- A hover surface counts, and it is the easiest one to get wrong: write `hover:bg-accent hover:text-accent-foreground` as a PAIR. `hover:bg-accent` on its own turns the background into a brand color while the text stays whatever it inherited (`text-muted-foreground` on a list row, typically) — the inherited-foreground bug below, arrived at by following the highlight rule.
+- **An image well is not a highlight.** The backdrop behind an `<img>`, and the placeholder box for an image the buyer has not uploaded yet, should be `bg-muted` — they are meant to disappear behind the picture, and an empty slot in a teal palette should not be a teal rectangle.
 - Need a whisper of brand in a full-width band? `bg-accent/8` over the page background, with normal text.
 
-Lint `surface-foreground` (warning) catches the explicit contradiction — `bg-accent` together with `text-foreground`/`text-muted-foreground` on the same element — from `variant-check` 0.1.21. It is deliberately narrow: a tint (`bg-accent/10`) and a correctly paired surface are silent, and it cannot see a foreground inherited from an ancestor, so **a `bg-accent` band with no `text-*` at all is the same bug and will not be reported.** Check those by eye.
+Lint `surface-foreground` (warning, `variant-check` 0.1.21) catches the explicit contradiction: a `class` attribute setting `bg-accent`/`bg-primary`/`bg-secondary` together with a text token from another surface. It is deliberately narrow — that version fires on none of the 85+ sections the platform ships, and every looser rule tried flagged the platform's own components, which is how a warning gets ignored.
+
+**You are the safety net for the rest.** The lint reads one element's own static class attribute, so four shapes that are the same bug go unreported. Check them by eye, every time:
+
+| | Shape | Why it is invisible to the lint |
+|---|---|---|
+| A | classes assembled in a `const` and applied via `class:list` | the attribute is an expression, not a static string |
+| B | `hover:bg-accent` with no `hover:text-*` | the hover foreground is inherited, not declared |
+| C | a `bg-accent` band with no `text-*` at all | same — inherited from an ancestor |
+| D | an empty image well / `<img>` backdrop on `bg-accent` | no text involved, so nothing contradicts — but a teal box is still wrong |
+
+A is the one to watch when refactoring: moving a class string into a `const` silences the lint without changing the markup.
 
 ## 7. Lint code table
 
