@@ -5,6 +5,37 @@ A WVF variant targets exactly one **section type**. The type decides which conte
 The authoritative, always-current list is generated from the platform schema:
 <https://docs.webto.id/marketplace/referensi-schema/> (or `npx @webto-id/variant-check --help` for the supported type ids). The CLI ships the same base schemas, so `hidden base fields` in its output tells you which base fields your variant ignores.
 
+## Required fields per type
+
+What the upload dry-run insists on at the top level of a section's `content` -- and, from `variant-check` 0.1.23, what `--content` checks too. A key with a platform default is never listed. **A field your variant hides (never reads in `Props`) is exempt** on both sides: the editor hides it for that variant, so demanding it would trap the buyer. Generated from the platform's schemas (`pnpm gen:schemas` in the CLI package), not maintained by hand.
+
+| Type | Required |
+|---|---|
+| `banner` | `text` |
+| `banner-inline` | `text` |
+| `before-after` | `pairs` |
+| `blog` | `heading` |
+| `contact` | — |
+| `countdown` | `heading`, `targetDate` |
+| `cta` | `heading` |
+| `faq` | `heading`, `items` |
+| `features-grid` | `features`, `heading` |
+| `footer` | — |
+| `form` | `fields` |
+| `gallery` | `heading`, `images` |
+| `hero` | `headline` |
+| `logo-cloud` | `logos` |
+| `map` | — |
+| `navbar` | — |
+| `pricing` | `heading`, `plans` |
+| `products` | `heading` |
+| `stats` | `stats` |
+| `steps` | `heading`, `steps` |
+| `team` | `heading`, `members` |
+| `testimonials` | `heading`, `testimonials` |
+| `text-block` | `content` |
+| `video` | `videoUrl` |
+
 ## Supported type ids
 
 `hero features-grid testimonials cta faq stats steps pricing team gallery logo-cloud contact map video countdown before-after text-block blog products form banner-inline`

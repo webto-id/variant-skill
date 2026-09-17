@@ -91,6 +91,10 @@ Validation (always an error, not gated by `--strict`): `pair-with-unknown` if th
 - Only `const { a, b = "default", key: local } = Astro.props;`. Rest `...x`, nested patterns → error `props`.
 - `const x = <expr>` with the expression subset below (a TS annotation on the const is ignored). `let`/`var`/`function`/`if`/`for`/`return`/`await`/`export` → error `statement`. `as` casts → error `ts-cast`. `Astro.*` other than `Astro.props` → error `astro`. Two special forms are allowed: `const t = sectionT(Astro.locals)` and `const editChrome = (Astro.locals as {…})?.editChrome === true`.
 
+**Defaults may be multi-paragraph** (compiler 0.1.15). A plain string takes JavaScript escapes -- `"Satu.
+
+Dua, tiga."` -- and a template literal may span lines and hold commas, semicolons, backslashes and `${...}`. Before 0.1.15 the first died as `unterminated string` and the second as `unterminated template literal` on its first comma, which made a multi-paragraph `text-block` default impossible to write; if you worked around it with a one-paragraph default and the full text only in `template.json`, you can now put the real text back.
+
 ### 1.4 Expression subset (frontmatter and `{}` in template)
 
 Literals (strings, template literals, numbers, `true/false/null/undefined`), identifiers, `a.b`, `a[i]`, `f(x)`, optional chaining `?.`, unary `! - + typeof`, binary `?? || && === !== == != < > <= >= + - * / %`, ternary, array/object literals (shorthand ok, no computed keys, no spread), **expression-bodied** arrow functions `(x, i) => …` (block bodies → error `arrow-block`), and JSX inside expressions (`cond && <div/>`, `items.map(i => <li/>)`).
@@ -401,6 +405,7 @@ The predicate itself stays as narrow as it was: full-strength surfaces only (`bg
 | `script-inline` `script-src` `script-define-vars` `script-type` `script-size` `script-syntax` `script-obfuscation` `script-with` `script-import` `script-debugger` `script-forbidden` `script-html` `script-loop` `script-count` | error | JavaScript |
 | `tailwind` `ir-size` `source-size` `content-size` | error | build/upload limits (the last two are CLI-side, ≥ 0.1.17) |
 | `surface-foreground` | warning | a brand surface (`bg-accent`/`bg-primary`/`bg-secondary`) paired with a foreign text token — §6.1 |
+| `content-required` | error | `--content` lacks a top-level field the section type requires AND this variant renders (hidden fields are exempt) — §9 |
 | `props-optional`* `props-unknown-item-key`* `props-type-mismatch` `props-undeclared` | warning | schema |
 | `ext-field-undocumented`* `ext-field-doc-thin` | warning | extension field docs (§1.2) |
 | `pair-with-unknown` `pair-with-not-array` `pair-with-bad-name` `pair-with-not-object` | error | `@pairWith` (§1.2c) — always an error, `--strict` or not |
@@ -418,3 +423,7 @@ The predicate itself stays as narrow as it was: full-strength surfaces only (`bg
 npx @webto-id/variant-check <file.astro> --type <sectionType> [--strict] [--content sample.json] [--out preview.html] [--theme light|dark|warm] [--json]
 ```
 Exit 0 = clean, 1 = errors, 2 = usage. Run with `--strict` before submitting. `--content` is checked against the base schema too (`content-*` codes above) — a required nested field left empty or a base array item shaped wrong fails here, not only on upload.
+
+**What `--content` checks, from 0.1.23.** Field shapes all the way down (as before) PLUS the section type's top-level `required` keys -- the same ones the upload dry-run enforces -- minus any the variant hides. A field you never read in `Props` lands in `hidden base fields` and is exempt on both sides: the CLI does not demand it, and since 2026-09-17 neither does the upload (the editor hides it for this variant, so a buyer could never fill it). A key with a platform default (`ctaText`, `viewMoreAlign`, ...) is never required. The list per type is in `schema.md`. Before 0.1.23 the bundled schema carried no `required` at all, so `0 error(s)` could still be rejected at upload with `"heading" wajib diisi`.
+
+**The `--out` preview resets what the site resets.** Its base layer now zeroes the margin on every element Tailwind preflight zeroes (`blockquote dl dd figure figcaption h1-h6 hr p pre`, `fieldset`), so a `figure` + `blockquote` testimonial measures the same at 390px in `preview.html` as on the live site. Before 0.1.15 only `h1-h4 p ul ol` were reset and the parity check invited `m-0` fixes for a defect that did not exist.
