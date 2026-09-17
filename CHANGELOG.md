@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.35 — 2026-09-18
+
+- **`schema.md` said site chrome could not be authored as WVF** — stale since 2026-09-04 — and listed no chrome fields at all. So every navbar written from this skill was missing `logoUrl`, `logoUrlDark` and `showSiteNameWithLogo`: all nine of one seller's templates, reported 2026-09-18. The damage is not just a missing logo. A base field no variant reads becomes a HIDDEN field, so the Logo settings also vanish from the site owner's editor — they upload a logo and nothing explains why it never appears.
+- New **Site chrome base fields** section: the `navbar` / `banner` / `footer` field tables, the injected context props, and a worked logo snippet that handles both dark-mode mechanisms (forced `dark` resolves from `colorMode` server-side because there is no `data-theme` to key off; `system` renders both logos and lets `dark:` swap them). `wvf.md` §4b repeats the rule next to `data-site-name`.
+- New lint **`chrome-logo-missing`** (warning, `@webto-id/variant-check` 0.1.26 / compiler 0.1.18): a `navbar` variant whose Props never read `logoUrl`. A warning, not a `--strict` error — it is about the owner's editor, and it must not block re-uploading an existing variant.
+
 ## 0.1.34 — 2026-09-17
 
 - **`<FormFields />` phase 2: the dropdown is the platform's own.** `select` and multi-option `product` fields now render the same custom dropdown every platform form uses (invisible native `<select>` for value and validation, a trigger styled by your `fieldClass`, keyboard-navigable listbox, product image following the selection). Its stylesheet and runtime moved out of the two Astro-scoped components into one shared module the site layout and every preview load once — which is also why 0.1.33's "native select for now" was really "unstyled": scoped styles could never reach macro markup. `@webto-id/variant-check` 0.1.25, compiler 0.1.17; the site needs a deploy.

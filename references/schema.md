@@ -26,7 +26,7 @@ What the upload dry-run insists on at the top level of a section's `content` -- 
 | `hero` | `headline` |
 | `logo-cloud` | `logos` |
 | `map` | — |
-| `navbar` | — |
+| `navbar` | — (but it must render `logoUrl` — see the chrome section below) |
 | `pricing` | `heading`, `plans` |
 | `products` | `heading` |
 | `stats` | `stats` |
@@ -40,7 +40,52 @@ What the upload dry-run insists on at the top level of a section's `content` -- 
 
 `hero features-grid testimonials cta faq stats steps pricing team gallery logo-cloud contact map video countdown before-after text-block blog products form banner-inline`
 
-Not supported as WVF (site chrome / system): `navbar banner footer post`.
+Site chrome (`navbar`, `banner`, `footer`) is also authorable as WVF — see the section below for its base fields and the extra rules in `wvf.md` §4b. Only `post` (blog article body) is system-managed and cannot be authored.
+
+## Site chrome base fields (navbar / banner / footer)
+
+Chrome is authorable as WVF, and its base fields are the site owner's branding — a variant that does not read them makes them **disappear from the owner's editor**, because a field no variant renders is a hidden field.
+
+| Type | Base fields |
+|---|---|
+| `navbar` | `siteName` string?, `siteNameSize` number = 18 (not rendered by variants - the platform applies it through `data-site-name`), `logoUrl` string?, `logoUrlDark` string?, `showSiteNameWithLogo` boolean?, `ctaText` string?, `ctaUrl` string?, `links` {label, url}[]? |
+| `banner` | `text` string |
+| `footer` | `text` string, `links` {label, url}[]? |
+
+Plus the context props the renderer injects (declare them to read them; they never appear in the editor): `pages`, `currentSlug`, `linkPrefix`, `colorMode`; footer also gets `footerPages` and `imageCredits`.
+
+**A navbar must render the logo.** Owners upload one in Site settings, and every platform navbar shows it. Lint `chrome-logo-missing` (warning) fires when `logoUrl` is not read.
+
+```astro
+interface Props {
+  /** Site name, shown when there is no logo (or alongside it). */
+  siteName?: string;
+  /** Logo image URL, set by the site owner. */
+  logoUrl?: string;
+  /** Logo used in dark mode; falls back to logoUrl. */
+  logoUrlDark?: string;
+  /** Show the site name next to the logo. */
+  showSiteNameWithLogo?: boolean;
+  /** Injected: "light" | "dark" | "system". */
+  colorMode?: string;
+}
+const { siteName = "", logoUrl = "", logoUrlDark = "", showSiteNameWithLogo = false, colorMode = "light" } = Astro.props;
+const darkLogo = logoUrlDark || logoUrl;
+const showName = !logoUrl || showSiteNameWithLogo;
+---
+<a href={url(linkPrefix + "/")} class="flex items-center gap-2" data-site-name>
+  {logoUrl && colorMode === "dark" && <img src={img(darkLogo, 256)} alt={siteName} class="h-8 w-auto object-contain" />}
+  {logoUrl && colorMode !== "dark" && (
+    <>
+      <img src={img(logoUrl, 256)} alt={siteName} class="h-8 w-auto object-contain dark:hidden" />
+      {logoUrlDark && <img src={img(darkLogo, 256)} alt={siteName} class="hidden h-8 w-auto object-contain dark:block" />}
+    </>
+  )}
+  {showName && <span data-edit-field="siteName">{siteName}</span>}
+</a>
+```
+
+Two modes, two mechanisms: forced `dark` has no `data-theme` attribute to key off, so it is resolved from `colorMode` server-side; `system` renders both and lets `dark:` swap them. `data-site-name` on the brand element is what applies the owner's name-size setting.
 
 ## Base fields of the most common types
 
