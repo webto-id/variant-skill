@@ -403,9 +403,9 @@ const { heading = "Ceritakan proyek Anda", fields = [], submitText = "Kirim", su
 
 **Limits, stated plainly.**
 - `form` sections only — anywhere else is `error` `form-fields-type`.
-- The dropdown is a **native `<select>`** styled by `fieldClass`; the platform's custom listbox (`FormSelect.astro`) is not ported yet, so a `u:` form's select looks slightly different from a platform form's until it is.
+- `select` and multi-option `product` fields render the **platform's own dropdown** (invisible native `<select>` for value/validation + a styled trigger and listbox); `fieldClass` goes on the trigger, so it matches your inputs. Its stylesheet and runtime are loaded once by the site layout and by every preview — from `variant-check` 0.1.25 / compiler 0.1.17. A single-option `product` renders the product card with a hidden ref, exactly like the platform.
 - No multi-step, no sidebar-info blocks — those are layouts, and layout is now yours to build around the macro.
-- The marketplace preview and `--out` render the block but carry no runtime; submit is swallowed there. That is expected.
+- The marketplace preview and `--out` render the block with the dropdown working, but carry no SUBMIT runtime; submit is swallowed there. That is expected.
 
 ## 6. Tailwind at upload
 

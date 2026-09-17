@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.34 — 2026-09-17
+
+- **`<FormFields />` phase 2: the dropdown is the platform's own.** `select` and multi-option `product` fields now render the same custom dropdown every platform form uses (invisible native `<select>` for value and validation, a trigger styled by your `fieldClass`, keyboard-navigable listbox, product image following the selection). Its stylesheet and runtime moved out of the two Astro-scoped components into one shared module the site layout and every preview load once — which is also why 0.1.33's "native select for now" was really "unstyled": scoped styles could never reach macro markup. `@webto-id/variant-check` 0.1.25, compiler 0.1.17; the site needs a deploy.
+- Platform side, no authoring change: the ten platform form components dropped their duplicated submit scripts in favour of the single layout runtime (the seller's finding). Their markup is untouched.
+
 ## 0.1.33 — 2026-09-17
 
 - **New macro `<FormFields />`** (`@webto-id/variant-check` 0.1.24, compiler 0.1.16; the site needs a deploy) — a `form` section variant can now place the platform's whole form block inside its own layout and style it with six static class props (`class fieldClass labelClass submitClass wrapClass successClass`). The form tags stay banned for authors; the platform renders fields (every type incl. product refs and the address group), honeypot, Turnstile slot, bump, submit, error and success, and ONE site-level runtime binds submission — inbox, WhatsApp, WhatsApp+Order, Send&Checkout, lead tracking — so the variant carries no script and never enters script review. Forms were the one section a converted template could not restyle; from a seller proposal where 3 of 9 templates had the form as the only off-brand section. `wvf.md` §5c.
