@@ -375,18 +375,17 @@ So:
 - **An image well is not a highlight.** The backdrop behind an `<img>`, and the placeholder box for an image the buyer has not uploaded yet, should be `bg-muted` — they are meant to disappear behind the picture, and an empty slot in a teal palette should not be a teal rectangle.
 - Need a whisper of brand in a full-width band? `bg-accent/8` over the page background, with normal text.
 
-Lint `surface-foreground` (warning, `variant-check` 0.1.21) catches the explicit contradiction: a `class` attribute setting `bg-accent`/`bg-primary`/`bg-secondary` together with a text token from another surface. It is deliberately narrow — that version fires on none of the 85+ sections the platform ships, and every looser rule tried flagged the platform's own components, which is how a warning gets ignored.
+Lint `surface-foreground` (warning) catches the explicit contradiction: any string holding `bg-accent`/`bg-primary`/`bg-secondary` together with a text token from another surface. From `variant-check` 0.1.22 it reads **every string literal in the file**, not just `class` attributes — so a class list assembled in a `const` and applied through `class:list` is caught too (before that, moving a string into a const silenced the lint without changing the markup). One shared string is reported once, however many elements use it.
 
-**You are the safety net for the rest.** The lint reads one element's own static class attribute, so four shapes that are the same bug go unreported. Check them by eye, every time:
+The predicate itself stays as narrow as it was: full-strength surfaces only (`bg-accent/10` is a tint over the page background and fine with normal text), and an explicitly named foreign foreground. Across every component the platform ships, that fires on nothing — which is why it is worth reading when it does fire.
 
-| | Shape | Why it is invisible to the lint |
+**You are the safety net for what is left.** Three shapes are the same bug and cannot be seen by any string-level check. Check them by eye, every time:
+
+| | Shape | Why no lint can see it |
 |---|---|---|
-| A | classes assembled in a `const` and applied via `class:list` | the attribute is an expression, not a static string |
-| B | `hover:bg-accent` with no `hover:text-*` | the hover foreground is inherited, not declared |
-| C | a `bg-accent` band with no `text-*` at all | same — inherited from an ancestor |
-| D | an empty image well / `<img>` backdrop on `bg-accent` | no text involved, so nothing contradicts — but a teal box is still wrong |
-
-A is the one to watch when refactoring: moving a class string into a `const` silences the lint without changing the markup.
+| A | `hover:bg-accent` with no `hover:text-*` | the hover foreground is inherited, not declared anywhere |
+| B | a `bg-accent` band with no `text-*` at all | same — inherited from an ancestor |
+| C | an empty image well / `<img>` backdrop on `bg-accent` | no text involved, so nothing contradicts — but a teal box is still wrong |
 
 ## 7. Lint code table
 

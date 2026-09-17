@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.28 — 2026-09-17
+
+- **`surface-foreground` now reads every string literal in the file, not just `class` attributes** (`variant-check` 0.1.22, compiler 0.1.14). That closes blind spot A from the palette report: a class list assembled in a `const` and applied through `class:list` is the same contradiction spelled differently, and until now moving a string into a const silenced the lint with the markup unchanged. Results are deduped, so one shared class string is reported once however many elements use it.
+- The predicate is unchanged — still full-strength surfaces only (`bg-accent/10` stays silent), still an explicitly named foreign foreground. Only its input widened, which is safe for the same measured reason the original scope was chosen: across every component the platform ships, **zero** string literals carry both a brand surface and a foreign foreground.
+- **The blind-spot checklist is three shapes now, not four**, and all three need inference no string-level check can do: `hover:bg-accent` with no `hover:text-*`, a `bg-accent` band with no `text-*` at all, and an empty image well or `<img>` backdrop on `bg-accent`.
+
 ## 0.1.27 — 2026-09-17
 
 Documentation only, from a seller who applied §6.1 across **38 `bg-accent` uses in 66 variants** and reported what the text did and did not prevent. The lint is unchanged — they verified the five shapes against compiler 0.1.13 and agreed that narrowing it to zero platform false positives was right.
