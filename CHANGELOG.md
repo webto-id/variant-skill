@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.37 — 2026-09-18
+
+- **A doc tag's value now runs to the next KNOWN tag, not to the next `@`** (`@webto-id/variant-check` 0.1.28, compiler 0.1.20). `@example halo@studio.design` used to store just `halo` and leak `@studio.design` into the description, and `@example @nadiraayu` produced no example at all — while still failing `ext-field-doc-thin`, with no way to satisfy it. Email addresses, social handles and profile URLs like `https://unsplash.com/@name` all work now, and no quoting is needed (quotes are stored verbatim if you use them). `@max 6` after an email still parses. Reported by a seller who found three already-uploaded variants with mangled AI instructions.
+
 ## 0.1.36 — 2026-09-18
 
 - **Content-driven CSS backgrounds, including `background-attachment: fixed`** (`@webto-id/variant-check` 0.1.27, compiler 0.1.19; the site needs a deploy). `bg-fixed` always compiled, but nothing could say WHICH image stays still: a dynamic `style` holding `url(...)` passed the lint and was then dropped at serialization — 0 errors, no background, no clue. Mark the element instead and the platform fills it, sanitized and capped at 1600px, merged with your own `style`:

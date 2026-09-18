@@ -40,7 +40,7 @@ roleTitle?: string;
 facts?: Array<{ /** Fact label, e.g. Pengalaman */ label: string; /** Fact value, e.g. 8+ tahun */ value: string }>;
 ```
 
-Recognized tags (folded into the stored schema, stripped from the prose): `@example <text>`, `@max <n>` / `@min <n>` (array → item count; string → character count), `@default <text>` (metadata only — does not seed a value; a scalar's default stays the destructuring default below), `@title <text>`. An extension field with no doc at all, or a doc under 15 characters with no example signal (`@example`, "e.g.", "mis.", "contoh", or a quoted example), is flagged — `ext-field-undocumented` (promoted to error under `--strict`) or `ext-field-doc-thin` (warning always).
+Recognized tags (folded into the stored schema, stripped from the prose): `@example <text>`, `@max <n>` / `@min <n>` (array → item count; string → character count), `@default <text>` (metadata only — does not seed a value; a scalar's default stays the destructuring default below), `@title <text>`. **A tag's value runs to the next KNOWN tag, so an `@` inside it is ordinary text** — `@example halo@studio.design`, `@example @nadiraayu` and `@example https://unsplash.com/@namaanda` all store the whole value (compiler 0.1.20; before that the value was cut at the first `@` and the remainder leaked into the description). No quoting needed: quotes or backticks around the value are kept verbatim and end up in the example the AI imitates. An extension field with no doc at all, or a doc under 15 characters with no example signal (`@example`, "e.g.", "mis.", "contoh", or a quoted example), is flagged — `ext-field-undocumented` (promoted to error under `--strict`) or `ext-field-doc-thin` (warning always).
 
 ### 1.2b Which language, where
 
