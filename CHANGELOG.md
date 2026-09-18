@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.38 — 2026-09-18
+
+- **New mood value: `calm`** (platform enum; needs an `apps/server` deploy). The vocabulary had three words for the loud end — `bold`, `brutal`, `playful` — and none for the quiet one, so `minimal` and `airy` had become the overflow bucket: across one seller's 101 variants they accounted for 45 and 21 uses, four variants carried the identical pair `["minimal","airy"]` across four unrelated registers, and a deliberately quiet CTA ended up tagged `bold` because nothing else fit. `calm` = slow pace, low contrast, nothing demanding attention first.
+- `catalog.md` now states the distinction the enum is easiest to get wrong on: **energy is not composition.** `airy` means empty space and `minimal` means few elements; neither implies a slow pace, and a spacious section with a 96px accent headline is `bold` AND `airy`. Guardrails so `calm` does not become the next bucket: not "simple" (`minimal`), not "lots of room" (`airy`), not "warm" (`warm`), not "expensive-looking" (`luxurious`).
+- Also recorded: **mood describes the LOOK, never the subject.** "Personal" or "for a clinic" belong in `description`/`fits` — a value that can sit on both a `brutal` and a `luxurious` variant tells the wizard nothing. New mappings: "structured" → `precise`, "direct" → `bold`.
+- Existing variants stay valid; nothing needs re-uploading.
+
 ## 0.1.37 — 2026-09-18
 
 - **A doc tag's value now runs to the next KNOWN tag, not to the next `@`** (`@webto-id/variant-check` 0.1.28, compiler 0.1.20). `@example halo@studio.design` used to store just `halo` and leak `@studio.design` into the description, and `@example @nadiraayu` produced no example at all — while still failing `ext-field-doc-thin`, with no way to satisfy it. Email addresses, social handles and profile URLs like `https://unsplash.com/@name` all work now, and no quoting is needed (quotes are stored verbatim if you use them). `@max 6` after an email still parses. Reported by a seller who found three already-uploaded variants with mangled AI instructions.
