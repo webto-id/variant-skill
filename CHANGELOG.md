@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.1.36 — 2026-09-18
+
+- **Content-driven CSS backgrounds, including `background-attachment: fixed`** (`@webto-id/variant-check` 0.1.27, compiler 0.1.19; the site needs a deploy). `bg-fixed` always compiled, but nothing could say WHICH image stays still: a dynamic `style` holding `url(...)` passed the lint and was then dropped at serialization — 0 errors, no background, no clue. Mark the element instead and the platform fills it, sanitized and capped at 1600px, merged with your own `style`:
+
+  ```astro
+  <div data-edit-image="images.0.url" data-edit-image-bg
+       class="absolute inset-0 -z-10 bg-fixed bg-cover bg-center"></div>
+  ```
+
+  `background-attachment: fixed` is not `position: fixed` (still a compile error): the paint stays clipped to the element's own box, takes no clicks, and cannot cover the editor. An empty field emits no `background-image` at all.
+- A dynamic `style` that assembles `url(...)` is now **`error` `style-url`** and names the alternative, instead of being discarded in silence.
+- `wvf.md` §2.3b also records why `position: sticky` cannot stand in for it: clipping the tall image needs `overflow: hidden` on the wrapper, which makes that wrapper the sticky element's scrollport — so it sticks to a box that never scrolls, and unclipped it bleeds into the next section.
+
 ## 0.1.35 — 2026-09-18
 
 - **`schema.md` said site chrome could not be authored as WVF** — stale since 2026-09-04 — and listed no chrome fields at all. So every navbar written from this skill was missing `logoUrl`, `logoUrlDark` and `showSiteNameWithLogo`: all nine of one seller's templates, reported 2026-09-18. The damage is not just a missing logo. A base field no variant reads becomes a HIDDEN field, so the Logo settings also vanish from the site owner's editor — they upload a logo and nothing explains why it never appears.

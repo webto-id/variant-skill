@@ -158,6 +158,23 @@ URL attributes (`href src action formaction poster data-lightbox-src xlink:href`
 
 **Dead-text rule**: any literal text node matching `[A-Za-z]{2,}` that is not inside `aria-hidden="true"` or `<svg>` → warning `dead-text`; **error on submit (strict)**. Every visible word must come from a content field (`data-edit-field`) or `t("key")`. `<img>` without `alt` → warning `img-alt` (error on submit).
 
+### 2.3b Content-driven CSS backgrounds (`data-edit-image-bg`)
+
+A background image that comes from content -- including the `background-attachment: fixed` parallax look -- is marked, not written. The variant never emits `url(`; the platform fills `background-image` at render from the field named by `data-edit-image`, sanitized and width-capped at 1600px, exactly as its own `CtaBgImage` does:
+
+```astro
+<section class="relative isolate overflow-hidden py-24">
+  <div data-edit-image="images.0.url" data-edit-image-bg
+       class="absolute inset-0 -z-10 bg-fixed bg-cover bg-center"></div>
+  <Container>…</Container>
+</section>
+```
+
+- `bg-fixed` (or `background-attachment: fixed` in `<style>`) keeps the photo still while the page scrolls. It is NOT `position: fixed`, which stays a compile error: the background is still clipped to its own element's box, cannot cover anything outside it, and takes no clicks.
+- An empty field renders no `background-image` at all, so a broken `url()` never ships. Your own `style` on the same element is kept and merged.
+- A dynamic `style` that assembles `url(...)` is `error` `style-url`. That form was always discarded at serialization; until compiler 0.1.19 it was discarded **silently**.
+- `position: sticky` is not a substitute: clipping the tall image needs `overflow: hidden` on the wrapper, which makes that wrapper the sticky element's scrollport -- so it sticks to a box that never scrolls. Unclipped it bleeds into the next section.
+
 ### 2.4 Root wrapper
 
 The compiler adds no root element. At render the host wraps your nodes in `<div data-wv-root data-wv-inst="<uid>">`; CSS is scoped to `[data-wv-inst="<uid>"]`; the script's `root` variable is that wrapper. Defense in depth at serialization: `script iframe object embed form input textarea select link meta base style template frame frameset applet noscript html head body` are never emitted even if present in IR.
@@ -463,6 +480,8 @@ The predicate itself stays as narrow as it was: full-strength surfaces only (`bg
 | `css-root` | warning | selector rewritten to root |
 | `script-inline` `script-src` `script-define-vars` `script-type` `script-size` `script-syntax` `script-obfuscation` `script-with` `script-import` `script-debugger` `script-forbidden` `script-html` `script-loop` `script-count` | error | JavaScript |
 | `tailwind` `ir-size` `source-size` `content-size` | error | build/upload limits (the last two are CLI-side, ≥ 0.1.17) |
+| `style-url` | error | inline style uses `url()`/`expression()` — for a content background use `data-edit-image-bg` (§2.3b) |
+| `chrome-logo-missing` | warning | a `navbar` variant never reads `logoUrl` — `schema.md` chrome section |
 | `surface-foreground` | warning | a brand surface (`bg-accent`/`bg-primary`/`bg-secondary`) paired with a foreign text token — §6.1 |
 | `content-required` | error | `--content` lacks a top-level field the section type requires AND this variant renders (hidden fields are exempt) — §9 |
 | `form-fields-type` | error | `<FormFields />` outside a `form` section — §5c |
