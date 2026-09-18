@@ -5,6 +5,7 @@
 - **`variant-check` now checks the manifest, not just the `.astro`** (`@webto-id/variant-check` 0.1.29). `variant.json` is picked up automatically when it sits beside the file, and a bundle's `template.json` when it sits one level above `sections/`; `--manifest <file>` points at one explicitly and `--no-manifest` opts out. The rules are generated from the platform's own schema at publish time, so the `mood` enum in the CLI is the enum the upload enforces — a 12-variant bundle that linted clean and was then rejected for four invented moods is what prompted this.
 - **Error**: a mood outside the enum, more than 4 of them, a `description` under 15 characters, an unknown `sectionType`, a malformed or duplicated `key`, more than 12 variants in one `template.json`, or a `sectionType` that disagrees with `--type`. **Warning**: `description`/`mood` absent (legal for a draft and for a patch-mode re-upload, refused at "Ajukan review" — so `--strict` promotes both to errors), a field name the upload would strip in silence (`moods`, `tags`), a legacy `hero-*` alias, and an `.astro` with no matching entry.
 - `SKILL.md` step 6 says to write `variant.json` before running the check, so the metadata half is validated on the same run.
+- Detection also accepts `<key>.variant.json`, the way several variants share one folder (these examples do). A standalone `variant.json` needs no `key`: the uploader takes it from the filename, and a key that disagrees only warns.
 
 ## 0.1.38 — 2026-09-18
 
