@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.39 — 2026-09-18
+
+- **`variant-check` now checks the manifest, not just the `.astro`** (`@webto-id/variant-check` 0.1.29). `variant.json` is picked up automatically when it sits beside the file, and a bundle's `template.json` when it sits one level above `sections/`; `--manifest <file>` points at one explicitly and `--no-manifest` opts out. The rules are generated from the platform's own schema at publish time, so the `mood` enum in the CLI is the enum the upload enforces — a 12-variant bundle that linted clean and was then rejected for four invented moods is what prompted this.
+- **Error**: a mood outside the enum, more than 4 of them, a `description` under 15 characters, an unknown `sectionType`, a malformed or duplicated `key`, more than 12 variants in one `template.json`, or a `sectionType` that disagrees with `--type`. **Warning**: `description`/`mood` absent (legal for a draft and for a patch-mode re-upload, refused at "Ajukan review" — so `--strict` promotes both to errors), a field name the upload would strip in silence (`moods`, `tags`), a legacy `hero-*` alias, and an `.astro` with no matching entry.
+- `SKILL.md` step 6 says to write `variant.json` before running the check, so the metadata half is validated on the same run.
+
 ## 0.1.38 — 2026-09-18
 
 - **New mood value: `calm`** (platform enum; needs an `apps/server` deploy). The vocabulary had three words for the loud end — `bold`, `brutal`, `playful` — and none for the quiet one, so `minimal` and `airy` had become the overflow bucket: across one seller's 101 variants they accounted for 45 and 21 uses, four variants carried the identical pair `["minimal","airy"]` across four unrelated registers, and a deliberately quiet CTA ended up tagged `bold` because nothing else fit. `calm` = slow pace, low contrast, nothing demanding attention first.
