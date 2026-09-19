@@ -52,7 +52,7 @@ Chrome is authorable as WVF, and its base fields are the site owner's branding �
 | `banner` | `text` string |
 | `footer` | `text` string, `links` {label, url}[]? |
 
-Plus the context props the renderer injects (declare them to read them; they never appear in the editor): `pages`, `currentSlug`, `linkPrefix`, `colorMode`; footer also gets `footerPages` and `imageCredits`.
+Plus the context props the renderer injects (declare them to read them; they never appear in the editor): `pages` (already filtered by "show in navbar"), `currentSlug`, `linkPrefix`, `colorMode`; footer also gets `footerPages` (filtered by "show in footer", items carry `title`/`slug` and `label`/`url`) and `imageCredits`. A navbar must render `pages` and a footer must render `footerPages`, or the owner's per-page navigation settings do nothing — see `wvf.md` §4b.
 
 **A navbar must render the logo.** Owners upload one in Site settings, and every platform navbar shows it. Lint `chrome-logo-missing` (warning) fires when `logoUrl` is not read.
 

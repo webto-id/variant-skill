@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.41 — 2026-09-19
+
+- **The owner's per-page navigation switches reach a variant only through `pages` / `footerPages`** — and the docs got both wrong. `pages` was described as "already filtered": it was not, because every platform navbar filters `showInNavbar` inside its own component, so a WVF navbar received the raw list and kept showing pages the owner had unticked. `footerPages` was documented as `{ title, slug }` while the renderer sent `{ label, url }`, so a footer that followed this skill rendered a column of empty links and "show in footer" looked broken. Both fixed platform-side (needs an `apps/site` deploy): the WVF context now carries the filtered list, and footer items carry both spellings.
+- New lints, `variant-check` 0.1.31 / compiler 0.1.22: **`chrome-nav-pages-missing`** (a `navbar` that never reads `pages`) and **`chrome-footer-pages-missing`** (a `footer` that never reads `footerPages`). Warnings, like `chrome-logo-missing` — a chrome variant can fail this in complete silence, since nothing errors and the links simply are not the site's.
+- `wvf.md` §4b and `schema.md` state the rule: render `pages` in a navbar and `footerPages` in a footer as-is; `links[]` is for EXTRA destinations, never a replacement for the site's own pages.
+
 ## 0.1.40 — 2026-09-19
 
 - **Image fields have a shape, and `--content` now checks it** (`@webto-id/variant-check` 0.1.30, compiler 0.1.21). Every base image field accepts only an absolute `http(s)` URL, an uploaded path (`/r2/`, `/media/`, `/illu/`), one of the sentinels `__IMG__:` / `__ILLU__:` / `asset:`, or empty — a relative path such as `assets/logo.png` is rejected by the upload. It used to lint clean here: the platform rule is a Zod `.refine()`, which JSON Schema cannot carry, so the bundled schemas saw a bare string. The fields ship tagged now and the new code is `content-image-url`.
