@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.40 — 2026-09-19
+
+- **Image fields have a shape, and `--content` now checks it** (`@webto-id/variant-check` 0.1.30, compiler 0.1.21). Every base image field accepts only an absolute `http(s)` URL, an uploaded path (`/r2/`, `/media/`, `/illu/`), one of the sentinels `__IMG__:` / `__ILLU__:` / `asset:`, or empty — a relative path such as `assets/logo.png` is rejected by the upload. It used to lint clean here: the platform rule is a Zod `.refine()`, which JSON Schema cannot carry, so the bundled schemas saw a bare string. The fields ship tagged now and the new code is `content-image-url`.
+- Related platform fix (needs an `apps/server` deploy): the upload's own validator rejected `__ILLU__:` in those fields although every import resolves it, so a bundle using platform illustrations for its logo cloud failed the dry run while the identical content written as `__IMG__:` passed.
+
 ## 0.1.39 — 2026-09-18
 
 - **`variant-check` now checks the manifest, not just the `.astro`** (`@webto-id/variant-check` 0.1.29). `variant.json` is picked up automatically when it sits beside the file, and a bundle's `template.json` when it sits one level above `sections/`; `--manifest <file>` points at one explicitly and `--no-manifest` opts out. The rules are generated from the platform's own schema at publish time, so the `mood` enum in the CLI is the enum the upload enforces — a 12-variant bundle that linted clean and was then rejected for four invented moods is what prompted this.
