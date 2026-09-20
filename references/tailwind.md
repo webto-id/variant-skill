@@ -18,6 +18,8 @@ The site owner controls **colors, fonts and corner radius** through their theme.
 | Fonts | — (inherit) | `font-family: var(--font-heading)` on display text; body inherits `var(--font-body)` |
 | Width | `<Container>` macro | `max-width: var(--site-max-width, 72rem)` |
 
+**`rounded-full` and `rounded-none` are FIXED shapes, not radii.** They compile to `border-radius:3.40282e38px` and `0` and never move with the site theme — only the four sizes above are derived from `--radius`. That is correct for a pill button, an avatar or a dot; it is a mistake anywhere the shape is meant to be the owner's rounding, because a site set to sharp corners still gets your pill. Nothing flags it (`hardcoded-radius` only catches a numeric `border-radius` in a `style` attribute), so it is a decision you make on purpose, per element. A reader asked why one form's submit button ignored the theme while its card and inputs followed it: the button was `rounded-full` (2026-09-21).
+
 Opacity modifiers work on tokens: `bg-primary/10`, `text-foreground/70`, `border-border/50`, `from-primary/80`. Use them instead of a lighter hardcoded shade.
 
 ## What still works from stock Tailwind

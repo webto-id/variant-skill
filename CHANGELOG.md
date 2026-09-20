@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.42 — 2026-09-21
+
+- **`rounded-full` and `rounded-none` never follow the site theme**, and until now nothing said so. Only `rounded-sm|md|lg|xl` are derived from `--radius`; the other two compile to a fixed `3.40282e38px` and `0`. That is right for a pill button, an avatar or a dot, and wrong anywhere the rounding is meant to be the owner's — a site set to sharp corners still gets your pill. Nothing flags it either: `hardcoded-radius` only catches a numeric `border-radius` in a `style` attribute.
+- Prompted by a real question: one form variant's submit button ignored the theme radius while its card and inputs followed it. The card was `rounded-xl`, the inputs `rounded-lg`, the button `rounded-full` — three deliberate choices that looked like a platform bug.
+- Written into `tailwind.md` (radius section), `wvf.md` (the Tailwind availability line) and `SKILL.md` step 3.
+
 ## 0.1.41 — 2026-09-19
 
 - **The owner's per-page navigation switches reach a variant only through `pages` / `footerPages`** — and the docs got both wrong. `pages` was described as "already filtered": it was not, because every platform navbar filters `showInNavbar` inside its own component, so a WVF navbar received the raw list and kept showing pages the owner had unticked. `footerPages` was documented as `{ title, slug }` while the renderer sent `{ label, url }`, so a footer that followed this skill rendered a column of empty links and "show in footer" looked broken. Both fixed platform-side (needs an `apps/site` deploy): the WVF context now carries the filtered list, and footer items carry both spellings.
