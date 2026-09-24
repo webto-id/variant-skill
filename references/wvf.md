@@ -173,7 +173,7 @@ A background image that comes from content -- including the `background-attachme
 **How the owner edits it.** The photo layer sits UNDER your content (`-z-10` inside an `isolate` section), so no click ever lands on it directly. The editor asks what is *visible* at the click point instead: a click on empty space, where the eye sees the photo through the transparent `Container`, opens the image dialog, and so does the 📷 pill in the layer's top-right corner. A click on content (text, a link or button, a field, an image, or a card with an opaque or glass background) opens the section panel. Design with that in mind:
 
 - **Always render the photo element**, even when the field is empty. `{images[0]?.url && <div data-edit-image-bg …>}` leaves an empty hero with nothing to click, so the owner cannot *add* a photo inline. An empty field already renders no `background-image`, so give the layer a fallback colour (`bg-muted`) instead. Lint: `edit-image-bg-conditional`.
-- **Keep tints and scrims empty** (`<div aria-hidden="true" class="absolute inset-0 -z-10 bg-foreground/60"></div>`, no children). An empty decorative layer counts as see-through. A layer with children counts as content, unless you mark it `data-edit-image-bg-overlay`.
+- **Keep tints and scrims empty** (`<div aria-hidden="true" class="absolute inset-0 -z-10 bg-foreground/60"></div>`, no children). An empty decorative layer counts as see-through. A layer with children counts as content, unless you mark it `data-edit-image-bg-overlay`. The same applies to a scrim laid over an ordinary `<img data-edit-image>`: a click on the photo through an empty scrim opens the dialog, so `pointer-events-none` on the scrim is optional.
 - **`data-edit-image-bg` always goes with `data-edit-image="<field>"`** on the same element. The marker on its own has nothing to fill the background from. Lint: `edit-image-bg-no-field`.
 - The photo only receives clicks where it is actually painted. A `clip-path` that cuts part of it away leaves that part to the section panel.
 
@@ -228,6 +228,7 @@ Some things the SITE does centrally: the variant only marks elements and gets th
 ```
 
 - `data-lightbox` makes the image enlargeable; `data-lightbox-src` is the full-resolution version (falls back to the `src`, so a small thumbnail can still open at 1600px); `data-caption` shows under the big image; `data-lightbox-group` bounds prev/next — the search never escapes that container, which is exactly what keeps one gallery from paging into another.
+- **`data-lightbox` goes on the `<img>`, `data-lightbox-group` on the container around ALL of them**, never on the same element. Wrapping each image in `<a href={img(url, 1600)} data-lightbox data-lightbox-group="…">` is the tempting shape, and until 2026-09-24 it opened an empty overlay without prev/next: an `<a>` has no `src`, and a group attribute on the trigger groups only itself. The platform now resolves that shape (the link's href, else the image inside) and pages through same-named triggers within the section, so published variants work. Write the documented shape anyway. Lints: `lightbox-not-img`, `lightbox-group-on-trigger`.
 - Free with it: close button, backdrop click, prev/next arrows, `Escape`, and a counter.
 - In the editor the lightbox **stands down** (it would stack over the image-upload dialog), and it is **not active on the marketplace preview page**, which renders without the layout. Both are expected — do not pull the attributes back out because the preview looks inert.
 - Use it on anything that shows off photographs (gallery, portfolio, bento, before/after) unless the image is purely decorative background.
@@ -492,6 +493,8 @@ The predicate itself stays as narrow as it was: full-strength surfaces only (`bg
 | `tailwind` `ir-size` `source-size` `content-size` | error | build/upload limits (the last two are CLI-side, ≥ 0.1.17) |
 | `style-url` | error | inline style uses `url()`/`expression()` — for a content background use `data-edit-image-bg` (§2.3b) |
 | `edit-image-bg-conditional` | warning | (≥ 0.1.33) the `data-edit-image-bg` element renders only when its own field is set, so an empty section offers nothing to click to add a photo (§2.3b) |
+| `lightbox-not-img` | warning | (≥ 0.1.34) `data-lightbox` on something other than the `<img>` (§2.6) |
+| `lightbox-group-on-trigger` | warning | (≥ 0.1.34) `data-lightbox-group` on the same element as `data-lightbox` — groups nothing (§2.6) |
 | `edit-image-bg-no-field` | warning | (≥ 0.1.33) `data-edit-image-bg` without `data-edit-image="<field>"` on the same element (§2.3b) |
 | `chrome-logo-missing` | warning | a `navbar` variant never reads `logoUrl` — `schema.md` chrome section |
 | `chrome-nav-pages-missing` | warning | a `navbar` variant never reads `pages` — the owner's "show in navbar" switch does nothing (§4b) |

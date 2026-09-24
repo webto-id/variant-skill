@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.44 — 2026-09-24
+
+- **`data-lightbox` belongs on the `<img>`, and `data-lightbox-group` on the container around all of them** (§2.6). Wrapping each photo in `<a href={img(url, 1600)} data-lightbox data-lightbox-group="…">` was the tempting shape, and six approved galleries used it. Until now it opened an empty overlay without prev/next: an `<a>` has no `src`, and a group attribute on the trigger groups only itself. It was fixed on the platform side (needs an `apps/site` deploy). The lightbox now takes the link's href, falling back to the image inside it, and pages through same-named triggers within the section, never beyond it. Published variants need no re-upload. Write the documented shape anyway.
+- New lints, `variant-check` ≥ 0.1.34 (compiler 0.1.24), both warnings: **`lightbox-not-img`** fires when `data-lightbox` sits on something other than the `<img>`, and **`lightbox-group-on-trigger`** fires when `data-lightbox-group` sits on the same element as `data-lightbox`.
+- §2.3b: the click-through-to-the-photo rule now covers an ordinary `<img data-edit-image>` under an empty scrim, not only `data-edit-image-bg`. `pointer-events-none` on such a scrim is optional. A production hero built as an in-flow photo under a full-bleed `bg-foreground/45` scrim could not open the image dialog until this platform fix.
+
 ## 0.1.43 — 2026-09-24
 
 - **Clicking a background photo opens the image dialog again.** The §2.3b pattern (a `-z-10` photo layer under a transparent `Container`) left no way to open ImageEditDialog: every click "on the photo" landed on the Container, and the 📷 pill was painted inside the `-z` layer, visible but not clickable. Every seller variant with a background photo was affected, 6 of 6 on staging and production. It was fixed on the platform side (needs an `apps/site` deploy): the editor now opens the dialog when the photo is the first visible thing under the pointer. Content (text, links, buttons, fields, images, opaque or glass cards) still opens the section panel. Published variants need no re-upload.
