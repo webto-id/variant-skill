@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.43 — 2026-09-24
+
+- **Clicking a background photo opens the image dialog again.** The §2.3b pattern (a `-z-10` photo layer under a transparent `Container`) left no way to open ImageEditDialog: every click "on the photo" landed on the Container, and the 📷 pill was painted inside the `-z` layer, visible but not clickable. Every seller variant with a background photo was affected, 6 of 6 on staging and production. It was fixed on the platform side (needs an `apps/site` deploy): the editor now opens the dialog when the photo is the first visible thing under the pointer. Content (text, links, buttons, fields, images, opaque or glass cards) still opens the section panel. Published variants need no re-upload.
+- §2.3b now spells out the click contract. Always render the photo element, even when its field is empty. Keep tint and scrim layers empty. Always pair `data-edit-image-bg` with `data-edit-image`.
+- New lints, `variant-check` 0.1.33 / compiler 0.1.23, both warnings: **`edit-image-bg-conditional`** fires when the photo layer renders only when its own field is set (`{images[0]?.url && <div data-edit-image-bg …>}`), which leaves an empty section with nothing to click to ADD a photo. One of the six production variants had this. **`edit-image-bg-no-field`** fires when `data-edit-image-bg` appears without `data-edit-image`.
+- There is deliberately no lint for a negative z-index on the photo layer. That is the recommended pattern, and it works now.
+
 ## 0.1.42 — 2026-09-21
 
 - **`rounded-full` and `rounded-none` never follow the site theme**, and until now nothing said so. Only `rounded-sm|md|lg|xl` are derived from `--radius`; the other two compile to a fixed `3.40282e38px` and `0`. That is right for a pill button, an avatar or a dot, and wrong anywhere the rounding is meant to be the owner's — a site set to sharp corners still gets your pill. Nothing flags it either: `hardcoded-radius` only catches a numeric `border-radius` in a `style` attribute.

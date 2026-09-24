@@ -170,6 +170,15 @@ A background image that comes from content -- including the `background-attachme
 </section>
 ```
 
+**How the owner edits it.** The photo layer sits UNDER your content (`-z-10` inside an `isolate` section), so no click ever lands on it directly. The editor asks what is *visible* at the click point instead: a click on empty space, where the eye sees the photo through the transparent `Container`, opens the image dialog, and so does the 📷 pill in the layer's top-right corner. A click on content (text, a link or button, a field, an image, or a card with an opaque or glass background) opens the section panel. Design with that in mind:
+
+- **Always render the photo element**, even when the field is empty. `{images[0]?.url && <div data-edit-image-bg …>}` leaves an empty hero with nothing to click, so the owner cannot *add* a photo inline. An empty field already renders no `background-image`, so give the layer a fallback colour (`bg-muted`) instead. Lint: `edit-image-bg-conditional`.
+- **Keep tints and scrims empty** (`<div aria-hidden="true" class="absolute inset-0 -z-10 bg-foreground/60"></div>`, no children). An empty decorative layer counts as see-through. A layer with children counts as content, unless you mark it `data-edit-image-bg-overlay`.
+- **`data-edit-image-bg` always goes with `data-edit-image="<field>"`** on the same element. The marker on its own has nothing to fill the background from. Lint: `edit-image-bg-no-field`.
+- The photo only receives clicks where it is actually painted. A `clip-path` that cuts part of it away leaves that part to the section panel.
+
+Before 2026-09-24 the platform only followed `closest()`, so a variant built exactly like the example above could not open the dialog at all, and even the pill was painted but not clickable. Variants already published were fixed on the platform side, with no re-upload needed.
+
 - `bg-fixed` (or `background-attachment: fixed` in `<style>`) keeps the photo still while the page scrolls. It is NOT `position: fixed`, which stays a compile error: the background is still clipped to its own element's box, cannot cover anything outside it, and takes no clicks.
 - An empty field renders no `background-image` at all, so a broken `url()` never ships. Your own `style` on the same element is kept and merged.
 - A dynamic `style` that assembles `url(...)` is `error` `style-url`. That form was always discarded at serialization; until compiler 0.1.19 it was discarded **silently**.
@@ -482,6 +491,8 @@ The predicate itself stays as narrow as it was: full-strength surfaces only (`bg
 | `script-inline` `script-src` `script-define-vars` `script-type` `script-size` `script-syntax` `script-obfuscation` `script-with` `script-import` `script-debugger` `script-forbidden` `script-html` `script-loop` `script-count` | error | JavaScript |
 | `tailwind` `ir-size` `source-size` `content-size` | error | build/upload limits (the last two are CLI-side, ≥ 0.1.17) |
 | `style-url` | error | inline style uses `url()`/`expression()` — for a content background use `data-edit-image-bg` (§2.3b) |
+| `edit-image-bg-conditional` | warning | (≥ 0.1.33) the `data-edit-image-bg` element renders only when its own field is set, so an empty section offers nothing to click to add a photo (§2.3b) |
+| `edit-image-bg-no-field` | warning | (≥ 0.1.33) `data-edit-image-bg` without `data-edit-image="<field>"` on the same element (§2.3b) |
 | `chrome-logo-missing` | warning | a `navbar` variant never reads `logoUrl` — `schema.md` chrome section |
 | `chrome-nav-pages-missing` | warning | a `navbar` variant never reads `pages` — the owner's "show in navbar" switch does nothing (§4b) |
 | `chrome-footer-pages-missing` | warning | a `footer` variant never reads `footerPages` — the owner's "show in footer" switch does nothing (§4b) |
