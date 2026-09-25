@@ -153,7 +153,7 @@ URL attributes (`href src action formaction poster data-lightbox-src xlink:href`
 | `data-edit-url="field"` on a `<a class="relative">` | compiler sugar: emits an `EditUrlPill` after the children; the link destination becomes editable |
 | `<EditUrlPill field="ctaUrl" value={ctaUrl} />` inside a `relative` `<a>` | explicit form of the same pill |
 | `data-track="cta"` | auto-added to any `<a href>` with an editable descendant; `Button href` and `ViewMoreLink` always emit it |
-| `id="…"` | warning `id-attr` — the editor's click walker stops at ids; use `data-*` |
+| `id="…"` | warning `id-attr` — the editor's click walker stops at ids, and every section already has an anchor (§2.3c); use `data-*` |
 | `aria-hidden="true"` (static) | suppresses the dead-text rule for the subtree (decorative text) |
 
 **Dead-text rule**: any literal text node matching `[A-Za-z]{2,}` that is not inside `aria-hidden="true"` or `<svg>` → warning `dead-text`; **error on submit (strict)**. Every visible word must come from a content field (`data-edit-field`) or `t("key")`. `<img>` without `alt` → warning `img-alt` (error on submit).
@@ -183,6 +183,45 @@ Before 2026-09-24 the platform only followed `closest()`, so a variant built exa
 - An empty field renders no `background-image` at all, so a broken `url()` never ships. Your own `style` on the same element is kept and merged.
 - A dynamic `style` that assembles `url(...)` is `error` `style-url`. That form was always discarded at serialization; until compiler 0.1.19 it was discarded **silently**.
 - `position: sticky` is not a substitute: clipping the tall image needs `overflow: hidden` on the wrapper, which makes that wrapper the sticky element's scrollport -- so it sticks to a box that never scrolls. Unclipped it bleeds into the next section.
+
+### 2.3c Anchor links (`#contact`)
+
+In-page links are allowed. Both `href="#contact"` and `href={url(ctaUrl)}` with a `#…` value lint clean, because `#` is a safe URL.
+
+**Every section already has an anchor.** The renderer gives each section's wrapper an `id` derived from its section TYPE (`scroll-margin-top: 80px` included, so a sticky navbar does not cover the heading). A user variant gets the anchor of the type it declares:
+
+| section type | anchor |
+|---|---|
+| `hero` | `#hero` |
+| `features-grid` | `#features` |
+| `text-block` | `#text` |
+| `gallery` | `#gallery` |
+| `stats` | `#stats` |
+| `products` | `#products` |
+| `testimonials` | `#testimonials` |
+| `faq` | `#faq` |
+| `cta` | `#cta` |
+| `pricing` | `#pricing` |
+| `contact` | `#contact` |
+| `footer` | `#footer` |
+| `steps` | `#steps` |
+| `video` | `#video` |
+| `logo-cloud` | `#logos` |
+| `team` | `#team` |
+| `blog` | `#blog` |
+| `map` | `#map` |
+| `banner` | `#banner` |
+| `countdown` | `#countdown` |
+| `form` | `#form` |
+
+- Any other type uses its own name: `about` → `#about`.
+- A second section of the same type on the page gets `-2`, a third `-3`: `#features`, `#features-2`. Hidden sections are not counted.
+- Anchors are per page. From another page, link `/#contact` (or `/layanan#pricing`) rather than `#contact`.
+- Header chrome (`navbar`, `banner`) and footer chrome are counted separately from the page's sections.
+
+So a navbar item or a CTA points at `#contact`, `#pricing` or `#faq` and nothing else is needed. **Do not put your own `id` on the section or on an element in it** (lint `id-attr`). It duplicates the platform's anchor, and the editor's click walker stops at the first `id` it meets, so clicks inside the section stop opening its panel.
+
+Not supported: an anchor to an ELEMENT inside a section (`#paket-premium` on one pricing card). The section is the smallest target.
 
 ### 2.4 Root wrapper
 

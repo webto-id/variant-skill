@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.45 — 2026-09-25
+
+- **Anchor links were never banned. Every section already has one** (new §2.3c). A template author asked whether `href="#kontak"` is allowed, because the only signal was the `id-attr` warning on a hand-made `<section id="layanan">`. It is allowed, statically or through `url()`. The renderer gives each section's wrapper an id from its type: `#hero`, `#features`, `#pricing`, `#faq`, `#contact`, with `#features-2` for a second one, and it adds `scroll-margin-top` so a sticky navbar does not cover the heading. §2.3c has the full table, kept equal to the renderer's map by a test. It also covers the rules: hidden sections are not counted, anchors are per page, and header and footer chrome are counted separately.
+- Do not add your own `id`. It duplicates the platform's anchor and stops the editor's click walker. An anchor to an element inside a section is not supported.
+- `id-attr` (`variant-check` ≥ 0.1.36, compiler 0.1.25) now says an id is not needed for anchor links and that `#…` links are fine. It is still a warning.
+
 ## 0.1.44 — 2026-09-24
 
 - **`data-lightbox` belongs on the `<img>`, and `data-lightbox-group` on the container around all of them** (§2.6). Wrapping each photo in `<a href={img(url, 1600)} data-lightbox data-lightbox-group="…">` was the tempting shape, and six approved galleries used it. Until now it opened an empty overlay without prev/next: an `<a>` has no `src`, and a group attribute on the trigger groups only itself. It was fixed on the platform side (needs an `apps/site` deploy). The lightbox now takes the link's href, falling back to the image inside it, and pages through same-named triggers within the section, never beyond it. Published variants need no re-upload. Write the documented shape anyway.
