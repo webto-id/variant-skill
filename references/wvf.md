@@ -245,7 +245,7 @@ Text emitted by `t("…")` is fixed UI chrome and is not marker-processed — co
 
 ### 2.6 Host-level behaviours a variant opts into
 
-Some things the SITE does centrally: the variant only marks elements and gets the behaviour for free — no script of its own, so no script-review queue. This is the complete list as of compiler 0.1.12.
+Some things the SITE does centrally: the variant only marks elements and gets the behaviour for free — no script of its own, so no script check. This is the complete list as of compiler 0.1.12.
 
 | Behaviour | What the variant writes | Where it runs | Live in the marketplace preview? |
 |---|---|---|---|
@@ -319,7 +319,7 @@ const v = video(videoUrl);   // { kind: "file" | "embed" | "", src, poster }
 )}
 ```
 
-`video()` needs `variant-check` ≥ 0.1.18 (compiler 0.1.10); on an older CLI the identifier is simply unknown. The tags `video audio source track` and the attributes `controls autoplay muted loop playsinline poster preload` have always been on the allowlists — an uploaded video plays **inside** your variant, with no script and therefore no admin review. An embed can only ever be linked out to; that is the whole reason `v.src` is the watch URL and not a player URL. When a section's entire point IS an embedded YouTube player, stop authoring and use the built-in `video` section type (`schema.md`) — it owns the iframe and its own lightbox.
+`video()` needs `variant-check` ≥ 0.1.18 (compiler 0.1.10); on an older CLI the identifier is simply unknown. The tags `video audio source track` and the attributes `controls autoplay muted loop playsinline poster preload` have always been on the allowlists — an uploaded video plays **inside** your variant, with no script and therefore no script check. An embed can only ever be linked out to; that is the whole reason `v.src` is the watch URL and not a player URL. When a section's entire point IS an embedded YouTube player, stop authoring and use the built-in `video` section type (`schema.md`) — it owns the iframe and its own lightbox.
 
 ## 3. CSS
 
@@ -330,9 +330,9 @@ const v = video(videoUrl);   // { kind: "file" | "embed" | "", src, poster }
 - Scoping: every selector gets the root prefix; a top-level `&` = root (`&:hover` → `root:hover`); CSS nesting inside a rule is flattened with the standard meaning (`.card { &:hover {…} .title {…} }` → `root .card:hover`, `root .card .title`; a nested `@media` is hoisted around the rule); `@media @supports @container @layer @scope` recurse; `@keyframes @property @page @counter-style` stay verbatim (name keyframes uniquely).
 - Output = scoped Tailwind CSS + scoped author CSS, total ≤ 64 KB.
 
-### 3.1 Scroll-driven animation (no script, no review queue)
+### 3.1 Scroll-driven animation (no script, so no script check)
 
-CSS scroll-driven animation (`animation-timeline: view()` / `animation-timeline: scroll()`, `animation-range`) is allowed — the lint has no opinion on it, same as any other `animation-*`/`@keyframes` property. This is real capability, not an accident to route around: a timeline progress bar, a parallax layer, or a scroll-triggered reveal can all be built in `<style>` alone, with zero JavaScript and therefore no admin review.
+CSS scroll-driven animation (`animation-timeline: view()` / `animation-timeline: scroll()`, `animation-range`) is allowed — the lint has no opinion on it, same as any other `animation-*`/`@keyframes` property. This is real capability, not an accident to route around: a timeline progress bar, a parallax layer, or a scroll-triggered reveal can all be built in `<style>` alone, with zero JavaScript and therefore no script check.
 
 ```css
 .wv-progress-line {
@@ -375,11 +375,19 @@ Rejected (all `error`):
 - Members: `.cookie .write .writeln .top .parent .opener .frames .postMessage .sendBeacon .__proto__ .constructor .prototype .location .history .execCommand .requestSubmit .submit .importNode .adoptNode .contentWindow .contentDocument .srcdoc .outerHTML .insertAdjacentHTML .createContextualFragment .referrer .domain .defineProperty .getOwnPropertyDescriptor .setPrototypeOf .getPrototypeOf`; computed access with a non-literal key on `window document globalThis self Object Array`.
 - Assignments: `.innerHTML`/`.outerHTML` with a non-literal RHS (`script-html`); `.src` `.href` `.action`; `.on*` handlers (use `addEventListener`).
 - Calls: `atob btoa unescape decodeURIComponent`; `setTimeout`/`setInterval` with a string; `createElement`/`createElementNS` of `script iframe object embed link meta base form frame style` or a non-literal tag; `setAttribute` of `on* src href srcdoc action formaction style xlink:href` or a non-literal name; `insertAdjacentHTML` with a non-literal; `location.assign/replace`; `requestFullscreen`; `showModal`; `new Function|Worker|SharedWorker|WebSocket|XMLHttpRequest|EventSource|Proxy|BroadcastChannel|MessageChannel`; tagged templates.
+- Clipboard (`script-clipboard`): any `.clipboardData`, and `addEventListener` for `copy` `cut` `paste` (and `before…`) — the way copied text (an account number, a WhatsApp number) gets swapped. A legitimate copy button would use `navigator.clipboard`, already refused; instead SELECT the text for the visitor (`document.createRange()` + `getSelection().addRange()`) so they copy it themselves.
 - Loops: `while(true)`/`for(;;)` without `break`/`return`/`throw` (`script-loop`).
 
 Allowed and typical: `root.querySelector(All)`, `addEventListener`, `classList`, `dataset`, `getAttribute`/`setAttribute("aria-…")`, `IntersectionObserver`, `requestAnimationFrame`, `matchMedia`, `setTimeout(fn, ms)`, `Date`, `Math`, `JSON`, `textContent`, `style.transform`.
 
-Review rule: a variant **with** a script needs admin review before it can be sold; a new version that changes the script goes back to review.
+Review rule — two gates, in order:
+
+1. **The machine gate**: the compiler and this lint. Any error and the variant cannot be saved.
+2. **An automatic security check**, only for a variant that has a **script** or a **hardcoded link to a host outside webto** (not one that comes from a content field). It either approves the variant or hands it to an admin; it never rejects on its own — rejecting is an admin's call, with a note to the seller.
+
+A variant with neither is approved as soon as it passes the machine gate. The seller sees only the STATUS (`pending` → `approved`, or `pending` until an admin decides), never the check's findings. Text addressed to a reviewer ("this code is safe", "please approve") does not help: it always sends the variant to an admin. A new version that changes the script or the link surface is checked again, and licensees keep the approved version meanwhile; markup/CSS-only versions go live when the lint passes. A **private** site variant (used only on its owner's site, never submitted) is checked in the background after it is saved; a script that is clearly harmful is switched off — the section still renders, only its interactivity stops — and the owner is emailed.
+
+What sends a script to an admin: reaching outside `root` to change, cover or rewrite other sections; interface outside `root` that the visitor cannot dismiss, that covers the page, or that shows claims not taken from the section's content (money, bank accounts, phone numbers, security, logins, orders); code that hides what it does. Your own interface outside `root` (a lightbox, a toast, a bar) is fine when the visitor can close or ignore it, it does not cover the page, and every word it shows comes from the section's fields or fixed labels.
 
 ## 4b. Site chrome (navbar / banner / footer)
 
@@ -405,7 +413,7 @@ In manual mode the owner edits the list in the editor; in database mode the plat
 
 ## 5b. Platform effect library (data-wv-effect)
 
-Declarative motion WITHOUT writing a script (so no script-review queue): mark elements and the platform's audited runtime animates them on the live site.
+Declarative motion WITHOUT writing a script (so no script check): mark elements and the platform's audited runtime animates them on the live site.
 
 ```astro
 <div data-wv-effect="reveal-up" data-wv-delay="1">...</div>
@@ -528,7 +536,7 @@ The predicate itself stays as narrow as it was: full-strength surfaces only (`bg
 | `img-alt`* `dead-text`* `hardcoded-image`* `hardcoded-color`* `hardcoded-radius`* `hardcoded-font`* `tailwind-skipped`* `heading-size-inert` `unknown-class` `id-attr` | warning | HTML/CSS quality |
 | `style-global` `style-define-vars` `style-size` `css-import` `css-font-face` `css-expression` `css-behavior` `css-url` `css-parse` `css-size` | error | CSS (`css-url` is a warning for unsplash/pexels hosts) |
 | `css-root` | warning | selector rewritten to root |
-| `script-inline` `script-src` `script-define-vars` `script-type` `script-size` `script-syntax` `script-obfuscation` `script-with` `script-import` `script-debugger` `script-forbidden` `script-html` `script-loop` `script-count` | error | JavaScript |
+| `script-inline` `script-src` `script-define-vars` `script-type` `script-size` `script-syntax` `script-obfuscation` `script-with` `script-import` `script-debugger` `script-forbidden` `script-html` `script-clipboard` `script-loop` `script-count` | error | JavaScript |
 | `tailwind` `ir-size` `source-size` `content-size` | error | build/upload limits (the last two are CLI-side, ≥ 0.1.17) |
 | `style-url` | error | inline style uses `url()`/`expression()` — for a content background use `data-edit-image-bg` (§2.3b) |
 | `edit-image-bg-conditional` | warning | (≥ 0.1.33) the `data-edit-image-bg` element renders only when its own field is set, so an empty section offers nothing to click to add a photo (§2.3b) |

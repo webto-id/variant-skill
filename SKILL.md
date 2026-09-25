@@ -79,7 +79,7 @@ const cols = n >= 3 ? "md:grid-cols-3" : n === 2 ? "md:grid-cols-2" : "max-w-md 
 - Frontmatter = `const` expressions only (no statements, loops, `await`, casts).
 - Tags/attributes from the allowlist; no `on*`, `set:html`, `iframe`, `form`, `input` (a `form` section places `<FormFields />` instead — `wvf.md` §5c), external `src`.
 - Every visible word editable or `t()`; every `<img>` has `alt`; no hardcoded colors/fonts/radius.
-- One `<script is:inline>` ≤ 8 KB obeying the reject list; scripts trigger admin review.
+- One `<script is:inline>` ≤ 8 KB obeying the reject list; a script (or a hardcoded off-platform link) gets an automatic security check that approves it or hands it to an admin (`wvf.md` §4 "Review rule").
 - Run `variant-check --strict` and get `0 error(s)` before handing over.
 - Never split a text field's value across elements (per-word spans) unless that field will never carry power-word emphasis — markers only survive inside one text node (`wvf.md` §2.5); keep markers out of `sample.json` entirely.
 - Deliver `variant.json` alongside the `.astro`/`.sample.json` (`references/catalog.md`) — `description`/`mood` aren't checked by the CLI, but a variant missing them is invisible to AI generation no matter how good the design is.

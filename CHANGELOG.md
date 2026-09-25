@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.46 — 2026-09-26
+
+- **How a variant gets approved changed** (`wvf.md` §4 "Review rule"). Two gates: the compiler/lint, then an automatic security check — only for a variant with a script or a hardcoded link to a host outside webto — that approves it or hands it to an admin. It never rejects on its own. A variant with neither is approved as soon as it compiles. Sellers see the status, not the check's findings; text addressed to a reviewer always sends the variant to an admin. Private site variants are checked in the background, and a clearly harmful script is switched off (the section still renders). The rule also says what a script may do outside `root`: its own dismissible interface built from the section's fields, never covering the page or rewriting other sections.
+- **New lint `script-clipboard`** (error): `.clipboardData` and `copy`/`cut`/`paste` listeners are refused — the way copied text gets swapped. For a copy button, select the text for the visitor (Selection API) instead.
+- Script lint messages now point at the right source line (they were one line too high).
+- "No review queue" wording for script-free features (effects, scroll-driven CSS, video) now reads "no script check".
+
 ## 0.1.45 — 2026-09-25
 
 - **Anchor links were never banned. Every section already has one** (new §2.3c). A template author asked whether `href="#kontak"` is allowed, because the only signal was the `id-attr` warning on a hand-made `<section id="layanan">`. It is allowed, statically or through `url()`. The renderer gives each section's wrapper an id from its type: `#hero`, `#features`, `#pricing`, `#faq`, `#contact`, with `#features-2` for a second one, and it adds `scroll-margin-top` so a sticky navbar does not cover the heading. §2.3c has the full table, kept equal to the renderer's map by a test. It also covers the rules: hidden sections are not counted, anchors are per page, and header and footer chrome are counted separately.
