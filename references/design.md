@@ -33,6 +33,7 @@ Before calling it done, render it with:
 - **Long text** — a 3-line headline, a 400-character description. Use `line-clamp-*` or generous wrapping; never fixed heights that overflow.
 - **No image** — show a placeholder div with `data-edit-image` so the owner can click to add one; never a broken `<img>`.
 - **Both themes** — swap the preview to dark; check overlays, borders and muted text.
+- **Navbar: a parent with sub-pages** — the `--out` preview of a navbar injects one ("Layanan" with two long-titled children). The dropdown needs a fixed width with wrapping text and must sit above the hero (`z-20`, `bg-card`, a border or shadow so it does not melt into the page). In the drawer the children indent under the parent; the parent stays a link, the chevron beside it is the toggle. A navbar that renders a dropdown only on hover fails on every phone and every keyboard — see `wvf.md` §4b.
 
 ## 3. Mobile is a different layout, not a squeeze
 

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.47 — 2026-09-28
+
+- **Navbars render sub-pages.** Every item of the `pages` context prop now carries `id` and `parentId` (one level; the list stays flat in page order, so a navbar reading only `title`/`slug` keeps working and shows sub-pages as plain links). Top level = `!p.parentId`; a page's children = `pages.filter((c) => c.parentId === p.id)`. A child whose parent is hidden from the navbar is left out; one whose parent was deleted arrives as top level. Render a dropdown that opens on click and keyboard (not hover only), `aria-expanded`, Escape closes; an accordion in the mobile drawer; the parent link stays clickable; mark the parent active on a child page. New example `examples/navbar-dropdown.*`. `variant-check` 0.1.39 previews navbars with nested pages and warns when a navbar reads `pages` but ignores the hierarchy.
+
 ## 0.1.46 — 2026-09-26
 
 - **How a variant gets approved changed** (`wvf.md` §4 "Review rule"). Two gates: the compiler/lint, then an automatic security check — only for a variant with a script or a hardcoded link to a host outside webto — that approves it or hands it to an admin. It never rejects on its own. A variant with neither is approved as soon as it compiles. Sellers see the status, not the check's findings; text addressed to a reviewer always sends the variant to an admin. Private site variants are checked in the background, and a clearly harmful script is switched off (the section still renders). The rule also says what a script may do outside `root`: its own dismissible interface built from the section's fields, never covering the page or rewriting other sections.

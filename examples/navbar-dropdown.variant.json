@@ -1,0 +1,7 @@
+{
+  "sectionType": "navbar",
+  "name": "Navbar Dropdown",
+  "description": "Single-row navbar with sub-page dropdowns that open on click or keyboard, and a mobile drawer with an accordion per parent page.",
+  "mood": ["minimal", "corporate"],
+  "fits": "sites with a parent page and sub-pages (Layanan, Tentang)"
+}

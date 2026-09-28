@@ -15,6 +15,7 @@ You are producing **one `.astro` file** in the Webto Variant Format: a restricte
 - `references/design.md` — what makes a variant good: structural distinctiveness, content-shape robustness (1 item … max items, missing optionals), mobile, both themes, the zero-dead-text discipline.
 - `references/catalog.md` — the `variant.json` manifest you deliver alongside the `.astro` (mood enum, description rules, `asset:<filename>` images). **Read this before step 8.**
 - `examples/hero-split.astro` (+ its `.sample.json` and `.variant.json`) — a complete, passing variant to mimic, manifest included.
+- `examples/navbar-dropdown.astro` (+ `.sample.json`, `.variant.json`) — a navbar that renders sub-pages: click/keyboard dropdown on desktop, accordion in the mobile drawer, active parent, logo fields. Start from it for any navbar (`wvf.md` §4b).
 
 ## Workflow
 

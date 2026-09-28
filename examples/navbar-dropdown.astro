@@ -1,0 +1,173 @@
+---
+import { img, url, EditUrlPill } from "webto/variant";
+
+interface Props {
+  siteName?: string;
+  logoUrl?: string;
+  logoUrlDark?: string;
+  showSiteNameWithLogo?: boolean;
+  ctaText?: string;
+  ctaUrl?: string;
+  /** Injected by the renderer: the site's nav pages, flat and in order. `parentId` = the parent page's `id`, or null for a top-level page. */
+  pages?: Array<{ id: string; title: string; slug: string; parentId: string | null }>;
+  currentSlug?: string;
+  linkPrefix?: string;
+  colorMode?: string;
+}
+
+const {
+  siteName = "",
+  logoUrl = "",
+  logoUrlDark = "",
+  showSiteNameWithLogo = false,
+  ctaText,
+  ctaUrl = "#",
+  pages = [],
+  currentSlug = "",
+  linkPrefix = "",
+  colorMode = "light",
+} = Astro.props;
+const darkLogo = logoUrlDark || logoUrl;
+const showName = !logoUrl || showSiteNameWithLogo;
+const top = pages.filter((p) => !p.parentId);
+const childrenOf = (id) => pages.filter((c) => c.parentId === id);
+const hrefOf = (slug) => url(linkPrefix + (slug ? "/" + slug : "/"));
+const activeIn = (p) => p.slug === currentSlug || childrenOf(p.id).some((c) => c.slug === currentSlug);
+---
+<nav class="border-b border-border bg-background text-foreground">
+  <div class="mx-auto flex max-w-6xl items-center gap-6 px-6 py-4">
+    <a href={hrefOf("")} class="flex min-w-0 items-center gap-2 text-lg font-semibold" style="font-family: var(--font-heading);" data-site-name>
+      {logoUrl && colorMode === "dark" && <img src={img(darkLogo, 256)} alt={siteName} data-edit-image={logoUrlDark ? "logoUrlDark" : "logoUrl"} class="h-9 w-auto object-contain" />}
+      {logoUrl && colorMode !== "dark" && (
+        <>
+          <img src={img(logoUrl, 256)} alt={siteName} data-edit-image="logoUrl" class="h-9 w-auto object-contain dark:hidden" />
+          {logoUrlDark && <img src={img(darkLogo, 256)} alt={siteName} data-edit-image="logoUrlDark" class="hidden h-9 w-auto object-contain dark:block" />}
+        </>
+      )}
+      {showName && <span data-edit-field="siteName" class="truncate">{siteName}</span>}
+    </a>
+
+    <ul class="hidden flex-1 items-center justify-center gap-1 text-sm lg:flex">
+      {top.map((p) => (
+        <li class="relative">
+          <div class="flex items-center">
+            <a href={hrefOf(p.slug)} aria-current={p.slug === currentSlug ? "page" : undefined} class:list={["whitespace-nowrap rounded-md px-3 py-2 transition-colors", activeIn(p) ? "font-medium text-foreground" : "text-muted-foreground hover:text-foreground"]}>
+              {p.title}
+            </a>
+            {childrenOf(p.id).length > 0 && (
+              <button type="button" data-sub-for={"dd-" + p.id} class="js-dd-toggle -ml-2 rounded-md p-2 transition-transform aria-expanded:rotate-180 text-muted-foreground hover:text-foreground" aria-expanded="false" aria-label={"Buka submenu " + p.title}>
+                <svg viewBox="0 0 20 20" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M5.3 7.3a1 1 0 0 1 1.4 0L10 10.6l3.3-3.3a1 1 0 1 1 1.4 1.4l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 0 1 0-1.4z" /></svg>
+              </button>
+            )}
+          </div>
+          {childrenOf(p.id).length > 0 && (
+            <ul data-sub={"dd-" + p.id} class="js-dd absolute left-0 top-full z-20 mt-1 hidden w-64 rounded-lg border border-border bg-card p-2 text-card-foreground shadow-lg">
+              {childrenOf(p.id).map((c) => (
+                <li>
+                  <a href={hrefOf(c.slug)} aria-current={c.slug === currentSlug ? "page" : undefined} class:list={["block rounded-md px-3 py-2 leading-snug transition-colors hover:bg-muted", c.slug === currentSlug ? "font-medium" : "text-muted-foreground"]}>
+                    {c.title}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+        </li>
+      ))}
+    </ul>
+
+    {ctaText && (
+      <a href={url(ctaUrl)} class="relative ml-auto hidden rounded-full bg-primary px-5 py-2 text-sm font-medium text-primary-foreground sm:inline-block lg:ml-0">
+        <span data-edit-field="ctaText">{ctaText}</span>
+        <EditUrlPill field="ctaUrl" value={ctaUrl} />
+      </a>
+    )}
+
+    {top.length > 0 && (
+      <button type="button" class="js-menu-toggle ml-auto rounded-md p-2 lg:hidden" aria-expanded="false" aria-label="Menu">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+      </button>
+    )}
+  </div>
+
+  <div class="js-menu hidden border-t border-border px-6 pb-4 lg:hidden" aria-hidden="true">
+    <ul class="flex flex-col py-2 text-sm">
+      {top.map((p) => (
+        <li class="border-b border-border last:border-0">
+          <div class="flex items-center justify-between">
+            <a href={hrefOf(p.slug)} aria-current={p.slug === currentSlug ? "page" : undefined} class:list={["flex-1 py-3", activeIn(p) ? "font-medium text-foreground" : "text-muted-foreground"]}>{p.title}</a>
+            {childrenOf(p.id).length > 0 && (
+              <button type="button" data-sub-for={"acc-" + p.id} class="js-acc-toggle p-3 transition-transform aria-expanded:rotate-180 text-muted-foreground" aria-expanded={activeIn(p) ? "true" : "false"} aria-label={"Buka submenu " + p.title}>
+                <svg viewBox="0 0 20 20" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M5.3 7.3a1 1 0 0 1 1.4 0L10 10.6l3.3-3.3a1 1 0 1 1 1.4 1.4l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 0 1 0-1.4z" /></svg>
+              </button>
+            )}
+          </div>
+          {childrenOf(p.id).length > 0 && (
+            <ul data-sub={"acc-" + p.id} class:list={["pb-2 pl-4", !activeIn(p) && "hidden"]}>
+              {childrenOf(p.id).map((c) => (
+                <li>
+                  <a href={hrefOf(c.slug)} aria-current={c.slug === currentSlug ? "page" : undefined} class:list={["block py-2 leading-snug", c.slug === currentSlug ? "font-medium text-foreground" : "text-muted-foreground"]}>{c.title}</a>
+                </li>
+              ))}
+            </ul>
+          )}
+        </li>
+      ))}
+    </ul>
+    {ctaText && (
+      <a href={url(ctaUrl)} class="mt-3 block rounded-full bg-primary px-5 py-2 text-center text-sm font-medium text-primary-foreground sm:hidden">{ctaText}</a>
+    )}
+  </div>
+</nav>
+
+<script is:inline>
+  if (root.dataset.navReady) return;
+  root.dataset.navReady = "1";
+
+  var setOpen = function (btn, isOpen) {
+    var key = btn.getAttribute("data-sub-for");
+    root.querySelectorAll("[data-sub]").forEach(function (panel) {
+      if (panel.getAttribute("data-sub") === key) panel.classList.toggle("hidden", !isOpen);
+    });
+    btn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+  };
+  var closeDropdowns = function (except) {
+    root.querySelectorAll(".js-dd-toggle").forEach(function (b) {
+      if (b !== except) setOpen(b, false);
+    });
+  };
+
+  // Desktop dropdowns: click or Enter/Space opens (a <button>), Escape and a click outside close.
+  root.querySelectorAll(".js-dd-toggle").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var isOpen = btn.getAttribute("aria-expanded") !== "true";
+      closeDropdowns(btn);
+      setOpen(btn, isOpen);
+    });
+  });
+  root.addEventListener("keydown", function (e) {
+    if (e.key !== "Escape") return;
+    var openBtn = root.querySelector('.js-dd-toggle[aria-expanded="true"]');
+    closeDropdowns(null);
+    if (openBtn) openBtn.focus();
+  });
+  document.addEventListener("click", function (e) {
+    if (!root.contains(e.target)) closeDropdowns(null);
+  });
+
+  // Mobile drawer and its accordions.
+  var menuBtn = root.querySelector(".js-menu-toggle");
+  var menu = root.querySelector(".js-menu");
+  if (menuBtn && menu) {
+    menuBtn.addEventListener("click", function () {
+      var isOpen = menuBtn.getAttribute("aria-expanded") !== "true";
+      menuBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+      menu.classList.toggle("hidden", !isOpen);
+      menu.setAttribute("aria-hidden", isOpen ? "false" : "true");
+    });
+  }
+  root.querySelectorAll(".js-acc-toggle").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      setOpen(btn, btn.getAttribute("aria-expanded") !== "true");
+    });
+  });
+</script>
