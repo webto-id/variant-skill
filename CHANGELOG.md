@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.50 — 2026-09-29
+
+- **`data-edit-group` works on `@pairWith` lists** (`wvf.md` §2.3a). A group built from a detail list — e.g. zones from `productsDetails[].zone`, with the products looped by index — is marked `data-edit-group="productsDetails[].zone" data-edit-group-value={z}`. Renaming a zone changes only the detail items that hold it; the product list and its order stay aligned. Nested lists are not supported yet (they warn `text-editable-unsure`). No `variant-check` change: 0.1.41 already checks this.
+
 ## 0.1.49 — 2026-09-29
 
 - **Group headings edit inline with `data-edit-group`** (`wvf.md` §2.3a). A heading printed once for several items that share a value — a shelf of products by `category`, an FAQ block by `category` — is not any single item's field, so `data-edit-field` would save the edit to ONE item and split the group. Mark it `<h3 data-edit-group="products[].category" data-edit-group-value={c}>{c}</h3>`: the owner renames the heading once and every item holding that value follows; renaming onto an existing group asks before merging.

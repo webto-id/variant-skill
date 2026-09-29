@@ -203,7 +203,28 @@ const shelves = products.map((p) => p.category || "").filter((c, i, all) => all.
 ))}
 ```
 
-- `data-edit-group` is a literal `"<list>[].<field>"`: a top-level content list (base, extension or `@pairWith`) and a plain text field of its items. `data-edit-group-value` is the group value itself (the loop variable), even when the text shows a fallback label for the unnamed group.
+The group may come from a `@pairWith` list too — group labels that live in a detail list beside the base items:
+
+```astro
+---
+// productsDetails: Array<{ zone?: string }>  /** … @pairWith products */
+const zones = productsDetails.map((d) => d.zone || "").filter((z, i, all) => all.indexOf(z) === i);
+---
+{zones.map((z) => (
+  <div>
+    <h3 data-edit-group="productsDetails[].zone" data-edit-group-value={z}>{z || t("other")}</h3>
+    <ul>
+      {products.map((p, i) => (productsDetails[i]?.zone || "") === z && (
+        <li data-edit-field={`products.${i}.title`}>{p.title}</li>
+      ))}
+    </ul>
+  </div>
+))}
+```
+
+Renaming "Rak dingin" changes `zone` on the `productsDetails` items that held it and nothing in `products`; every item keeps its index, so the pairing stays aligned.
+
+- `data-edit-group` is a literal `"<list>[].<field>"`: a top-level content list (base, extension or `@pairWith` — all supported; a list nested inside another list is not yet) and a plain text field of its items. `data-edit-group-value` is the group value itself (the loop variable), even when the text shows a fallback label for the unnamed group.
 - The owner clicks the heading and types a new name: every item whose `field` held the old value gets the new one. A name that already exists merges the two groups (the editor asks first). Empty names are refused.
 - Build the groups with what the expression subset has: `.map((p) => p.field)`, then `.filter((c, i, all) => all.indexOf(c) === i)` to dedupe (`.filter(Boolean)` to drop the empty group). `new`, spread (`new Set`, `[...x]`) and `.sort()` are not available in a variant.
 - Loop the items inside a group over the WHOLE list with its index and a condition (as above), so their `data-edit-field` paths stay the stored ones.
