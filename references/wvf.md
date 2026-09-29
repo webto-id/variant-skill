@@ -158,6 +158,29 @@ URL attributes (`href src action formaction poster data-lightbox-src xlink:href`
 
 **Dead-text rule**: any literal text node matching `[A-Za-z]{2,}` that is not inside `aria-hidden="true"` or `<svg>` → warning `dead-text`; **error on submit (strict)**. Every visible word must come from a content field (`data-edit-field`) or `t("key")`. `<img>` without `alt` → warning `img-alt` (error on submit).
 
+**Field-text rule** (`text-not-editable`, `variant-check` ≥ 0.1.40): every `{…}` that prints the TEXT of a content field (a string prop, an item of an array field, an extension or `@pairWith` field) must sit in an element carrying `data-edit-field` with that field's path — on the element itself, or on an ancestor that wraps nothing but this value (`<h2><span data-edit-field="heading">{heading}</span></h2>` and `<p data-edit-field="x"><strong>{x}</strong></p>` both count). Otherwise the owner clicks the words and nothing happens. **This is an error on every upload, `--strict` or not.** Versions already approved are not re-rejected; the rule applies when you upload a new version, and an `.astro` that is byte-identical to the stored one passes as it did.
+
+The compiler follows the value back to its stored path, so a helper or alias is no excuse — and no obstacle either. Write the path the value is STORED under (`featuresDetails.${i}.integrity`, never `spec.integrity`):
+
+```astro
+---
+const spec = (i) => featuresDetails[i] ?? {};   // featuresDetails: @pairWith features
+const lead = features[0] ?? {};
+---
+{features.map((f, i) => (
+  <div>
+    <h3 data-edit-field={`features.${i}.title`}>{f.title}</h3>
+    <p data-edit-field={`featuresDetails.${i}.integrity`}>{spec(i).integrity}</p>
+  </div>
+))}
+<p data-edit-field="features.0.description">{lead.description}</p>
+```
+
+- Inside a loop take the index (`items.map((item, i) => …)`) and use it in a template literal: ``data-edit-field={`items.${i}.title`}``. `.slice(0, n)` keeps the indexes; after `.filter()` / `.sort()` they are not the stored ones — the lint can only warn (`text-editable-unsure`), so map over the whole array and hide items with a condition instead.
+- **A second visible copy needs the marker too** (the desktop table and its mobile cards, a duplicated `lg:hidden` label). The same path may appear on several elements; the editor updates all of them. A purely decorative copy goes under `aria-hidden="true"`: the rule skips hidden text whose field is editable elsewhere (a marquee's second track, a badge repeating a code shown beside it). Hidden text with NO editable copy is a warning, `text-not-editable-hidden`.
+- Not flagged: computed text (numbers, `Math.*`, `title.toUpperCase()`, a template string mixing a field with other text — nothing to edit in place), attributes (`alt`, `aria-label`, `title`), `t()` labels, the chrome context props (`pages`, `footerPages`, …), and a URL field printed as its own link text when `data-edit-url`/`<EditUrlPill>` already edits it. `siteName` IS content: mark it (`<span data-edit-field="siteName">`).
+- A marker naming a different path than the value it wraps → warning `text-edit-field-mismatch` (the edit would be saved to the wrong field).
+
 ### 2.3b Content-driven CSS backgrounds (`data-edit-image-bg`)
 
 A background image that comes from content -- including the `background-attachment: fixed` parallax look -- is marked, not written. The variant never emits `url(`; the platform fills `background-image` at render from the field named by `data-edit-image`, sanitized and width-capped at 1600px, exactly as its own `CtaBgImage` does:
@@ -547,6 +570,8 @@ The predicate itself stays as narrow as it was: full-strength surfaces only (`bg
 | `edit-image-bg-conditional` | warning | (≥ 0.1.33) the `data-edit-image-bg` element renders only when its own field is set, so an empty section offers nothing to click to add a photo (§2.3b) |
 | `lightbox-not-img` | warning | (≥ 0.1.34) `data-lightbox` on something other than the `<img>` (§2.6) |
 | `lightbox-group-on-trigger` | warning | (≥ 0.1.34) `data-lightbox-group` on the same element as `data-lightbox` — groups nothing (§2.6) |
+| `text-not-editable` | error | (≥ 0.1.40) a content field printed as text without `data-edit-field` (§2.3) — an error on every upload, `--strict` or not; the message names the path to mark |
+| `text-not-editable-hidden` `text-editable-unsure` `text-edit-field-mismatch` | warning | (≥ 0.1.40) field text only inside `aria-hidden`/`<svg>`; an index the lint cannot trace (`.filter()` before `.map`); a marker naming another field (§2.3) |
 | `edit-image-bg-no-field` | warning | (≥ 0.1.33) `data-edit-image-bg` without `data-edit-image="<field>"` on the same element (§2.3b) |
 | `chrome-logo-missing` | warning | a `navbar` variant never reads `logoUrl` — `schema.md` chrome section |
 | `chrome-nav-pages-missing` | warning | a `navbar` variant never reads `pages` — the owner's "show in navbar" switch does nothing (§4b) |

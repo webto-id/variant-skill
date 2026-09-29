@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.48 — 2026-09-29
+
+- **Every content field printed as text must be editable inline** (`wvf.md` §2.3 "Field-text rule"). A prop, list item or `@pairWith` field rendered as text needs `data-edit-field` on the element that holds only that value, or on a `<span>` wrapped around it inside a larger element. This includes values reached through a helper: `const spec = (i) => featuresDetails[i] ?? {}` → `<p data-edit-field={`featuresDetails.${i}.integrity`}>{spec(i).integrity}</p>`. A second visible copy (a mobile layout next to a desktop one) is marked too. Decorative copies inside `aria-hidden` are fine when another copy is editable. Computed values (numbers, `Math.*`, strings combining fields) and attributes are exempt.
+- **Checked as an error** by `variant-check` ≥ 0.1.40 (rule `text-not-editable`) and on every upload. Unsure aliases (`.filter`/`.sort` before `.map`) give the warning `text-editable-unsure`; a marker naming a different field gives `text-edit-field-mismatch`. Variants already approved keep working; the rule applies when a changed file is uploaded.
+
 ## 0.1.47 — 2026-09-28
 
 - **Navbars render sub-pages.** Every item of the `pages` context prop now carries `id` and `parentId` (one level; the list stays flat in page order, so a navbar reading only `title`/`slug` keeps working and shows sub-pages as plain links). Top level = `!p.parentId`; a page's children = `pages.filter((c) => c.parentId === p.id)`. A child whose parent is hidden from the navbar is left out; one whose parent was deleted arrives as top level. Render a dropdown that opens on click and keyboard (not hover only), `aria-expanded`, Escape closes; an accordion in the mobile drawer; the parent link stays clickable; mark the parent active on a child page. New example `examples/navbar-dropdown.*`. `variant-check` 0.1.39 previews navbars with nested pages and warns when a navbar reads `pages` but ignores the hierarchy.
