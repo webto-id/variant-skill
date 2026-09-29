@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.49 — 2026-09-29
+
+- **Group headings edit inline with `data-edit-group`** (`wvf.md` §2.3a). A heading printed once for several items that share a value — a shelf of products by `category`, an FAQ block by `category` — is not any single item's field, so `data-edit-field` would save the edit to ONE item and split the group. Mark it `<h3 data-edit-group="products[].category" data-edit-group-value={c}>{c}</h3>`: the owner renames the heading once and every item holding that value follows; renaming onto an existing group asks before merging.
+- **Checked as an error** by `variant-check` ≥ 0.1.41: `text-edit-group-missing` (a grouped value printed without the attribute; the message carries the exact attribute) and `edit-group-invalid` (path not `<list>[].<text field>`, nested list, non-text field, or a value that is not the printed group). Values reached through an expression the check cannot follow now warn `text-editable-unsure` instead of passing silently.
+- **Do not restructure a layout, drop the grouping, or duplicate fields to avoid an edit rule** — use the attribute the message names. Build groups with `list.map((p) => p.field).filter((v, i, all) => all.indexOf(v) === i)` (the WVF parser has no `new` or spread).
+
 ## 0.1.48 — 2026-09-29
 
 - **Every content field printed as text must be editable inline** (`wvf.md` §2.3 "Field-text rule"). A prop, list item or `@pairWith` field rendered as text needs `data-edit-field` on the element that holds only that value, or on a `<span>` wrapped around it inside a larger element. This includes values reached through a helper: `const spec = (i) => featuresDetails[i] ?? {}` → `<p data-edit-field={`featuresDetails.${i}.integrity`}>{spec(i).integrity}</p>`. A second visible copy (a mobile layout next to a desktop one) is marked too. Decorative copies inside `aria-hidden` are fine when another copy is editable. Computed values (numbers, `Math.*`, strings combining fields) and attributes are exempt.

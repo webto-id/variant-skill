@@ -57,6 +57,8 @@ Semantic elements (`<section>`, `<h2>` for the section heading — the page's `<
 
 Every visible word is either a content field (`data-edit-field`) or a fixed chrome label via `t("…")`. Decorative characters (`✓`, `→`, `01`) are `aria-hidden="true"`. Sample copy lives in **defaults** (`const { heading = "Kenapa memilih kami" } = Astro.props;`) — Indonesian, short, replaceable — never in JSX literals.
 
+**Grouped layouts stay grouped.** A design that files items under a heading per value (shelves per category, a timeline per year) is a legitimate design: keep it, and mark each heading with `data-edit-group="products[].category" data-edit-group-value={c}` (`wvf.md` §2.3a) so the owner renames the group in one click. Do not flatten it into a single list, drop the headings, or add a duplicate "section title" field per item to satisfy the edit lint.
+
 A buyer can also emphasize fragments of any of those fields (`==diskon==`, `**tebal**`) — the site renders those centrally, you do nothing. But a marker pair only survives inside ONE text node, so splitting a field's value across elements (per-word animation being the usual temptation) silently kills them for that field. See `wvf.md` §2.5.
 
 ## 7b. Let the site do its half

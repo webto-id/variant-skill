@@ -150,6 +150,7 @@ URL attributes (`href src action formaction poster data-lightbox-src xlink:href`
 | `data-edit-image="path"` | an `<img>` (or empty placeholder `<div>`) bound to an image URL field |
 | `data-edit-image-bg` | wrapper whose CSS background image is editable |
 | `data-edit-icon="path"` | editable icon/emoji span |
+| `data-edit-group="list[].field"` + `data-edit-group-value={v}` | the element's text is a value SHARED by several items of `list` (a group heading, e.g. a shelf per `category`); renaming it renames every item holding it (§2.3a) |
 | `data-edit-url="field"` on a `<a class="relative">` | compiler sugar: emits an `EditUrlPill` after the children; the link destination becomes editable |
 | `<EditUrlPill field="ctaUrl" value={ctaUrl} />` inside a `relative` `<a>` | explicit form of the same pill |
 | `data-track="cta"` | auto-added to any `<a href>` with an editable descendant; `Button href` and `ViewMoreLink` always emit it |
@@ -180,6 +181,34 @@ const lead = features[0] ?? {};
 - **A second visible copy needs the marker too** (the desktop table and its mobile cards, a duplicated `lg:hidden` label). The same path may appear on several elements; the editor updates all of them. A purely decorative copy goes under `aria-hidden="true"`: the rule skips hidden text whose field is editable elsewhere (a marquee's second track, a badge repeating a code shown beside it). Hidden text with NO editable copy is a warning, `text-not-editable-hidden`.
 - Not flagged: computed text (numbers, `Math.*`, `title.toUpperCase()`, a template string mixing a field with other text — nothing to edit in place), attributes (`alt`, `aria-label`, `title`), `t()` labels, the chrome context props (`pages`, `footerPages`, …), and a URL field printed as its own link text when `data-edit-url`/`<EditUrlPill>` already edits it. `siteName` IS content: mark it (`<span data-edit-field="siteName">`).
 - A marker naming a different path than the value it wraps → warning `text-edit-field-mismatch` (the edit would be saved to the wrong field).
+- A list item reached through something the lint cannot follow (a helper that chunks the list into rows, an array literal of slices) → warning `text-editable-unsure` (≥ 0.1.41). Loop the list itself with its index where you can.
+
+### 2.3a Group headings (`data-edit-group`)
+
+Grouping items under a heading per distinct value — shelves per `category`, a timeline per `year`, a menu per `section` — prints a value that several items share. No `data-edit-field` path is right for it: `products.${first}.category` renames ONE product and splits the shelf. Mark the heading with the group instead:
+
+```astro
+---
+const shelves = products.map((p) => p.category || "").filter((c, i, all) => all.indexOf(c) === i);
+---
+{shelves.map((c) => (
+  <div>
+    <h3 data-edit-group="products[].category" data-edit-group-value={c}>{c || t("other")}</h3>
+    <ul>
+      {products.map((p, i) => (p.category || "") === c && (
+        <li data-edit-field={`products.${i}.title`}>{p.title}</li>
+      ))}
+    </ul>
+  </div>
+))}
+```
+
+- `data-edit-group` is a literal `"<list>[].<field>"`: a top-level content list (base, extension or `@pairWith`) and a plain text field of its items. `data-edit-group-value` is the group value itself (the loop variable), even when the text shows a fallback label for the unnamed group.
+- The owner clicks the heading and types a new name: every item whose `field` held the old value gets the new one. A name that already exists merges the two groups (the editor asks first). Empty names are refused.
+- Build the groups with what the expression subset has: `.map((p) => p.field)`, then `.filter((c, i, all) => all.indexOf(c) === i)` to dedupe (`.filter(Boolean)` to drop the empty group). `new`, spread (`new Set`, `[...x]`) and `.sort()` are not available in a variant.
+- Loop the items inside a group over the WHOLE list with its index and a condition (as above), so their `data-edit-field` paths stay the stored ones.
+- A group value printed without the attribute is the error `text-edit-group-missing` (≥ 0.1.41); the message spells the exact attributes. A wrong path, a non-text field, a nested list (`rows[].items[].tag`), or a value that is not the printed group → `edit-group-invalid`. Grouping inside a nested list is not supported: the lint only warns there.
+- **Never restructure the layout, drop the grouping, or duplicate a field to make this rule go away.** The grouped design is the point of the variant; `data-edit-group` is the fix.
 
 ### 2.3b Content-driven CSS backgrounds (`data-edit-image-bg`)
 
@@ -571,7 +600,9 @@ The predicate itself stays as narrow as it was: full-strength surfaces only (`bg
 | `lightbox-not-img` | warning | (≥ 0.1.34) `data-lightbox` on something other than the `<img>` (§2.6) |
 | `lightbox-group-on-trigger` | warning | (≥ 0.1.34) `data-lightbox-group` on the same element as `data-lightbox` — groups nothing (§2.6) |
 | `text-not-editable` | error | (≥ 0.1.40) a content field printed as text without `data-edit-field` (§2.3) — an error on every upload, `--strict` or not; the message names the path to mark |
-| `text-not-editable-hidden` `text-editable-unsure` `text-edit-field-mismatch` | warning | (≥ 0.1.40) field text only inside `aria-hidden`/`<svg>`; an index the lint cannot trace (`.filter()` before `.map`); a marker naming another field (§2.3) |
+| `text-not-editable-hidden` `text-editable-unsure` `text-edit-field-mismatch` | warning | (≥ 0.1.40) field text only inside `aria-hidden`/`<svg>`; an index the lint cannot trace (`.filter()` before `.map`), or (≥ 0.1.41) a list item reached through an expression the lint cannot follow; a marker naming another field (§2.3) |
+| `text-edit-group-missing` | error | (≥ 0.1.41) a value shared by several items (a group heading from `.map((p) => p.field)` + dedupe) printed without `data-edit-group` (§2.3a) — every upload, `--strict` or not; the message names the attributes. Do not restructure the layout to avoid it |
+| `edit-group-invalid` | error | (≥ 0.1.41) `data-edit-group` path is not `"<list>[].<text field>"` of a top-level list, or `data-edit-group-value` is missing / not the printed group value (§2.3a) |
 | `edit-image-bg-no-field` | warning | (≥ 0.1.33) `data-edit-image-bg` without `data-edit-image="<field>"` on the same element (§2.3b) |
 | `chrome-logo-missing` | warning | a `navbar` variant never reads `logoUrl` — `schema.md` chrome section |
 | `chrome-nav-pages-missing` | warning | a `navbar` variant never reads `pages` — the owner's "show in navbar" switch does nothing (§4b) |
