@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.51 — 2026-10-01
+
+- **More script patterns are refused** (`wvf.md` script rules; `variant-check` ≥ 0.1.42): anything that can make the page request a URL or run built code — `style.setProperty` with a URL-bearing property, `Object.assign(el.style, …)`, a runtime CSS custom property read by a background/mask/`url()`, stylesheet APIs (`insertRule`, `replaceSync`, `styleSheets`), `Image`/`Audio`/`FontFace`, HTML parsers (`DOMParser`, `setHTMLUnsafe`), property names built from strings, `setTimeout`/`setInterval` with a non-function callback. Keep scripts to the section's own interaction; legitimate patterns (`document.fonts.ready`, CSS variables inside gradients/`calc()`, `inset()`) still pass.
+
 ## 0.1.50 — 2026-09-29
 
 - **`data-edit-group` works on `@pairWith` lists** (`wvf.md` §2.3a). A group built from a detail list — e.g. zones from `productsDetails[].zone`, with the products looped by index — is marked `data-edit-group="productsDetails[].zone" data-edit-group-value={z}`. Renaming a zone changes only the detail items that hold it; the product list and its order stay aligned. Nested lists are not supported yet (they warn `text-editable-unsure`). No `variant-check` change: 0.1.41 already checks this.
