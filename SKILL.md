@@ -16,7 +16,7 @@ You are producing **one `.astro` file** in the Webto Variant Format: a restricte
 - `references/catalog.md` — the `variant.json` manifest you deliver alongside the `.astro` (mood enum, description rules, `asset:<filename>` images). **Read this before step 8.**
 - `examples/hero-split.astro` (+ its `.sample.json` and `.variant.json`) — a complete, passing variant to mimic, manifest included.
 - `examples/navbar-dropdown.astro` (+ `.sample.json`, `.variant.json`) — a navbar that renders sub-pages: click/keyboard dropdown on desktop, accordion in the mobile drawer, active parent, logo fields. Start from it for any navbar (`wvf.md` §4b).
-- `examples/product-detail-split.astro` (+ `.sample.json`, `.variant.json`) — a product page layout (`product-detail`): pinned gallery, buy box, description, a sticky mobile buy bar, around the platform's product blocks. Start from it for any product/detail page (`wvf.md` §4d).
+- `examples/product-detail-split.astro` (+ `.sample.json`, `.variant.json`) — a product page layout (`product-detail`): pinned gallery, buy box, description, the spec tables (`<ProductAttributes />`), a sticky mobile buy bar, around the platform's product blocks. Start from it for any product/detail page (`wvf.md` §4d).
 - `examples/product-detail-donation.astro` (+ `.sample.json`, `.variant.json`) — a donation page built on `view.kindInfo` (progress bar of the amount raised) and `<ProductAttributes />`; preview with `--product-kind donation`.
 
 ## Workflow

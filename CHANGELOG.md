@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.53 — 2026-10-10
+
+- **`examples/product-detail-split` shows the product's own fields.** It now places `<ProductAttributes />` under the description, so the seller's spec groups ("Spesifikasi" as a table, "Komposisi" as a list) appear on the page. Without it a layout shows no custom fields: add the block wherever they belong, or render `view.attributes` yourself (`wvf.md` §4d).
+
 ## 0.1.52 — 2026-10-10
 
 - **Product page layouts (`product-detail`)** (`wvf.md` §4d; `variant-check` ≥ 0.1.46). A new section type that is the layout of every `/product/<slug>` page, chosen as the site default or per product. The platform keeps the selling part: `<ProductBuyBox />` (required, once) renders price, variant choice, stock, the buy/WhatsApp button and the purchase pixel; `<ProductGallery />`, `<ProductDescription />`, `<ProductCurriculum />` (schedule + course outline) and `<ProductAttributes group? />` (spec tables and lists) are optional. Everything around them is yours, fed by `product` and `view` (price labels, images, variants, `view.kindInfo` per product kind — physical, digital, course, webinar, event, donation — and `view.attributes`). Fields are static text the owner edits once per site. Preview a kind with `variant-check --type product-detail --product-kind donation`. Examples: `product-detail-split`, `product-detail-donation`.
