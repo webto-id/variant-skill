@@ -1,0 +1,7 @@
+{
+  "sectionType": "product-detail",
+  "name": "Product Split Sticky",
+  "description": "Product page with the gallery pinned on the left, name and buy box on the right, a long description below, and a sticky buy bar on mobile.",
+  "mood": ["minimal", "corporate"],
+  "fits": "physical products with several photos"
+}

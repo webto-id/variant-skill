@@ -1,0 +1,7 @@
+{
+  "sectionType": "product-detail",
+  "name": "Product Detail Donation",
+  "description": "Donation campaign page: wide photo, title with a progress bar of the amount raised, buy box, then the story and attribute groups.",
+  "mood": ["calm", "warm"],
+  "fits": "donation products with a target amount"
+}

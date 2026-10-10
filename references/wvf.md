@@ -15,7 +15,7 @@ One `.astro` file: a `---` frontmatter block containing `interface Props`, then 
 
 ### 1.1 Imports
 
-Canonical: `import { t, img, url, video, Container, Button, EditUrlPill, ViewMoreLink, AddImageButton } from "webto/variant";` — import only what you use. Legacy aliases also accepted: `sanitizeUrl` (= `url`), `withUnsplashWidth` (= `img`), `resolveVideoSource` (= `video`), `sectionT`. Relative platform paths (`../lib/sanitize`, `../ui/Button.astro`, …) are tolerated. Any other module → `error` `import`. Unknown name → `error` `import`. `import type` is ignored.
+Canonical: `import { t, img, url, video, Container, Button, EditUrlPill, ViewMoreLink, AddImageButton } from "webto/variant";` — import only what you use (`FormFields` and the `Product*` blocks come from the same module, §5c and §4d). Legacy aliases also accepted: `sanitizeUrl` (= `url`), `withUnsplashWidth` (= `img`), `resolveVideoSource` (= `video`), `sectionT`. Relative platform paths (`../lib/sanitize`, `../ui/Button.astro`, …) are tolerated. Any other module → `error` `import`. Unknown name → `error` `import`. `import type` is ignored.
 
 ### 1.2 `interface Props`
 
@@ -126,7 +126,7 @@ HTML: `a abbr address article aside b bdi bdo blockquote br button caption cite 
 
 SVG: `svg path circle rect line polyline polygon g defs linearGradient radialGradient stop clipPath mask text tspan ellipse symbol pattern filter feGaussianBlur feOffset feBlend feColorMatrix feMerge feMergeNode title desc`
 
-Everything else → `error` `tag` — including `iframe form input select textarea object embed link meta base template noscript canvas dialog`. `<Fragment>`/`<>` flatten. Capitalized tags must be one of the four macros (`component` error otherwise). `<style>` and `<script>` are raw blocks (cannot be self-closing). A form section still gets a real form: place `<FormFields />` (§5c) inside your layout and the platform renders the form tags for you — the ban is on AUTHORING them, not on having one.
+Everything else → `error` `tag` — including `iframe form input select textarea object embed link meta base template noscript canvas dialog`. `<Fragment>`/`<>` flatten. Capitalized tags must be one of the macros of §5 (`component` error otherwise). `<style>` and `<script>` are raw blocks (cannot be self-closing). A form section still gets a real form: place `<FormFields />` (§5c) inside your layout and the platform renders the form tags for you — the ban is on AUTHORING them, not on having one.
 
 ### 2.2 Attributes
 
@@ -490,6 +490,79 @@ A navbar renders on EVERY page of a buyer's site — review is strict about it; 
 
 In manual mode the owner edits the list in the editor; in database mode the platform fills the array from the site's real products/posts before render (same shape). Rules: handle the EMPTY list (a fresh database mode has no rows yet — render the heading, not a broken grid); `url` is optional (no link → no `<a>`); `source` stays visible in the editor automatically (the compiler never hides it, even when your variant does not read it) - it is how the owner switches modes; pagination is rendered by the page OUTSIDE your section — ignore it.
 
+## 4d. Product page layout (`product-detail`)
+
+A `product-detail` variant is not a page section: it is the layout of every `/product/<slug>` page of a site, the place where the platform's Classic / Landing / Minimal layouts sit. The owner picks it in Produk › Tata Letak (as the site default, or for one product); a template bundle carries one through `productLayout` in `template.json` (template skill `manifest.md`). It can also be sold on its own as a variant listing. It can never be placed on a page (the editor and the upload refuse it).
+
+**The platform keeps the selling part.** Price, variant choice, stock, the buy / WhatsApp button and the purchase pixel are rendered by the platform, through four blocks you place where your design wants them:
+
+| Macro | Renders | Props (style only) |
+|---|---|---|
+| `<ProductBuyBox />` | price, variant buttons, stock note, bundle contents, the buy/WhatsApp button, AddToCart pixel | `class`, `showPrice` (false = you print `view.priceLabel` yourself), `compact` (centered pill buttons) |
+| `<ProductGallery />` | main photo + thumbnails, switching with the chosen variant | `class`, `aspect="square|wide"`, `thumbs` |
+| `<ProductDescription />` | the product description (the owner's markdown) | `class`, `size="base|lg"` |
+| `<ProductCurriculum />` | event/webinar schedule and venue, course curriculum (renders nothing for other products) | `class` |
+| `<ProductAttributes />` | the seller's attribute groups (`view.attributes`): a table when items have labels, a list when they do not; nothing when the product has none | `class`, `group="<name>"` (only that group; absent = every group) |
+
+Import them like the other macros (`import { ProductBuyBox, ProductGallery } from "webto/variant"`). Rules, all checked by the compiler:
+
+- `<ProductBuyBox />` is **required** (`product-buybox-missing`, error): a product page that cannot sell is not a layout.
+- `<ProductBuyBox />` and `<ProductGallery />` at most **once** each (`product-block-multiple`, error) — the page script finds them by a unique selector. Inside a `.map()` only the first renders.
+- The product macros are valid only in a `product-detail` variant (`product-block-type`, error).
+- The page needs an `<h1>` — normally `<h1>{view.name}</h1>` (`product-h1-missing`, warning).
+
+**Data you read: three injected props.** Declare them in `interface Props` to read them; like chrome's `pages`, they never become editor fields:
+
+```ts
+product?: { id: string; name: string; slug: string; category: string | null; kind: string; type: string };
+view?: {
+  name: string; category: string | null; kind: string;      // kind: physical | digital | course | webinar | event | ...
+  priceLabel: string;                                         // pre-formatted ("Rp189.000" or a range) — print verbatim
+  soldOut: boolean; lowStockCount: number | null;
+  images: string[];
+  variants: Array<{ id: string; name: string; priceLabel: string; inStock: boolean; low: boolean }>;
+  bundleComponents: Array<{ name: string; priceLabel: string }>; bundleSumLabel: string | null;
+  schedule: { rangeLabel: string; address: string | null; locationUrl: string | null; online: boolean; past: boolean } | null;
+  curriculum: Array<{ title: string; lessonCount: number }>; totalLessons: number; totalDurationLabel: string;
+  checkoutHref: string; waHref: string | null;
+  kindInfo: KindInfo;                                         // per-kind facts, table below
+  attributes: Array<{ name: string; items: Array<{ label: string; value: string }> }>;  // seller's groups; [] when none
+};
+linkPrefix?: string;   // always "" — emit plain paths
+```
+
+**`view.kindInfo` — what each kind of product adds.** Always present; switch on `kindInfo.kind` (it equals `view.kind`). Labels are formatted for the site's language; a `null` means the seller left it empty.
+
+| `kind` | fields |
+|---|---|
+| `physical` | `weightGram: number \| null` |
+| `digital` | — |
+| `course` | `cohortStartLabel`, `enrollUntilLabel` (string \| null), `freeEnroll: boolean`, `totalLessons: number`, `totalDurationLabel: string` |
+| `webinar` | `scheduleLabel: string \| null`, `past: boolean` — never the meeting link (it reaches the buyer in the ticket email only) |
+| `event` | `scheduleLabel`, `address`, `mapUrl` (string \| null), `past: boolean` |
+| `donation` | `targetIdr`/`targetLabel`, `raisedIdr`/`raisedLabel`, `percent` (0–100, capped; all `null` without a target or when the seller hides the amount raised), `minLabel: string`, `presets: string[]` (formatted amounts), `allowCustom: boolean` |
+
+A donation progress bar, for instance:
+
+```astro
+{view.kindInfo.kind === "donation" && view.kindInfo.percent !== null && (
+  <div class="mt-6">
+    <div class="h-2 w-full overflow-hidden rounded-full bg-muted">
+      <div class="h-full bg-primary" style={`width: ${view.kindInfo.percent}%`}></div>
+    </div>
+    <p class="mt-2 text-sm text-muted-foreground">{view.kindInfo.raisedLabel} / {view.kindInfo.targetLabel}</p>
+  </div>
+)}
+```
+
+Render the raised amount only from `kindInfo` — it is `null` exactly when the seller chose to hide it. `view.attributes` is there to read a single value for decoration (a "100% katun" badge); for the full table use `<ProductAttributes />`, which keeps the platform's layout and multi-line handling.
+
+`view` is for decoration around the blocks (a category eyebrow, a "Terjual habis" ribbon, a lessons count). Do not rebuild what a block renders: a price you print yourself does not follow the chosen variant. To repeat the buy button elsewhere (a sticky bar, a closing band), write `<a data-pd-cta href={url(view.checkoutHref)}>…</a>` (and `data-pd-wa` with `view.waHref`); a price mirror is `<span data-pd-price>{view.priceLabel}</span>`. The platform script keeps every one of them in step with the chosen variant.
+
+**Your own fields are static text.** Everything else in `Props` is a field the owner edits in the Tata Letak dialog: a badge, section titles, a guarantee line. Strings (and booleans/enums/numbers, or a list of strings) only — the dialog has no image upload or list-of-objects editor (`product-detail-field-nontext`, warning). There is no inline editing on product pages, so `data-edit-field` is optional here. Document each field (`/** … @example … */`) as usual.
+
+**Preview.** `variant-check --type product-detail --out preview.html` (add `--product-kind donation|course|webinar|event|digital` to preview a layout built on `kindInfo`, ≥ 0.1.46) renders the variant around the platform's sample product ("Tas Kanvas Serbaguna", three photos, three colour variants, one sold out) plus two attribute groups ("Spesifikasi" as a table, "Komposisi" as a list), with stand-ins for the blocks; the marketplace preview and a template's `/product/contoh` page show the same sample product with the real blocks. See `examples/product-detail-split.astro`, and `examples/product-detail-donation.astro` for a layout built on `kindInfo`.
+
 ## 5b. Platform effect library (data-wv-effect)
 
 Declarative motion WITHOUT writing a script (so no script check): mark elements and the platform's audited runtime animates them on the live site.
@@ -512,6 +585,7 @@ Params: `data-wv-delay` = whole steps of 100ms, 0-10; `data-wv-duration` = ms, 1
 - `<ViewMoreLink url={viewMoreUrl} text={viewMoreText} style="outline|link|solid" align="left|center|right" />` → renders nothing when `url` is empty; emits an editable label + pill + `data-track="cta"`.
 - `<AddImageButton path={`images.${images.length}.url`} visible={images.length < 20} label? mode="inline|floating" />` → the editor's "Tambah Gambar" pill for an image list; renders nothing on the live site. Put it at the list's bottom seam (after the grid, before `<ViewMoreLink>`); `path` is the **next** index of the list, `visible` gates on the list's max. `floating` pins it bottom-right of a full-bleed section, which then needs `class="relative"`. Every list of pictures with `data-edit-image` items should have one — a gallery without it has no way to add a photo in the editor (the platform appends a fallback pill at the section's end when a variant has none, but that placement is a guess).
 - `<FormFields class? fieldClass? labelClass? submitClass? wrapClass? successClass? />` → the platform's whole form block (§5c), for `form` sections only.
+- `<ProductBuyBox />` `<ProductGallery />` `<ProductDescription />` `<ProductCurriculum />` `<ProductAttributes group? />` → the platform's product blocks (§4d), for `product-detail` variants only.
 - `t(key)` → localized fixed UI label (30 languages) — for chrome words only, never for content. **`key` is a CLOSED enum of platform term keys, never display text** — `t("Alamat")` is wrong (lint `t-unknown`, fails --strict; it used to crash the section at render, and the preview's identity `t` will not catch it for you). The ones sections typically need: `address` `email` `phone` `hours` `operatingHours` `today` `closed` `menu` `readMore` `contactUs` `price` `all` `close` `noResults` `openInMaps` `locationLabel` `customerReviews` `specialOffer` `freeLabel` `soldOut` `days` `minutes` `seconds` `minRead` `nextPage` `prevPage` `download` `questions` (the CLI validates the full list). A visible label with no matching term key is NOT a t() call — make it an optional content field with a default (`socialHeading = "Sosial"` + `data-edit-field`).
 - `img(url, width = 960)` → sanitizes and sizes Unsplash/Pexels URLs (`w=`), passes other hosts through, returns `undefined` for empty input (attribute omitted). Use 480 for thumbnails, 960 for split images, 1600 for full-bleed backgrounds.
 - `url(u)` → sanitizer (`javascript:` etc. → `#`); empty → `#`.
@@ -634,6 +708,8 @@ The predicate itself stays as narrow as it was: full-strength surfaces only (`bg
 | `content-required` | error | `--content` lacks a top-level field the section type requires AND this variant renders (hidden fields are exempt) — §9 |
 | `form-fields-type` | error | `<FormFields />` outside a `form` section — §5c |
 | `form-fields-no-fields` | warning | `<FormFields />` used but `fields` is not read from `Astro.props` — §5c |
+| `product-buybox-missing` `product-block-multiple` `product-block-type` | error | (≥ 0.1.45) a `product-detail` variant without `<ProductBuyBox />`; BuyBox/Gallery written twice; a product macro (incl. `<ProductAttributes />`, ≥ 0.1.46) outside `product-detail` — §4d |
+| `product-h1-missing` `product-detail-field-nontext` | warning | (≥ 0.1.45) product layout without `<h1>`; a product-layout field that is not text — §4d |
 | `props-optional`* `props-unknown-item-key`* `props-type-mismatch` `props-undeclared` | warning | schema |
 | `ext-field-undocumented`* `ext-field-doc-thin` | warning | extension field docs (§1.2) |
 | `pair-with-unknown` `pair-with-not-array` `pair-with-bad-name` `pair-with-not-object` | error | `@pairWith` (§1.2c) — always an error, `--strict` or not |
@@ -643,7 +719,7 @@ The predicate itself stays as narrow as it was: full-strength surfaces only (`bg
 
 ## 8. Unsupported
 
-`navbar`, `banner`, `footer` (site-scoped chrome) and `post` cannot be WVF variants. Everything else in the section catalog can (see `schema.md`).
+`post` cannot be a WVF variant. Site chrome (`navbar`, `banner`, `footer`) can (§4b), and so can the product page layout `product-detail` (§4d), which is not a page section. Everything else in the section catalog can (see `schema.md`).
 
 ## 9. CLI
 

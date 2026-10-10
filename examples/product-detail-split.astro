@@ -1,0 +1,48 @@
+---
+import { url, Container, ProductBuyBox, ProductGallery, ProductDescription, ProductCurriculum } from "webto/variant";
+
+interface Props {
+  /** Small label above the product name, two or three words. @example Paling laris */
+  badge?: string;
+  /** Short reassurance line under the buy box. @example Gratis tukar ukuran dalam 7 hari */
+  guarantee?: string;
+  /** Title over the product description. @example Tentang produk ini */
+  storyTitle?: string;
+  /** Text of the buy button in the sticky bar on mobile. @example Beli sekarang */
+  stickyCta?: string;
+  product?: { id: string; name: string; slug: string; category: string | null; kind: string; type: string };
+  view?: { name: string; category: string | null; priceLabel: string; soldOut: boolean; checkoutHref: string };
+  linkPrefix?: string;
+}
+
+const { badge = "Pilihan kami", guarantee = "", storyTitle = "Tentang produk ini", stickyCta = "Beli sekarang", view } = Astro.props;
+---
+<section class="bg-background py-12 md:py-20 text-foreground">
+  <Container>
+    <div class="grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-14">
+      <ProductGallery aspect="square" class="md:sticky md:top-24 self-start" />
+      <div>
+        <div class="flex flex-wrap items-center gap-2">
+          {badge && <span class="rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">{badge}</span>}
+          {view.category && <span class="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{view.category}</span>}
+        </div>
+        <h1 class="mt-4 !text-3xl font-bold md:!text-4xl" style="font-family: var(--font-heading);">{view.name}</h1>
+        <ProductBuyBox class="mt-6" />
+        {guarantee && <p class="mt-4 rounded-lg border border-border bg-muted px-4 py-3 text-sm text-muted-foreground">{guarantee}</p>}
+        <ProductCurriculum class="mt-8" />
+      </div>
+    </div>
+    <div class="mx-auto mt-16 max-w-3xl">
+      <h2 class="!text-2xl font-bold" style="font-family: var(--font-heading);">{storyTitle}</h2>
+      <ProductDescription size="lg" class="mt-6" />
+    </div>
+  </Container>
+  {!view.soldOut && (
+    <div class="sticky bottom-0 mt-12 border-t border-border bg-background/95 px-6 py-3 md:hidden">
+      <a data-pd-cta href={url(view.checkoutHref)} class="flex w-full items-center justify-between rounded-lg bg-primary px-5 py-3 font-semibold text-primary-foreground">
+        <span>{stickyCta}</span>
+        <span data-pd-price>{view.priceLabel}</span>
+      </a>
+    </div>
+  )}
+</section>

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.52 — 2026-10-10
+
+- **Product page layouts (`product-detail`)** (`wvf.md` §4d; `variant-check` ≥ 0.1.46). A new section type that is the layout of every `/product/<slug>` page, chosen as the site default or per product. The platform keeps the selling part: `<ProductBuyBox />` (required, once) renders price, variant choice, stock, the buy/WhatsApp button and the purchase pixel; `<ProductGallery />`, `<ProductDescription />`, `<ProductCurriculum />` (schedule + course outline) and `<ProductAttributes group? />` (spec tables and lists) are optional. Everything around them is yours, fed by `product` and `view` (price labels, images, variants, `view.kindInfo` per product kind — physical, digital, course, webinar, event, donation — and `view.attributes`). Fields are static text the owner edits once per site. Preview a kind with `variant-check --type product-detail --product-kind donation`. Examples: `product-detail-split`, `product-detail-donation`.
+
 ## 0.1.51 — 2026-10-01
 
 - **More script patterns are refused** (`wvf.md` script rules; `variant-check` ≥ 0.1.42): anything that can make the page request a URL or run built code — `style.setProperty` with a URL-bearing property, `Object.assign(el.style, …)`, a runtime CSS custom property read by a background/mask/`url()`, stylesheet APIs (`insertRule`, `replaceSync`, `styleSheets`), `Image`/`Audio`/`FontFace`, HTML parsers (`DOMParser`, `setHTMLUnsafe`), property names built from strings, `setTimeout`/`setInterval` with a non-function callback. Keep scripts to the section's own interaction; legitimate patterns (`document.fonts.ready`, CSS variables inside gradients/`calc()`, `inset()`) still pass.
