@@ -520,7 +520,9 @@ view?: {
   priceLabel: string;                                         // pre-formatted ("Rp189.000" or a range) — print verbatim
   soldOut: boolean; lowStockCount: number | null;
   images: string[];
-  variants: Array<{ id: string; name: string; priceLabel: string; inStock: boolean; low: boolean }>;
+  variants: Array<{ id: string; name: string; priceLabel: string; inStock: boolean; low: boolean;
+    optionValues: Record<string, string> | null }>;          // { Warna: "Hitam", Ukuran: "M" } on a combination, else null
+  options: Array<{ name: string; values: Array<{ label: string; available: boolean }> }>;  // [] without options
   bundleComponents: Array<{ name: string; priceLabel: string }>; bundleSumLabel: string | null;
   schedule: { rangeLabel: string; address: string | null; locationUrl: string | null; online: boolean; past: boolean } | null;
   curriculum: Array<{ title: string; lessonCount: number }>; totalLessons: number; totalDurationLabel: string;
@@ -530,6 +532,8 @@ view?: {
 };
 linkPrefix?: string;   // always "" — emit plain paths
 ```
+
+**`view.options` — decoration only.** A product with options (Warna × Ukuran, at most 3 options × 20 values, 100 combinations) lists them here; `available` is false when no active, in-stock combination uses that value. Use it to SAY something about the choice — "Tersedia dalam {view.options[0].values.length} warna", colour dots in a hero, "Ukuran L habis". Choosing a combination, its price, stock and photo are `<ProductBuyBox />`'s job (its own option pills drive the page script): never build a picker yourself, it would not reach the checkout.
 
 **`view.kindInfo` — what each kind of product adds.** Always present; switch on `kindInfo.kind` (it equals `view.kind`). Labels are formatted for the site's language; a `null` means the seller left it empty.
 
@@ -561,7 +565,7 @@ Render the raised amount only from `kindInfo` — it is `null` exactly when the 
 
 **Your own fields are static text.** Everything else in `Props` is a field the owner edits in the Tata Letak dialog: a badge, section titles, a guarantee line. Strings (and booleans/enums/numbers, or a list of strings) only — the dialog has no image upload or list-of-objects editor (`product-detail-field-nontext`, warning). There is no inline editing on product pages, so `data-edit-field` is optional here. Document each field (`/** … @example … */`) as usual.
 
-**Preview.** `variant-check --type product-detail --out preview.html` (add `--product-kind donation|course|webinar|event|digital` to preview a layout built on `kindInfo`, ≥ 0.1.46) renders the variant around the platform's sample product ("Tas Kanvas Serbaguna", three photos, three colour variants, one sold out) plus two attribute groups ("Spesifikasi" as a table, "Komposisi" as a list), with stand-ins for the blocks; the marketplace preview and a template's `/product/contoh` page show the same sample product with the real blocks. See `examples/product-detail-split.astro`, and `examples/product-detail-donation.astro` for a layout built on `kindInfo`.
+**Preview.** `variant-check --type product-detail --out preview.html` (add `--product-kind donation|course|webinar|event|digital` to preview a layout built on `kindInfo`, ≥ 0.1.46) renders the variant around the platform's sample product ("Tas Kanvas Serbaguna", three photos, options Warna × Ukuran with the Krem / L combination sold out) plus two attribute groups ("Spesifikasi" as a table, "Komposisi" as a list), with stand-ins for the blocks; the marketplace preview and a template's `/product/contoh` page show the same sample product with the real blocks. See `examples/product-detail-split.astro`, and `examples/product-detail-donation.astro` for a layout built on `kindInfo`.
 
 ## 5b. Platform effect library (data-wv-effect)
 

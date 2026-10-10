@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.54 — 2026-10-10
+
+- **Products with option combinations** (`wvf.md` §4d; `variant-check` ≥ 0.1.47). A product can sell combinations of up to 3 options (e.g. Colour × Size). `view.options` lists each option with its values and whether any in-stock combination uses them; every `view.variants[]` carries its `optionValues`. Use them for decoration only ("Available in 3 colours"): choosing the combination is done by `<ProductBuyBox />`, which shows one picker per option and keeps price, photo, stock and the buy button in step. The sample product now has Colour × Size with one sold-out combination.
+
 ## 0.1.53 — 2026-10-10
 
 - **`examples/product-detail-split` shows the product's own fields.** It now places `<ProductAttributes />` under the description, so the seller's spec groups ("Spesifikasi" as a table, "Komposisi" as a list) appear on the page. Without it a layout shows no custom fields: add the block wherever they belong, or render `view.attributes` yourself (`wvf.md` §4d).
