@@ -527,6 +527,7 @@ view?: {
   schedule: { rangeLabel: string; address: string | null; locationUrl: string | null; online: boolean; past: boolean } | null;
   curriculum: Array<{ title: string; lessonCount: number }>; totalLessons: number; totalDurationLabel: string;
   checkoutHref: string; waHref: string | null;
+  canCheckout: boolean;                                       // false = checkout would refuse the order (physical, shipping not ready)
   kindInfo: KindInfo;                                         // per-kind facts, table below
   attributes: Array<{ name: string; items: Array<{ label: string; value: string }> }>;  // seller's groups; [] when none
 };
@@ -562,6 +563,16 @@ A donation progress bar, for instance:
 Render the raised amount only from `kindInfo` — it is `null` exactly when the seller chose to hide it. `view.attributes` is there to read a single value for decoration (a "100% katun" badge); for the full table use `<ProductAttributes />`, which keeps the platform's layout and multi-line handling.
 
 `view` is for decoration around the blocks (a category eyebrow, a "Terjual habis" ribbon, a lessons count). Do not rebuild what a block renders: a price you print yourself does not follow the chosen variant. To repeat the buy button elsewhere (a sticky bar, a closing band), write `<a data-pd-cta href={url(view.checkoutHref)}>…</a>` (and `data-pd-wa` with `view.waHref`); a price mirror is `<span data-pd-price>{view.priceLabel}</span>`. The platform script keeps every one of them in step with the chosen variant.
+
+**Every `data-pd-cta` you draw yourself MUST be guarded by `view.canCheckout`** (≥ 0.1.49). It is `true` for a digital product, and for a physical one only once the seller's shipping is set up; while it is `false` checkout refuses the order, so an unguarded button sends the buyer to an error. `<ProductBuyBox />` already does this — fall back the same way: `data-pd-wa` when `view.waHref` is set, else no button. In showcase (template and marketplace previews) `canCheckout` keeps its real value and `checkoutHref` is `"#"`, and the sample product in the preview has `canCheckout: true`.
+
+```astro
+{!view.soldOut && (view.canCheckout || view.waHref) && (
+  view.canCheckout
+    ? <a data-pd-cta href={url(view.checkoutHref)} class="…">{stickyCta}</a>
+    : <a data-pd-wa href={url(view.waHref)} target="_blank" rel="noopener" class="…">{stickyWa}</a>
+)}
+```
 
 **Your own fields are static text.** Everything else in `Props` is a field the owner edits in the Tata Letak dialog: a badge, section titles, a guarantee line. Strings (and booleans/enums/numbers, or a list of strings) only — the dialog has no image upload or list-of-objects editor (`product-detail-field-nontext`, warning). There is no inline editing on product pages, so `data-edit-field` is optional here. Document each field (`/** … @example … */`) as usual.
 

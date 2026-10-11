@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.56 — 2026-10-12
+
+- **`view.canCheckout` on product pages** (`wvf.md` §4d). `true` for digital, and for physical only once the seller's shipping is set up; while `false`, checkout refuses the order. Every `<a data-pd-cta href={view.checkoutHref}>` a `product-detail` variant draws itself must be guarded by it, falling back to `data-pd-wa` (when `view.waHref` is set) or to no button, as `<ProductBuyBox />` does. `examples/product-detail-split.astro` shows it in its sticky bar. The preview sample has `canCheckout: true`.
+
 ## 0.1.55 — 2026-10-11
 
 - **Template previews use the template's own products** (`wvf.md` §4d). When a template declares `sampleProducts` (template skill `manifest.md`), its preview's `/product/<slug>` pages render your `product-detail` layout on those products — their kinds, photos, options and attributes — while `/product/contoh` stays the platform sample. Make the layout hold up on real data: a product without options or attributes, a single photo, a long name.

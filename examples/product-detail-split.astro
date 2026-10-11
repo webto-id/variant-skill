@@ -10,12 +10,14 @@ interface Props {
   storyTitle?: string;
   /** Text of the buy button in the sticky bar on mobile. @example Beli sekarang */
   stickyCta?: string;
+  /** Sticky bar button when the shop takes orders by WhatsApp only. @example Pesan via WhatsApp */
+  stickyWa?: string;
   product?: { id: string; name: string; slug: string; category: string | null; kind: string; type: string };
-  view?: { name: string; category: string | null; priceLabel: string; soldOut: boolean; checkoutHref: string };
+  view?: { name: string; category: string | null; priceLabel: string; soldOut: boolean; checkoutHref: string; canCheckout: boolean; waHref: string | null };
   linkPrefix?: string;
 }
 
-const { badge = "Pilihan kami", guarantee = "", storyTitle = "Tentang produk ini", stickyCta = "Beli sekarang", view } = Astro.props;
+const { badge = "Pilihan kami", guarantee = "", storyTitle = "Tentang produk ini", stickyCta = "Beli sekarang", stickyWa = "Pesan via WhatsApp", view } = Astro.props;
 ---
 <section class="bg-background py-12 md:py-20 text-foreground">
   <Container>
@@ -38,12 +40,18 @@ const { badge = "Pilihan kami", guarantee = "", storyTitle = "Tentang produk ini
       <ProductAttributes class="mt-10" />
     </div>
   </Container>
-  {!view.soldOut && (
+  {!view.soldOut && (view.canCheckout || view.waHref) && (
     <div class="sticky bottom-0 mt-12 border-t border-border bg-background/95 px-6 py-3 md:hidden">
-      <a data-pd-cta href={url(view.checkoutHref)} class="flex w-full items-center justify-between rounded-lg bg-primary px-5 py-3 font-semibold text-primary-foreground">
-        <span>{stickyCta}</span>
-        <span data-pd-price>{view.priceLabel}</span>
-      </a>
+      {view.canCheckout ? (
+        <a data-pd-cta href={url(view.checkoutHref)} class="flex w-full items-center justify-between rounded-lg bg-primary px-5 py-3 font-semibold text-primary-foreground">
+          <span>{stickyCta}</span>
+          <span data-pd-price>{view.priceLabel}</span>
+        </a>
+      ) : (
+        <a data-pd-wa href={url(view.waHref)} target="_blank" rel="noopener" class="flex w-full items-center justify-center rounded-lg bg-primary px-5 py-3 font-semibold text-primary-foreground">
+          <span>{stickyWa}</span>
+        </a>
+      )}
     </div>
   )}
 </section>
