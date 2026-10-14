@@ -13,7 +13,7 @@ interface Props {
   /** Sticky bar button when the shop takes orders by WhatsApp only. @example Pesan via WhatsApp */
   stickyWa?: string;
   product?: { id: string; name: string; slug: string; category: string | null; kind: string; type: string };
-  view?: { name: string; category: string | null; priceLabel: string; soldOut: boolean; checkoutHref: string; canCheckout: boolean; waHref: string | null };
+  view?: { name: string; category: string | null; priceLabel: string; soldOut: boolean; checkoutHref: string; canCheckout: boolean; waHref: string | null; cart: { enabled: boolean; addLabel: string } };
   linkPrefix?: string;
 }
 
@@ -41,14 +41,17 @@ const { badge = "Pilihan kami", guarantee = "", storyTitle = "Tentang produk ini
     </div>
   </Container>
   {!view.soldOut && (view.canCheckout || view.waHref) && (
-    <div class="sticky bottom-0 mt-12 border-t border-border bg-background/95 px-6 py-3 md:hidden">
+    <div class="sticky bottom-0 mt-12 flex gap-2 border-t border-border bg-background/95 px-6 py-3 md:hidden">
+      {view.cart.enabled && (
+        <button type="button" data-pd-add class="shrink-0 rounded-lg border border-primary px-4 py-3 font-semibold text-primary">{view.cart.addLabel}</button>
+      )}
       {view.canCheckout ? (
-        <a data-pd-cta href={url(view.checkoutHref)} class="flex w-full items-center justify-between rounded-lg bg-primary px-5 py-3 font-semibold text-primary-foreground">
+        <a data-pd-cta href={url(view.checkoutHref)} class="flex flex-1 items-center justify-between rounded-lg bg-primary px-5 py-3 font-semibold text-primary-foreground">
           <span>{stickyCta}</span>
           <span data-pd-price>{view.priceLabel}</span>
         </a>
       ) : (
-        <a data-pd-wa href={url(view.waHref)} target="_blank" rel="noopener" class="flex w-full items-center justify-center rounded-lg bg-primary px-5 py-3 font-semibold text-primary-foreground">
+        <a data-pd-wa href={url(view.waHref)} target="_blank" rel="noopener" class="flex flex-1 items-center justify-center rounded-lg bg-primary px-5 py-3 font-semibold text-primary-foreground">
           <span>{stickyWa}</span>
         </a>
       )}

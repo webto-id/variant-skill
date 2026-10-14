@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.57 — 2026-10-14
+
+- **Add to cart on product pages** (`wvf.md` §4d; `variant-check` ≥ 0.1.50). Stores whose shipping is ready now have a shopping cart. `<ProductBuyBox />` draws the add-to-cart button beside the buy button on its own. To draw another one (a sticky bar, a closing band), write `<button type="button" data-pd-add>{view.cart.addLabel}</button>` inside a `view.cart.enabled` condition, paired with `view.soldOut` like the buy button. The click adds the combination chosen in the buy box. Never draw your own cart icon, drawer or navbar link: the platform injects them. New lints: `product-cart-not-button` (error) and `product-cart-unguarded` (warning, error under `--strict`). `examples/product-detail-split.astro` shows the button in its sticky bar.
+
 ## 0.1.56 — 2026-10-12
 
 - **`view.canCheckout` on product pages** (`wvf.md` §4d). `true` for digital, and for physical only once the seller's shipping is set up; while `false`, checkout refuses the order. Every `<a data-pd-cta href={view.checkoutHref}>` a `product-detail` variant draws itself must be guarded by it, falling back to `data-pd-wa` (when `view.waHref` is set) or to no button, as `<ProductBuyBox />` does. `examples/product-detail-split.astro` shows it in its sticky bar. The preview sample has `canCheckout: true`.

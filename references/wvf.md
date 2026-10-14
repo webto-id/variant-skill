@@ -498,7 +498,7 @@ A `product-detail` variant is not a page section: it is the layout of every `/pr
 
 | Macro | Renders | Props (style only) |
 |---|---|---|
-| `<ProductBuyBox />` | price, variant buttons, stock note, bundle contents, the buy/WhatsApp button, AddToCart pixel | `class`, `showPrice` (false = you print `view.priceLabel` yourself), `compact` (centered pill buttons) |
+| `<ProductBuyBox />` | price, variant buttons, stock note, bundle contents, the buy/WhatsApp button, the add-to-cart button (when `view.cart.enabled`), AddToCart pixel | `class`, `showPrice` (false = you print `view.priceLabel` yourself), `compact` (centered pill buttons) |
 | `<ProductGallery />` | main photo + thumbnails, switching with the chosen variant | `class`, `aspect="square|wide"`, `thumbs` |
 | `<ProductDescription />` | the product description (the owner's markdown) | `class`, `size="base|lg"` |
 | `<ProductCurriculum />` | event/webinar schedule and venue, course curriculum (renders nothing for other products) | `class` |
@@ -510,6 +510,7 @@ Import them like the other macros (`import { ProductBuyBox, ProductGallery } fro
 - `<ProductBuyBox />` and `<ProductGallery />` at most **once** each (`product-block-multiple`, error) — the page script finds them by a unique selector. Inside a `.map()` only the first renders.
 - The product macros are valid only in a `product-detail` variant (`product-block-type`, error).
 - The page needs an `<h1>` — normally `<h1>{view.name}</h1>` (`product-h1-missing`, warning).
+- `data-pd-add` only on a `<button>` (`product-cart-not-button`, error), and only inside a `view.cart.enabled` condition (`product-cart-unguarded`, warning; error under `--strict`) — ≥ 0.1.50, see the cart paragraph below.
 
 **Data you read: three injected props.** Declare them in `interface Props` to read them; like chrome's `pages`, they never become editor fields:
 
@@ -528,6 +529,7 @@ view?: {
   curriculum: Array<{ title: string; lessonCount: number }>; totalLessons: number; totalDurationLabel: string;
   checkoutHref: string; waHref: string | null;
   canCheckout: boolean;                                       // false = checkout would refuse the order (physical, shipping not ready)
+  cart: { enabled: boolean; addLabel: string };               // shopping cart; enabled false = no add-to-cart button (≥ 0.1.50)
   kindInfo: KindInfo;                                         // per-kind facts, table below
   attributes: Array<{ name: string; items: Array<{ label: string; value: string }> }>;  // seller's groups; [] when none
 };
@@ -573,6 +575,20 @@ Render the raised amount only from `kindInfo` — it is `null` exactly when the 
     : <a data-pd-wa href={url(view.waHref)} target="_blank" rel="noopener" class="…">{stickyWa}</a>
 )}
 ```
+
+**Add to cart: `view.cart` + `data-pd-add`** (≥ 0.1.50). `<ProductBuyBox />` already draws the cart button beside its buy button, so a layout that only places the buy box needs nothing. To draw one more (a sticky bar, a closing band), write `<button type="button" data-pd-add>` and guard it with `view.cart.enabled`:
+
+```astro
+{view.cart.enabled && !view.soldOut && (
+  <button type="button" data-pd-add class="…">{view.cart.addLabel}</button>
+)}
+```
+
+- `view.cart.enabled` is `true` only when the store's cart is on (the seller's shipping is ready and the cart is not switched off), the product ships (`physical`, not a bundle), and the page is not a showcase (template, marketplace snapshot, sample product). It says nothing about stock — pair it with `view.soldOut`, as for the buy button. Unguarded, the button shows on stores without a cart, where the page script never wires it: a dead button (`product-cart-unguarded`).
+- `view.cart.addLabel` is the platform's label in the site's language ("+ Keranjang" / "+ Cart"). Print it; do not hardcode your own.
+- A click adds **the combination currently chosen in `<ProductBuyBox />`**, quantity 1, then shows the platform toast and updates the floating cart icon. You may draw several `data-pd-add` buttons, like `data-pd-cta`. An icon or a label inside the button is fine; another element (`<a>`, `<div>`) is refused (`product-cart-not-button`).
+- Never draw a cart icon, a cart drawer or a cart link in the navbar: the platform injects those on every page.
+- Older sites send no cart yet: there `view.cart` is `{ enabled: false, addLabel: "" }`. The `variant-check` preview pretends a ready shop so you can see the button: its sample product has `{ enabled: true, addLabel: "+ Keranjang" }` (physical only). The real template and marketplace previews do not.
 
 **Your own fields are static text.** Everything else in `Props` is a field the owner edits in the Tata Letak dialog: a badge, section titles, a guarantee line. Strings (and booleans/enums/numbers, or a list of strings) only — the dialog has no image upload or list-of-objects editor (`product-detail-field-nontext`, warning). There is no inline editing on product pages, so `data-edit-field` is optional here. Document each field (`/** … @example … */`) as usual.
 
@@ -725,6 +741,8 @@ The predicate itself stays as narrow as it was: full-strength surfaces only (`bg
 | `form-fields-no-fields` | warning | `<FormFields />` used but `fields` is not read from `Astro.props` — §5c |
 | `product-buybox-missing` `product-block-multiple` `product-block-type` | error | (≥ 0.1.45) a `product-detail` variant without `<ProductBuyBox />`; BuyBox/Gallery written twice; a product macro (incl. `<ProductAttributes />`, ≥ 0.1.46) outside `product-detail` — §4d |
 | `product-h1-missing` `product-detail-field-nontext` | warning | (≥ 0.1.45) product layout without `<h1>`; a product-layout field that is not text — §4d |
+| `product-cart-not-button` | error | (≥ 0.1.50) `data-pd-add` on anything but a `<button>` — §4d |
+| `product-cart-unguarded` | warning (strict: error) | (≥ 0.1.50) a `data-pd-add` button outside a `view.cart.enabled` condition — §4d |
 | `props-optional`* `props-unknown-item-key`* `props-type-mismatch` `props-undeclared` | warning | schema |
 | `ext-field-undocumented`* `ext-field-doc-thin` | warning | extension field docs (§1.2) |
 | `pair-with-unknown` `pair-with-not-array` `pair-with-bad-name` `pair-with-not-object` | error | `@pairWith` (§1.2c) — always an error, `--strict` or not |
