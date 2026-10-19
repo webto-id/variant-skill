@@ -49,6 +49,8 @@ Decide, per variant, what happens under 640 px: stack, hide decoration, reduce t
 
 Subtle, opt-in, and never required to see content: fade/translate on enter via `IntersectionObserver` in the script, `transition-*` on hover. Respect `prefers-reduced-motion` (`@media (prefers-reduced-motion: reduce) { … { animation: none } }`). Marquees: `overflow:hidden` on the section, the animated track inside.
 
+Pick the lightest tool that does the job: `transition-*` on hover; `data-wv-effect` (wvf.md §5b) for entrance reveals, staggers, counters and soft parallax — no script, no review; scroll-driven CSS (§3.1) for simple scrubbing. GSAP (`data-uses`, wvf.md §4a) is for motion that is part of the design itself — a choreographed hero timeline, scroll storytelling, a pinned section whose content scrubs or scrolls sideways. One such moment per page reads as craft; GSAP on every section reads as noise. Animate from the visible state (`gsap.from`), keep it inside `root`, and let the platform handle reduced motion, the editor and thumbnails.
+
 ## 6. Accessibility floor
 
 Semantic elements (`<section>`, `<h2>` for the section heading — the page's `<h1>` belongs to the hero only), `alt` on every image (derive from a field, e.g. `alt={item.title}`), `aria-hidden="true"` on decorative SVG/text, keyboard-reachable interactive controls (`<button>`, not `<div onclick>`), visible focus (`focus:ring-2 focus:ring-ring`), `aria-expanded`/`aria-controls` on accordions and tabs.

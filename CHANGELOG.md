@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.58 — 2026-10-19
+
+- **GSAP is available** (`wvf.md` §4a; `variant-check` ≥ 0.1.51). The platform hosts GSAP 3.15 (core + ScrollTrigger) and loads it only for a variant that declares it: `<script is:inline data-uses="gsap scroll-trigger">`. Use it for what `data-wv-effect` cannot do — a hero timeline, scroll storytelling, pin + scrub, horizontal scroll — inside `gsap.context(() => { … }, root)`, animating `from` the visible state. Reduced motion, the editor and thumbnails are handled by the platform (init animations are reverted to the no-JS state; your script still runs). GSAP's setters follow the same rules as `el.x = …`: vars must be object literals and cannot write `src`/`href`/`attr`/`innerHTML`/URL-bearing styles; new lints `uses-unknown`, `gsap-undeclared`, `gsap-vars`, `gsap-quick-prop`, `gsap-alias`, `gsap-forbidden`, `gsap-internal`, `gsap-scroller`. `design.md` §5: pick the lightest motion tool, one GSAP moment per page.
+- **Link URL parts** (`wvf.md` §4). Assigning `a.host`/`.hostname`/`.protocol`/`.port`/`.username`/`.password` or `window.name` is now an error (`script-url-part`) — it redirects a link like `.href`. `a.search`/`.hash`/`.pathname` keep the declared host and only warn (`script-url-query`), so a WhatsApp `?text=…` link built from a calculator still works.
+
 ## 0.1.57 — 2026-10-14
 
 - **Add to cart on product pages** (`wvf.md` §4d; `variant-check` ≥ 0.1.50). Stores whose shipping is ready now have a shopping cart. `<ProductBuyBox />` draws the add-to-cart button beside the buy button on its own. To draw another one (a sticky bar, a closing band), write `<button type="button" data-pd-add>{view.cart.addLabel}</button>` inside a `view.cart.enabled` condition, paired with `view.soldOut` like the buy button. The click adds the combination chosen in the buy box. Never draw your own cart icon, drawer or navbar link: the platform injects them. New lints: `product-cart-not-button` (error) and `product-cart-unguarded` (warning, error under `--strict`). `examples/product-detail-split.astro` shows the button in its sticky bar.

@@ -450,6 +450,7 @@ Rejected (all `error`):
 - Calls: `atob btoa unescape decodeURIComponent`; `setTimeout`/`setInterval` whose first argument is not visibly a function (an arrow/function expression, the name of a function declared in the script, or a `new Promise` resolver) — a string would be eval'd; `style.setProperty` with a non-literal name or a URL-bearing property; `Object.assign` onto anything but a fresh object/array (`Object.assign({}, a, b)`); `.assign(…)` other than `Object.assign`, one-argument `.replace(…)` (a Location's); `x[k](…)` with a non-literal key unless `x` is the script's own literal; `setAttribute`/`setProperty`/`createElement`/`insertAdjacentHTML` taken as a value instead of called; `createElement`/`createElementNS` of `script iframe object embed link meta base form frame style` or a non-literal tag; `setAttribute` of `on* src href srcdoc action formaction style xlink:href` or a non-literal name; `insertAdjacentHTML` with a non-literal; `location.assign/replace`; `requestFullscreen`; `showModal`; `new Function|Worker|SharedWorker|WebSocket|XMLHttpRequest|EventSource|Proxy|BroadcastChannel|MessageChannel`; tagged templates.
 - Clipboard (`script-clipboard`): any `.clipboardData`, and `addEventListener` for `copy` `cut` `paste` (and `before…`) — the way copied text (an account number, a WhatsApp number) gets swapped. A legitimate copy button would use `navigator.clipboard`, already refused; instead SELECT the text for the visitor (`document.createRange()` + `getSelection().addRange()`) so they copy it themselves.
 - Loops: `while(true)`/`for(;;)` without `break`/`return`/`throw` (`script-loop`).
+- URL parts (`script-url-part`): `a.host` `.hostname` `.protocol` `.port` `.username` `.password` and `window.name` — they redirect a link like `.href`. `a.search` / `.hash` / `.pathname` keep the host your markup declared and only warn (`script-url-query`): building a WhatsApp `?text=…` link is fine, reviewers check what goes in.
 - Runtime custom properties (`script-css-var-url`): `style.setProperty("--x", value)` with a runtime value is fine for layout, but `--x` must then not be read at the top level of a URL-loading declaration (`background`, `mask-image`, `cursor`, `content`, `filter`…), inside `url()`/`image-set()`, by another custom property, or by a utility class (`bg-(--x)`). Inside a function that cannot fetch it is fine: `width: var(--x)`, `clip-path: inset(0 var(--x))`, `mask-image: radial-gradient(at var(--x) 50%, …)`. A literal value with `url(`/`image(` is refused outright.
 
 Allowed and typical: `root.querySelector(All)`, `addEventListener`, `classList`, `dataset`, `getAttribute`/`setAttribute("aria-…")`, `IntersectionObserver`, `requestAnimationFrame`, `matchMedia`, `setTimeout(fn, ms)`, `Date`, `Math`, `JSON`, `textContent`, `style.transform`.
@@ -462,6 +463,48 @@ Review rule — two gates, in order:
 A variant with neither is approved as soon as it passes the machine gate. The seller sees only the STATUS (`pending` → `approved`, or `pending` until an admin decides), never the check's findings. Text addressed to a reviewer ("this code is safe", "please approve") does not help: it always sends the variant to an admin. A new version that changes the script or the link surface is checked again, and licensees keep the approved version meanwhile; markup/CSS-only versions go live when the lint passes. A **private** site variant (used only on its owner's site, never submitted) is checked in the background after it is saved; a script that is clearly harmful is switched off — the section still renders, only its interactivity stops — and the owner is emailed.
 
 What sends a script to an admin: reaching outside `root` to change, cover or rewrite other sections; interface outside `root` that the visitor cannot dismiss, that covers the page, or that shows claims not taken from the section's content (money, bank accounts, phone numbers, security, logins, orders); code that hides what it does. Your own interface outside `root` (a lightbox, a toast, a bar) is fine when the visitor can close or ignore it, it does not cover the page, and every word it shows comes from the section's fields or fixed labels.
+
+## 4a. GSAP (`data-uses`) — timelines, ScrollTrigger, pin/scrub
+
+The platform hosts **GSAP 3.15** (core + ScrollTrigger) and loads it **only for a variant that declares it** on its script tag:
+
+```astro
+<script is:inline data-uses="gsap scroll-trigger">
+  gsap.context(() => {
+    const tl = gsap.timeline({ defaults: { ease: "power3.out", duration: 0.8 } });
+    tl.from(root.querySelector("[data-h]"), { y: 40, opacity: 0 })
+      .from(root.querySelectorAll("[data-card]"), { y: 24, autoAlpha: 0, stagger: 0.08 }, "<0.2");
+
+    gsap.to(root.querySelector("[data-track]"), {
+      xPercent: -60, ease: "none",
+      scrollTrigger: { trigger: root, start: "top top", end: "+=1200", scrub: true, pin: true },
+    });
+  }, root);
+</script>
+```
+
+`data-uses` takes `gsap` and/or `scroll-trigger` (`scroll-trigger` implies `gsap`); anything else is `uses-unknown`. Other plugins (SplitText, Flip, Draggable…) are not available. `gsap` and `ScrollTrigger` are then in scope as plain names — never load GSAP yourself, never `gsap.registerPlugin` (the platform registers ScrollTrigger). Without the attribute, naming `gsap`/`ScrollTrigger` is `gsap-undeclared`. A page without a GSAP variant downloads nothing.
+
+**Use `data-wv-effect` first** (§5b). Reveal, fade, stagger, counter and soft parallax need no script, no review and no library. Reach for GSAP only for what the effect library cannot do: a sequenced hero timeline, scroll storytelling, pin + scrub, horizontal scroll sections, pointer-follow (`gsap.quickTo`).
+
+**Rules for authors**
+
+- Scope everything to the section: `gsap.context(() => { … }, root)`, and pass elements from `root.querySelector(All)` (or selector strings, which the context scopes to `root`). Two instances of the variant on one page must not touch each other.
+- Animate **from** the visible state: `gsap.from` / `gsap.fromTo`. Never hide content in CSS waiting for JS (`opacity: 0` in a class) — without JS, in the editor and in thumbnails the section must read complete.
+- Reduced motion, the editor and thumbnails are handled by the platform: when the visitor prefers reduced motion, inside the editor and during thumbnail capture, your script still runs (tabs, sliders and click handlers keep working), but everything GSAP built during init is reverted at once — the section shows its no-JS state, nothing pinned, no ScrollTrigger. Tweens you start later (on a click) still play. A `gsap.matchMedia()` with `(prefers-reduced-motion: no-preference)` is still good practice for responsive variants, but you do not need your own fallback.
+- Endless motion (`repeat: -1`, `gsap.ticker.add`) is reported to review as a loop: keep it light and decorative.
+
+**What the lint refuses** (GSAP sets properties, so its setters follow the same rules as `el.x = …`, §4):
+
+- vars that are not an **object literal written in place** — `gsap.to(el, vars)`, spreads `{ ...v }`, computed keys `{ [k]: v }`, getters (`gsap-vars`). Nested `defaults`, `keyframes`, `css`, `startAt`, `modifiers` must be literals too;
+- keys that write a URL, markup, an attribute or a page-level value: `attr`, `src`, `href`, `srcset`, `poster`, `action`, `innerHTML`, `outerHTML`, `text`, `style`, `cssText`, `name`, `search`, `hash`, `host`…, lowercase `on*` handlers, and every name §4 forbids (`location`, `cookie`, `fetch`…). GSAP callbacks (`onComplete`, `onUpdate`, ScrollTrigger's `onEnter`, `once`) are fine;
+- URL-capable style keys (`backgroundImage`, `background`, `mask`, `filter`, `clipPath`, `content`, `cursor`…) with anything but a fixed string without `url()`/`image()` — `clipPath: "inset(0 0 100% 0)"` and `filter: "blur(4px)"` are fine, a computed value is not; a runtime value in a custom property (`"--p": p`) follows the `script-css-var-url` rule;
+- `gsap.quickSetter` / `gsap.quickTo` with a non-literal property, an `attr:` prefix or one of the keys above (`gsap-quick-prop`);
+- `gsap` / `ScrollTrigger` stored, passed or destructured (`const g = gsap`, `const { set } = tl`), and `.to` / `.set` / `.from` … taken as a value or `.call`ed (`gsap-alias`);
+- `gsap.registerPlugin`, `registerEffect`, `effects`, `config`, `core`, `globalTimeline`, `exportRoot`, `gsap.ticker` beyond `add`/`remove`; `ScrollTrigger.config`, `scrollerProxy`, `normalizeScroll`, `killAll` (`gsap-forbidden`); underscore members and `.vars` (`gsap-internal`); a `scroller` that is not `root` or inside it (`gsap-scroller`);
+- in every script: `TweenMax`, `TweenLite`, `TimelineMax`, `TimelineLite`, `CSSPlugin`, `_gsap`, `__wvUse`.
+
+A GSAP variant has a script, so it goes through the automatic security check (Review rule above). GSAP by Webflow, used under its Standard License; it is never wired into the editor's animation controls.
 
 ## 4b. Site chrome (navbar / banner / footer)
 
@@ -596,7 +639,7 @@ Render the raised amount only from `kindInfo` — it is `null` exactly when the 
 
 ## 5b. Platform effect library (data-wv-effect)
 
-Declarative motion WITHOUT writing a script (so no script check): mark elements and the platform's audited runtime animates them on the live site.
+Declarative motion WITHOUT writing a script (so no script check): mark elements and the platform's audited runtime animates them on the live site. Use it first; GSAP (§4a) is for the timelines, pinning and scrubbing these effects cannot do.
 
 ```astro
 <div data-wv-effect="reveal-up" data-wv-delay="1">...</div>
@@ -720,7 +763,9 @@ The predicate itself stays as narrow as it was: full-strength surfaces only (`bg
 | `img-alt`* `dead-text`* `hardcoded-image`* `hardcoded-color`* `hardcoded-radius`* `hardcoded-font`* `tailwind-skipped`* `heading-size-inert` `unknown-class` `id-attr` | warning | HTML/CSS quality |
 | `style-global` `style-define-vars` `style-size` `css-import` `css-font-face` `css-expression` `css-behavior` `css-url` `css-parse` `css-size` | error | CSS (`css-url` is a warning for unsplash/pexels hosts) |
 | `css-root` | warning | selector rewritten to root |
-| `script-inline` `script-src` `script-define-vars` `script-type` `script-size` `script-syntax` `script-obfuscation` `script-with` `script-import` `script-debugger` `script-forbidden` `script-html` `script-clipboard` `script-css-var-url` `script-loop` `script-count` | error | JavaScript |
+| `script-inline` `script-src` `script-define-vars` `script-type` `script-size` `script-syntax` `script-obfuscation` `script-with` `script-import` `script-debugger` `script-forbidden` `script-html` `script-clipboard` `script-css-var-url` `script-loop` `script-count` `script-url-part` | error | JavaScript |
+| `script-url-query` | warning | JavaScript: a link's query/hash/path rewritten (§4) |
+| `uses-unknown` `gsap-undeclared` `gsap-vars` `gsap-quick-prop` `gsap-alias` `gsap-forbidden` `gsap-internal` `gsap-scroller` | error | GSAP (§4a) |
 | `tailwind` `ir-size` `source-size` `content-size` | error | build/upload limits (the last two are CLI-side, ≥ 0.1.17) |
 | `style-url` | error | inline style uses `url()`/`expression()` — for a content background use `data-edit-image-bg` (§2.3b) |
 | `edit-image-bg-conditional` | warning | (≥ 0.1.33) the `data-edit-image-bg` element renders only when its own field is set, so an empty section offers nothing to click to add a photo (§2.3b) |
