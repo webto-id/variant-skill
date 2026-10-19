@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.59 — 2026-10-19
+
+- **Arbitrary properties and arbitrary variants compile** (`wvf.md` Tailwind paragraph, `tailwind.md`; `variant-check` ≥ 0.1.52). Tokens that start with `[` were all dropped as `tailwind-skipped`, so `[scrollbar-width:none]` left the scrollbar showing. Now `[scrollbar-width:none]`, `[mask-image:…]`, `[&::-webkit-scrollbar]:hidden`, `[&>*]:shrink-0`, `md:[&_p]:mt-2` and `[@media_print]:hidden` produce CSS scoped to the section. Still refused, with the reason in the warning: `&` inside parentheses (`[:not(&)]`, `[:is(&,body)]`, `[*:has(&)]`), `&` glued to a selector before it (`[.x&]`), at-rule variants other than `@media`/`@supports`/`@container`/`@starting-style`, `url()`/`image-set()`/`image()`/`src()`/`cross-fade()`/`element()`/`expression()`, `behavior`/`-moz-binding`, quotes, backslashes, `;` and braces. Nested `<style>` CSS with `&` inside parentheses (`.x { :not(&) {} }`) is now a `css-parse` error.
+
 ## 0.1.58 — 2026-10-19
 
 - **GSAP is available** (`wvf.md` §4a; `variant-check` ≥ 0.1.51). The platform hosts GSAP 3.15 (core + ScrollTrigger) and loads it only for a variant that declares it: `<script is:inline data-uses="gsap scroll-trigger">`. Use it for what `data-wv-effect` cannot do — a hero timeline, scroll storytelling, pin + scrub, horizontal scroll — inside `gsap.context(() => { … }, root)`, animating `from` the visible state. Reduced motion, the editor and thumbnails are handled by the platform (init animations are reverted to the no-JS state; your script still runs). GSAP's setters follow the same rules as `el.x = …`: vars must be object literals and cannot write `src`/`href`/`attr`/`innerHTML`/URL-bearing styles; new lints `uses-unknown`, `gsap-undeclared`, `gsap-vars`, `gsap-quick-prop`, `gsap-alias`, `gsap-forbidden`, `gsap-internal`, `gsap-scroller`. `design.md` §5: pick the lightest motion tool, one GSAP moment per page.

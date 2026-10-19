@@ -36,7 +36,11 @@ When a heading merely shouldn't use the heading scale but *should* scale with bo
 
 ## Negative utilities
 
-`-mt-16`, `-translate-y-2`, `-inset-1`, `-z-10` compile like any other utility (compiler ≥ 0.1.2; 0.1.0 dropped them silently). Any class token the compiler cannot accept — for example `[&>*]:mt-2` — now raises a `tailwind-skipped` warning instead of vanishing; `--strict` fails on it. Rewrite such tokens (arbitrary values like `mt-[-4rem]` are fine) or move the rule into `<style>`.
+`-mt-16`, `-translate-y-2`, `-inset-1`, `-z-10` compile like any other utility (compiler ≥ 0.1.2; 0.1.0 dropped them silently). Any class token the compiler cannot accept — for example `[:not(&)]:mt-2` — raises a `tailwind-skipped` warning instead of vanishing; `--strict` fails on it. Rewrite such tokens (arbitrary values like `mt-[-4rem]` are fine) or move the rule into `<style>`.
+
+## Arbitrary properties and variants
+
+`[scrollbar-width:none]`, `[mask-image:…]`, `[&::-webkit-scrollbar]:hidden`, `[&>*]:shrink-0` and `[@supports(display:grid)]:grid` compile (`variant-check` ≥ 0.1.52; earlier versions dropped every token that starts with `[`). A horizontal scroller without a visible scrollbar is `overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden`. The selector must keep `&` outside parentheses, so it stays on elements of your section: `[:not(&)]`, `[:is(&,…)]` and `[*:has(&)]` are refused. Full list of what is refused: `wvf.md`, Tailwind paragraph.
 
 ## Rules the compiler enforces
 
