@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.61 — 2026-10-21
+
+- **Official buy-box styling for product-detail** (`wvf.md` §4d). `<ProductBuyBox />` and `<ProductGallery />` defaults now sit in the `wvf-product` cascade layer, below your variant's CSS, with no inline colors. Plain CSS wins without `!important`.
+- **New `--pd-*` tokens** for action buttons (radius, border, weight, case, tracking, width), colors (`--pd-buy-*`, `--pd-cart-*`, `--pd-wa-*`), option/variant buttons (`--pd-opt-*`, `--pd-opt-active-*`), and gallery photo/thumbnail radius. Defaults equal the previous look.
+- **Selector contract documented**: `data-pd-buybox`, `data-pd-cta`, `data-pd-wa`, `data-pd-add`, `data-pd-opt`/`data-pd-val`, `data-pd-variant`, `data-pd-price`, `data-pd-stock`, `aria-checked`, `aria-disabled`, gallery `data-pd-main`/`data-pd-thumb`. Showcase buttons keep their live marker plus `data-pd-showcase` (never a link). Your own showcase button should use the same markers.
+- **New lints**: `product-part-hidden` (error on upload: CSS or utility classes that hide or disable the buy/WhatsApp/cart button, the buy box, or its wrapper) and `product-part-contrast` (warning: `--pd-*` fg/bg pairs below 4.5:1 on the theme). Limits are documented.
+- **`variant-check` 0.1.55**: the preview renders the platform's real buy box and gallery. Branch flags: `--order-via whatsapp|checkout`, `--can-checkout false`, `--cart` / `--no-cart`, `--showcase`.
+- `text-primary-text` utility and `--primary-text` in the preview. Examples use it for text in the primary color (split sticky cart button, donation eyebrow).
+
 ## 0.1.60 — 2026-10-20
 
 - **`view.orderVia` on product pages** (`wvf.md` §4d; `variant-check` ≥ 0.1.54): `"checkout" | "whatsapp"`. A seller can mark a **physical** product "order via WhatsApp only" (a rental, a negotiated service, B2B "mulai dari"); every other kind is delivered by the platform after payment, so its `view.orderVia` is always `"checkout"`. For a WhatsApp-only product `view.canCheckout` and `view.cart.enabled` are `false`, checkout and the cart refuse it, and `<ProductBuyBox />` draws only the WhatsApp button. In showcase (`checkoutHref` `"#"`) the platform draws a disabled WhatsApp button for it, and a button you draw yourself should match. Read the flag; never guess it from the copy.

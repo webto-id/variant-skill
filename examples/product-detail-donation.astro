@@ -26,7 +26,7 @@ const showProgress = info.kind === "donation" && info.percent !== null && info.p
     <div class="grid grid-cols-1 gap-10 md:grid-cols-5 md:gap-14">
       <ProductGallery aspect="wide" class="md:col-span-3" />
       <div class="md:col-span-2">
-        <p class="text-xs font-semibold uppercase tracking-widest text-primary">{eyebrow}</p>
+        <p class="text-xs font-semibold uppercase tracking-widest text-primary-text">{eyebrow}</p>
         <h1 class="mt-3 !text-3xl font-bold" style="font-family: var(--font-heading);">{view.name}</h1>
         {showProgress && (
           <div class="mt-6">

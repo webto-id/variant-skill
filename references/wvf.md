@@ -624,9 +624,11 @@ Render the raised amount only from `kindInfo` — it is `null` exactly when the 
 
 ```astro
 {!view.soldOut && view.checkoutHref === "#" && view.orderVia === "whatsapp" && (
-  <span aria-disabled="true" class="… opacity-60 cursor-not-allowed">WhatsApp</span>
+  <span data-pd-wa data-pd-showcase aria-disabled="true" class="… opacity-60 cursor-not-allowed">WhatsApp</span>
 )}
 ```
+
+`data-pd-wa data-pd-showcase` (≥ 0.1.55) is the platform's own showcase marker: your CSS for `[data-pd-wa]` styles it like the live button, and the page script skips anything with `data-pd-showcase` (no link, no pixel).
 
 Read the flag; NEVER guess it from the copy (a price "mulai dari", the word "sewa", a "hubungi kami" line). The sample product in the `variant-check` preview has `orderVia: "checkout"`. A template sets it per product with `sampleProducts[].orderVia` (template skill `manifest.md`).
 
@@ -644,9 +646,93 @@ Read the flag; NEVER guess it from the copy (a price "mulai dari", the word "sew
 - Never draw a cart icon, a cart drawer or a cart link in the navbar: the platform injects those on every page.
 - Older sites send no cart yet: there `view.cart` is `{ enabled: false, addLabel: "" }`. The `variant-check` preview pretends a ready shop so you can see the button: its sample product has `{ enabled: true, addLabel: "+ Keranjang" }` (physical only). The real template and marketplace previews do not.
 
+**Styling the buy box and the gallery** (≥ 0.1.55). The blocks are platform markup, but how they look is up to you. Every default style sits in the cascade layer `wvf-product`, and every page declares it BEFORE your variant's layer (`@layer wvf-product, wvf;`). So plain CSS in your `<style>` wins. You need no `!important` and no guessing at internal markup. Nothing in the buy box is styled inline. There are two ways in:
+
+1. **Tokens.** Set them on the class you pass to the block (`<ProductBuyBox class="tr-buy" />`) or on any ancestor. They are read only inside the buy box root `[data-pd-buybox]` and the gallery, so buttons you draw yourself are not affected. An unset token keeps the platform look exactly.
+
+   | Token | Default | Applies to |
+   |---|---|---|
+   | `--pd-btn-radius` | `var(--radius)` (showcase button: `var(--radius) + 4px`) | every action button |
+   | `--pd-btn-border-width` / `--pd-btn-border-color` | `0` on solid buttons, `2px` on outline ones / per button | every action button |
+   | `--pd-btn-weight` / `--pd-btn-case` / `--pd-btn-tracking` | `700` / inherited (`none` on the cart button) / inherited | every action button |
+   | `--pd-btn-width` | `auto` (`100%` = column-wide buttons, stacked) | every action button |
+   | `--pd-buy-bg` / `--pd-buy-fg` | `var(--color-primary)` / `var(--color-primary-foreground)` | pay button (and its showcase twin) |
+   | `--pd-cart-bg` / `--pd-cart-fg` / `--pd-cart-border` | `transparent` / `var(--color-primary-text)` / `var(--color-primary)` | add-to-cart (outline) |
+   | `--pd-wa-bg` / `--pd-wa-fg` | `#25D366` / `#fff` | WhatsApp when it is the main button; beside the pay button it is an outline in `--pd-wa-bg` |
+   | `--pd-opt-radius` / `--pd-opt-border` / `--pd-opt-bg` / `--pd-opt-fg` | pill `9999px` (list rows: `var(--radius)`) / foreground 12% / `transparent` / inherited | option and variant buttons |
+   | `--pd-opt-active-bg` / `--pd-opt-active-fg` / `--pd-opt-active-border` | `--pd-opt-bg` / `--pd-opt-fg` / `var(--color-primary)` (plus a 1px ring) | the chosen one (`aria-checked="true"`) |
+   | `--pd-opt-case` / `--pd-opt-weight` | `none` / inherited | option and variant buttons |
+   | `--pd-media-radius` | `1rem` | gallery main photo |
+   | `--pd-thumb-radius` / `--pd-thumb-active-border` | `var(--radius)` / `var(--color-primary)` | gallery thumbnails |
+
+   There are no tokens for touch-target size, labels, visibility or colour swatches. Those stay with the platform.
+
+2. **Selectors (the contract).** These are stable. Style them under your own class (`.tr-buy [data-pd-wa]`):
+
+   | Selector | Element |
+   |---|---|
+   | `[data-pd-buybox]` | the buy box root |
+   | `[data-pd-cta]` | pay button (an `<a>`; in showcase a `<span>`) |
+   | `[data-pd-wa]` | WhatsApp button (an `<a>`; in showcase a `<span>`) |
+   | `[data-pd-add]` | add-to-cart `<button>` |
+   | `[data-pd-showcase]` | added to the showcase twin of `data-pd-cta` / `data-pd-wa` (template and marketplace previews); it always has `aria-disabled="true"` and never a link |
+   | `[data-pd-opt]` + `[data-pd-val]` | option buttons (Warna × Ukuran) |
+   | `[data-pd-variant]` | variant buttons of a product without options |
+   | `[aria-checked="true"]` | the chosen option / variant |
+   | `[aria-disabled="true"]` | an option value with no working combination for the other picks (still clickable) |
+   | `:disabled` | an option value / variant that cannot be bought at all |
+   | `[data-pd-price]` | the price (and your own price mirrors) |
+   | `[data-pd-stock]` | the "Tersisa n" note of the chosen combination |
+   | `[data-pd-main]`, `[data-pd-thumb]` + `[aria-current="true"]` | gallery main photo, thumbnails, the current thumbnail |
+
+   Classes inside the blocks (`wvpd-*`) are internal and can change. Do not target them. There is no `data-pd-part`.
+
+The Trak Rent "steel plate" look (square corners, a 2px foreground border, upper-case, column-wide buttons):
+
+```astro
+<ProductBuyBox class="tr-buy mt-6" />
+
+<style>
+  .tr-buy {
+    --pd-btn-radius: 0;
+    --pd-btn-border-width: 2px;
+    --pd-btn-border-color: var(--foreground);
+    --pd-btn-case: uppercase;
+    --pd-btn-tracking: 0.04em;
+    --pd-btn-width: 100%;
+    --pd-buy-bg: var(--foreground);
+    --pd-buy-fg: var(--background);
+    --pd-opt-radius: 0;
+    --pd-opt-border: color-mix(in srgb, var(--foreground) 25%, transparent);
+    --pd-opt-case: uppercase;
+    --pd-opt-weight: 700;
+    --pd-opt-active-bg: var(--primary);
+    --pd-opt-active-fg: var(--primary-foreground);
+    --pd-opt-active-border: var(--foreground);
+  }
+  .tr-buy [data-pd-opt][aria-checked="true"] { box-shadow: none; }
+</style>
+```
+
+For text in the brand colour on the page background, use `text-primary-text` / `var(--primary-text)` (≥ 0.1.55). It is the primary, darkened or lightened until it reads at 4.5:1 there. Raw `text-primary` is for fills and decoration. A pale primary (a yellow `#f2c230` on white) used raw as a label is what makes a "+ Keranjang" disappear.
+
+**Restyle, never hide.** Two rules check the above:
+
+- `product-part-hidden` (**error** for a new upload; a warning when a stored variant is recompiled) catches CSS that hides, disables or empties the pay / WhatsApp / cart button, the buy box root, or the element you wrap it in.
+  - **Where it looks.** Any selector whose last part names `data-pd-cta|wa|add|buybox`, behind any class and inside `@media` / `@supports`. Also the class you pass to `<ProductBuyBox>` and the classes of every element around it.
+  - **Flagged properties.** `display:none`, `visibility:hidden|collapse`, `opacity` below 0.3, `pointer-events:none`, `content`, a zero `width` / `height` / `max-*` / `font-size`, `clip` / `clip-path`, `scale(0)`, an off-screen offset (≥ 999px, 60rem or 100vw/vh in `left` / `top` / `margin` / `text-indent` / `translate`), and `color: transparent`.
+  - **Flagged tokens.** `--pd-X-fg` equal to `--pd-X-bg`, a transparent `--pd-X-fg`, and `--pd-btn-width: 0`.
+  - **Flagged utilities.** Unconditional hiding utilities (`hidden`, `invisible`, `opacity-0`…`25`, `sr-only`, `pointer-events-none`) on the buy box or an ancestor. A class list that shows it again at a breakpoint passes (`hidden md:block`).
+  - **Not flagged.** `:hover` dimming at 0.3 or above (`hover:opacity-90` is fine), anything under `:disabled`, `[aria-disabled]` or `[data-pd-showcase]`, and `::before` / `::after` decoration such as an icon.
+  - **Limits: this is static analysis.** It does not see values built from your own custom properties (`display: var(--x)`), classes added by your script, another element laid over the button, a `::before` / `::after` that covers it, selectors that reach the buy box only by tag or position (`section > div:nth-child(2)`), or class expressions (`class={cond ? "hidden" : ""}`). Passing the lint is not permission: hiding the buy button any other way is still a review rejection.
+- `product-part-contrast` (warning) checks every `--pd-X-fg` / `--pd-X-bg` pair you set, for `buy`, `cart`, `wa`, `opt` and `opt-active`. Setting either half is enough; the other half takes its default.
+  - It measures on the bundle's `theme.colors` and `theme.darkColors` (the demo palettes when there is no theme) and warns below 4.5:1.
+  - It resolves hex values, `white` / `black`, `transparent` (taken as the page background), the theme tokens (`var(--primary)`, `var(--color-primary-text)`, …) and `color-mix(in srgb, …)` of those. Anything else is skipped, not guessed.
+  - A theme's own pair (`--primary` + `--primary-foreground`, `--background` + `--foreground`, …) is not reported, because its contrast belongs to the theme.
+
 **Your own fields are static text.** Everything else in `Props` is a field the owner edits in the Tata Letak dialog: a badge, section titles, a guarantee line. Strings (and booleans/enums/numbers, or a list of strings) only — the dialog has no image upload or list-of-objects editor (`product-detail-field-nontext`, warning). There is no inline editing on product pages, so `data-edit-field` is optional here. Document each field (`/** … @example … */`) as usual.
 
-**Preview.** `variant-check --type product-detail --out preview.html` (add `--product-kind donation|course|webinar|event|digital` to preview a layout built on `kindInfo`, ≥ 0.1.46) renders the variant around the platform's sample product ("Tas Kanvas Serbaguna", three photos, options Warna × Ukuran with the Krem / L combination sold out) plus two attribute groups ("Spesifikasi" as a table, "Komposisi" as a list), with stand-ins for the blocks; the variant's marketplace preview shows the same sample product with the real blocks. A TEMPLATE's preview uses the template's own sample products when its `template.json` declares `sampleProducts` (template skill `manifest.md`) — their `/product/<slug>` pages, in their own kinds, photos, options and attributes — while `/product/contoh` keeps serving the platform sample as the fallback. So a layout must hold up on the seller's real data, not just the bag: a product without options or attributes, one photo, a long name. See `examples/product-detail-split.astro`, and `examples/product-detail-donation.astro` for a layout built on `kindInfo`.
+**Preview.** `variant-check --type product-detail --out preview.html` (add `--product-kind donation|course|webinar|event|digital` to preview a layout built on `kindInfo`, ≥ 0.1.46) renders the variant around the platform's sample product ("Tas Kanvas Serbaguna", three photos, options Warna × Ukuran with the Krem / L combination sold out) plus two attribute groups ("Spesifikasi" as a table, "Komposisi" as a list). Since 0.1.55 `<ProductBuyBox />` and `<ProductGallery />` in the preview are the platform's own markup and styles, not stand-ins, so buy-box CSS can be judged locally. By default the preview shows a ready shop (pay + cart, no WhatsApp). Pick the branch to check with `--order-via whatsapp` (one WhatsApp button), `--can-checkout false` (shipping not ready: WhatsApp instead of pay), `--no-cart`, and `--showcase` (the disabled template-preview button; combine with `--order-via whatsapp`). The variant's marketplace preview shows the same sample product with the same blocks. A TEMPLATE's preview uses the template's own sample products when its `template.json` declares `sampleProducts` (template skill `manifest.md`) — their `/product/<slug>` pages, in their own kinds, photos, options and attributes — while `/product/contoh` keeps serving the platform sample as the fallback. So a layout must hold up on the seller's real data, not just the bag: a product without options or attributes, one photo, a long name. See `examples/product-detail-split.astro`, and `examples/product-detail-donation.astro` for a layout built on `kindInfo`.
 
 ## 5b. Platform effect library (data-wv-effect)
 

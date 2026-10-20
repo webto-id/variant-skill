@@ -43,7 +43,7 @@ const { badge = "Pilihan kami", guarantee = "", storyTitle = "Tentang produk ini
   {!view.soldOut && (view.canCheckout || view.waHref) && (
     <div class="sticky bottom-0 mt-12 flex gap-2 border-t border-border bg-background/95 px-6 py-3 md:hidden">
       {view.cart.enabled && (
-        <button type="button" data-pd-add class="shrink-0 rounded-lg border border-primary px-4 py-3 font-semibold text-primary">{view.cart.addLabel}</button>
+        <button type="button" data-pd-add class="shrink-0 rounded-lg border border-primary px-4 py-3 font-semibold text-primary-text">{view.cart.addLabel}</button>
       )}
       {view.canCheckout ? (
         <a data-pd-cta href={url(view.checkoutHref)} class="flex flex-1 items-center justify-between rounded-lg bg-primary px-5 py-3 font-semibold text-primary-foreground">
