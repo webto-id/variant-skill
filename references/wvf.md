@@ -571,7 +571,8 @@ view?: {
   schedule: { rangeLabel: string; address: string | null; locationUrl: string | null; online: boolean; past: boolean } | null;
   curriculum: Array<{ title: string; lessonCount: number }>; totalLessons: number; totalDurationLabel: string;
   checkoutHref: string; waHref: string | null;
-  canCheckout: boolean;                                       // false = checkout would refuse the order (physical, shipping not ready)
+  canCheckout: boolean;                                       // false = checkout would refuse the order (physical, shipping not ready, or orderVia "whatsapp")
+  orderVia: "checkout" | "whatsapp";                          // "whatsapp" = order by chat only, no checkout or cart; physical products only (≥ 0.1.54)
   cart: { enabled: boolean; addLabel: string };               // shopping cart; enabled false = no add-to-cart button (≥ 0.1.50)
   kindInfo: KindInfo;                                         // per-kind facts, table below
   attributes: Array<{ name: string; items: Array<{ label: string; value: string }> }>;  // seller's groups; [] when none
@@ -618,6 +619,16 @@ Render the raised amount only from `kindInfo` — it is `null` exactly when the 
     : <a data-pd-wa href={url(view.waHref)} target="_blank" rel="noopener" class="…">{stickyWa}</a>
 )}
 ```
+
+**Order via WhatsApp only: `view.orderVia`** (≥ 0.1.54). A seller can mark a **physical** product `"whatsapp"`: they take its orders by chat (a rental, a negotiated service, B2B with a "mulai dari" price). Every other kind (digital, course, webinar, event, donation) is delivered by the platform after payment, so its `view.orderVia` is always `"checkout"` — a layout never needs a WhatsApp-only branch for a ticket, a file or a donation. Then `view.canCheckout` and `view.cart.enabled` are `false`, checkout and the cart refuse the product server-side, and `<ProductBuyBox />` draws only the WhatsApp button (or no button without a number), so the guard above already does the right thing. `view.orderVia` matters in **showcase** (template and marketplace previews: `checkoutHref` is `"#"` and `waHref` is `null`): there the platform draws a disabled WhatsApp button for such a product instead of a pay button, and a button you draw yourself should match:
+
+```astro
+{!view.soldOut && view.checkoutHref === "#" && view.orderVia === "whatsapp" && (
+  <span aria-disabled="true" class="… opacity-60 cursor-not-allowed">WhatsApp</span>
+)}
+```
+
+Read the flag; NEVER guess it from the copy (a price "mulai dari", the word "sewa", a "hubungi kami" line). The sample product in the `variant-check` preview has `orderVia: "checkout"`. A template sets it per product with `sampleProducts[].orderVia` (template skill `manifest.md`).
 
 **Add to cart: `view.cart` + `data-pd-add`** (≥ 0.1.50). `<ProductBuyBox />` already draws the cart button beside its buy button, so a layout that only places the buy box needs nothing. To draw one more (a sticky bar, a closing band), write `<button type="button" data-pd-add>` and guard it with `view.cart.enabled`:
 

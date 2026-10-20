@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.60 — 2026-10-20
+
+- **`view.orderVia` on product pages** (`wvf.md` §4d; `variant-check` ≥ 0.1.54): `"checkout" | "whatsapp"`. A seller can mark a **physical** product "order via WhatsApp only" (a rental, a negotiated service, B2B "mulai dari"); every other kind is delivered by the platform after payment, so its `view.orderVia` is always `"checkout"`. For a WhatsApp-only product `view.canCheckout` and `view.cart.enabled` are `false`, checkout and the cart refuse it, and `<ProductBuyBox />` draws only the WhatsApp button. In showcase (`checkoutHref` `"#"`) the platform draws a disabled WhatsApp button for it, and a button you draw yourself should match. Read the flag; never guess it from the copy.
+
 ## 0.1.59 — 2026-10-19
 
 - **Arbitrary properties and arbitrary variants compile** (`wvf.md` Tailwind paragraph, `tailwind.md`; `variant-check` ≥ 0.1.52). Tokens that start with `[` were all dropped as `tailwind-skipped`, so `[scrollbar-width:none]` left the scrollbar showing. Now `[scrollbar-width:none]`, `[mask-image:…]`, `[&::-webkit-scrollbar]:hidden`, `[&>*]:shrink-0`, `md:[&_p]:mt-2` and `[@media_print]:hidden` produce CSS scoped to the section. Still refused, with the reason in the warning: `&` inside parentheses (`[:not(&)]`, `[:is(&,body)]`, `[*:has(&)]`), `&` glued to a selector before it (`[.x&]`), at-rule variants other than `@media`/`@supports`/`@container`/`@starting-style`, `url()`/`image-set()`/`image()`/`src()`/`cross-fade()`/`element()`/`expression()`, `behavior`/`-moz-binding`, quotes, backslashes, `;` and braces. Nested `<style>` CSS with `&` inside parentheses (`.x { :not(&) {} }`) is now a `css-parse` error.
