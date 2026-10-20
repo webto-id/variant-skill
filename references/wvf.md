@@ -571,7 +571,7 @@ view?: {
   schedule: { rangeLabel: string; address: string | null; locationUrl: string | null; online: boolean; past: boolean } | null;
   curriculum: Array<{ title: string; lessonCount: number }>; totalLessons: number; totalDurationLabel: string;
   checkoutHref: string; waHref: string | null;
-  canCheckout: boolean;                                       // false = checkout would refuse the order (physical, shipping not ready, or orderVia "whatsapp")
+  canCheckout: boolean;                                       // false = checkout would refuse the order (physical: shipping not ready or no way to pay; or orderVia "whatsapp")
   orderVia: "checkout" | "whatsapp";                          // "whatsapp" = order by chat only, no checkout or cart; physical products only (≥ 0.1.54)
   cart: { enabled: boolean; addLabel: string };               // shopping cart; enabled false = no add-to-cart button (≥ 0.1.50)
   kindInfo: KindInfo;                                         // per-kind facts, table below
@@ -610,7 +610,7 @@ Render the raised amount only from `kindInfo` — it is `null` exactly when the 
 
 `view` is for decoration around the blocks (a category eyebrow, a "Terjual habis" ribbon, a lessons count). Do not rebuild what a block renders: a price you print yourself does not follow the chosen variant. To repeat the buy button elsewhere (a sticky bar, a closing band), write `<a data-pd-cta href={url(view.checkoutHref)}>…</a>` (and `data-pd-wa` with `view.waHref`); a price mirror is `<span data-pd-price>{view.priceLabel}</span>`. The platform script keeps every one of them in step with the chosen variant.
 
-**Every `data-pd-cta` you draw yourself MUST be guarded by `view.canCheckout`** (≥ 0.1.49). It is `true` for a digital product, and for a physical one only once the seller's shipping is set up; while it is `false` checkout refuses the order, so an unguarded button sends the buyer to an error. `<ProductBuyBox />` already does this — fall back the same way: `data-pd-wa` when `view.waHref` is set, else no button. In showcase (template and marketplace previews) `canCheckout` keeps its real value and `checkoutHref` is `"#"`, and the sample product in the preview has `canCheckout: true`.
+**Every `data-pd-cta` you draw yourself MUST be guarded by `view.canCheckout`** (≥ 0.1.49). It is `true` for a digital product, and for a physical one only once the seller's shipping is set up AND the store can take the payment (an active payment account, or COD the product allows — `view.orderVia` stays `"checkout"` then: it is the store's state, not the seller's choice); while it is `false` checkout refuses the order, so an unguarded button sends the buyer to an error. `<ProductBuyBox />` already does this — fall back the same way: `data-pd-wa` when `view.waHref` is set, else no button. In showcase (template and marketplace previews) `canCheckout` keeps its real value and `checkoutHref` is `"#"`, and the sample product in the preview has `canCheckout: true`.
 
 ```astro
 {!view.soldOut && (view.canCheckout || view.waHref) && (

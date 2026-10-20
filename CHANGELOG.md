@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.62 — 2026-10-21
+
+- **`view.canCheckout` is also `false` for a physical product when the store cannot take the payment** (`wvf.md` §4d): no active payment account, and COD off or not allowed for the product. Checkout and the cart refuse it, and `<ProductBuyBox />` falls back to the WhatsApp button (or none). `view.orderVia` stays `"checkout"`, because this is the store's state, not the seller's choice. A `data-pd-cta` you draw yourself must already be guarded by `view.canCheckout`; nothing else changes.
+
 ## 0.1.61 — 2026-10-21
 
 - **Official buy-box styling for product-detail** (`wvf.md` §4d). `<ProductBuyBox />` and `<ProductGallery />` defaults now sit in the `wvf-product` cascade layer, below your variant's CSS, with no inline colors. Plain CSS wins without `!important`.
