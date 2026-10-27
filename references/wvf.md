@@ -533,6 +533,19 @@ A navbar renders on EVERY page of a buyer's site — review is strict about it; 
 
 In manual mode the owner edits the list in the editor; in database mode the platform fills the array from the site's real products/posts before render (same shape). Rules: handle the EMPTY list (a fresh database mode has no rows yet — render the heading, not a broken grid); `url` is optional (no link → no `<a>`); `source` stays visible in the editor automatically (the compiler never hides it, even when your variant does not read it) - it is how the owner switches modes; pagination is rendered by the page OUTSIDE your section — ignore it.
 
+### Blog in database mode: the extra keys the platform fills
+
+Only in `source: "database"` does the platform add these to what a `blog` variant receives. Declare the ones you read in `interface Props`, optional. None is an editor field, none needs a doc comment, none counts as an extension field (variant-check ≥ 0.1.56; before that they lint as unknown item keys):
+
+- Per card, in `posts[]`: `category?: string` (label), `categoryUrl?: string` (the category archive, `""` when the post has no category), `publishedAt?: string` (ISO instant, `""` if unknown). `date` is still the pre-formatted long date in the site language.
+- Per section: `categoryName?: string` and `archiveUrl?: string` — set only when the section has a `category` filter (`archiveUrl` is that category's archive; use it for a "Lihat semua" link and skip the link when it is absent); `pagination?` is the page-switcher payload and the platform draws it OUTSIDE your section — do not render it.
+
+In manual mode none of them exist (`category` is hand-typed, the rest are undefined), so every use must be guarded: `{p.categoryUrl ? <a href={p.categoryUrl}>…</a> : <span>…</span>}`.
+
+**Relative time ("2 jam lalu").** `date` is a fixed string. For a news feel, print `<time datetime={p.publishedAt}>{p.date}</time>` and, only if you want the relative form, rewrite the text from `datetime` in a small `<script>` with `Intl.RelativeTimeFormat` (document language, fall back to `date` past one week or without `datetime`). The text must work without the script, and the usual script rules and review apply. Never compute the label from `publishedAt` in the frontmatter (it would freeze at render time in the cache).
+
+**Empty and sparse feeds.** A database blog can have 0 posts, 1 post, posts without `image`, posts without `category`. Print a one-sentence empty state in the site language (via `t()` or a content field), never an empty frame. The Generation Lab renders your variant over 0 / 1 / 12 posts, with and without image and category, and sends a throw back for repair; do the same by hand.
+
 ## 4d. Product page layout (`product-detail`)
 
 A `product-detail` variant is not a page section: it is the layout of every `/product/<slug>` page of a site, the place where the platform's Classic / Landing / Minimal layouts sit. The owner picks it in Produk › Tata Letak (as the site default, or for one product); a template bundle carries one through `productLayout` in `template.json` (template skill `manifest.md`). It can also be sold on its own as a variant listing. It can never be placed on a page (the editor and the upload refuse it).
