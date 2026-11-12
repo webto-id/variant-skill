@@ -1,0 +1,7 @@
+{
+  "sectionType": "hero",
+  "name": "Hero Webgl Ripple",
+  "description": "Full-bleed photo hero whose image ripples around the pointer (WebGL), with the headline, one line and a CTA at the bottom left over a dark gradient.",
+  "mood": ["editorial", "bold"],
+  "fits": "short headline + one strong landscape photo"
+}

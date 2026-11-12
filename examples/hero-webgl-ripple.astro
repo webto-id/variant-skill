@@ -1,0 +1,101 @@
+---
+import { img, url, Button, EditUrlPill } from "webto/variant";
+
+interface Props {
+  /** The H1 over the photo, ≤8 words. @example Kopi sangrai pagi ini */
+  headline?: string;
+  /** One sentence under the headline, ≤20 words. @example Biji pilihan dari Gayo, disangrai setiap pagi di dapur kami. */
+  subheadline?: string;
+  ctaText?: string;
+  ctaUrl?: string;
+  images?: Array<{ url: string; alt?: string }>;
+}
+
+const { headline, subheadline, ctaText = "Lihat Menu", ctaUrl = "#", images = [] } = Astro.props;
+const photo = img(images[0]?.url, 1600);
+---
+<section class="relative isolate flex min-h-[80vh] items-end overflow-hidden bg-foreground text-background">
+  {photo ? (
+    <img data-gl-poster src={photo} crossorigin="anonymous" alt={images[0]?.alt ?? ""} data-edit-image="images.0.url" class="absolute inset-0 -z-20 h-full w-full object-cover" />
+  ) : (
+    <div data-edit-image="images.0.url" class="absolute inset-0 -z-20 bg-muted"></div>
+  )}
+  <div data-gl class="absolute inset-0 -z-10" aria-hidden="true"></div>
+  <div class="absolute inset-0 -z-10 bg-gradient-to-t from-foreground/80 to-transparent" aria-hidden="true"></div>
+  <div class="mx-auto w-full max-w-6xl px-6 pb-16 sm:pb-24">
+    <h1 class="max-w-3xl font-bold tracking-tight" style="font-family: var(--font-heading);">
+      <span data-edit-field="headline">{headline}</span>
+    </h1>
+    {subheadline && <p data-edit-field="subheadline" class="mt-5 max-w-xl text-lg opacity-90">{subheadline}</p>}
+    {ctaText && (
+      <Button href={url(ctaUrl)} size="lg" class="relative mt-8">
+        <span data-edit-field="ctaText">{ctaText}</span>
+        <EditUrlPill field="ctaUrl" value={ctaUrl} />
+      </Button>
+    )}
+  </div>
+</section>
+
+<script is:inline data-uses="ogl">
+  // OGL is null in the editor, thumbnails, reduced motion and without WebGL:
+  // the poster <img> above is then the whole design.
+  if (!OGL) return;
+  if (root.dataset.wvInit) return;
+  root.dataset.wvInit = "1";
+  const poster = root.querySelector("[data-gl-poster]");
+  const host = root.querySelector("[data-gl]");
+  if (!poster || !host) return;
+
+  const { Renderer, Program, Mesh, Triangle, Texture, Vec2 } = OGL;
+  const renderer = new Renderer({ dpr: window.devicePixelRatio, alpha: true });
+  const gl = renderer.gl;
+  gl.canvas.style.width = "100%";
+  gl.canvas.style.height = "100%";
+
+  const texture = new Texture(gl, { generateMipmaps: false });
+  const mouse = new Vec2(0.5, 0.5);
+  const program = new Program(gl, {
+    vertex: `
+      attribute vec2 uv; attribute vec2 position; varying vec2 vUv;
+      void main() { vUv = uv; gl_Position = vec4(position, 0.0, 1.0); }`,
+    fragment: `
+      precision highp float;
+      uniform sampler2D tMap; uniform float uTime; uniform vec2 uMouse; uniform vec2 uCover;
+      varying vec2 vUv;
+      void main() {
+        vec2 uv = (vUv - 0.5) * uCover + 0.5;
+        float d = distance(vUv, uMouse);
+        uv += 0.012 * sin(d * 28.0 - uTime * 2.4) * smoothstep(0.45, 0.0, d);
+        gl_FragColor = texture2D(tMap, uv);
+      }`,
+    uniforms: { tMap: { value: texture }, uTime: { value: 0 }, uMouse: { value: mouse }, uCover: { value: new Vec2(1, 1) } },
+  });
+  const mesh = new Mesh(gl, { geometry: new Triangle(gl), program });
+
+  // object-cover for the texture: scale the UVs by the box / photo aspect ratio.
+  function fit() {
+    const w = root.clientWidth, h = root.clientHeight;
+    renderer.setSize(w, h);
+    const box = w / h, pic = (poster.naturalWidth || 1) / (poster.naturalHeight || 1);
+    program.uniforms.uCover.value.set(box < pic ? box / pic : 1, box < pic ? 1 : pic / box);
+  }
+
+  function start() {
+    texture.image = poster;
+    host.appendChild(gl.canvas);
+    fit();
+    new ResizeObserver(fit).observe(root);
+    root.addEventListener("pointermove", (e) => {
+      const r = root.getBoundingClientRect();
+      mouse.set((e.clientX - r.x) / r.width, 1 - (e.clientY - r.y) / r.height);
+    });
+    function frame(t) {
+      requestAnimationFrame(frame);
+      program.uniforms.uTime.value = t * 0.001;
+      renderer.render({ scene: mesh });
+    }
+    requestAnimationFrame(frame);
+  }
+  if (poster.complete && poster.naturalWidth) start();
+  else poster.addEventListener("load", start, { once: true });
+</script>

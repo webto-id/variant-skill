@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.65 — 2026-11-12
+
+- **WebGL with OGL** (new `references/webgl.md`, example `examples/hero-webgl-ripple.*`; `variant-check` ≥ 0.1.61): `data-uses="ogl"` hands the script the platform's OGL 1.0.11 build as `OGL`, for an image ripple, a shader gradient, particles. `OGL` is `null` in the editor, thumbnails, for reduced motion, without WebGL and past 4 canvases per page, so `if (!OGL) return;` is required (`ogl-no-fallback`) and a real poster `<img>` with `data-edit-image` must carry the design. The build has no loaders: textures come from the variant's own `<img>` (`crossorigin="anonymous"` for a photo on another host, now accepted on `<img>`/`<video>`). The platform caps the pixel ratio at 1.5 and pauses frames while the section is off screen. New lint codes: `ogl-undeclared`, `ogl-no-fallback`.
+
 ## 0.1.64 — 2026-11-12
 
 - **Smooth page scrolling is a site setting, not a variant's script** (`SKILL.md` Workflow step 4). When the source ships Lenis, Locomotive Scroll or another smooth-scroll script, drop it from the variant: the site turns it on with `theme.smoothScroll` (one Lenis instance the platform runs, synced with GSAP ScrollTrigger). A variant must never start its own.
