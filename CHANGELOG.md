@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.64 — 2026-11-12
+
+- **Smooth page scrolling is a site setting, not a variant's script** (`SKILL.md` Workflow step 4). When the source ships Lenis, Locomotive Scroll or another smooth-scroll script, drop it from the variant: the site turns it on with `theme.smoothScroll` (one Lenis instance the platform runs, synced with GSAP ScrollTrigger). A variant must never start its own.
+
 ## 0.1.63 — 2026-10-27
 
 - **Blog in database mode: the keys the platform fills** (`wvf.md` §4c). A `blog` variant may read, optionally, per card `categoryUrl` and `publishedAt` (ISO instant) beside `category`, and per section `categoryName`, `archiveUrl` (only when the section has a `category` filter) and `pagination` (drawn by the platform outside your section). None is an editor field or an extension field; with `variant-check` 0.1.56 they lint clean instead of as unknown item keys. Documented: relative time from `publishedAt`, a "Lihat semua" link from `archiveUrl`, guarding every use for manual mode, and the 0 / 1 / 12 post cases (with and without image and category) a database feed can produce.
