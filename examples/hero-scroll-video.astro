@@ -1,0 +1,75 @@
+---
+import { img, url, video, Button, EditUrlPill } from "webto/variant";
+
+interface Props {
+  /** The H1, ≤8 words. @example Lihat setiap detailnya */
+  headline?: string;
+  /** One sentence under the headline, ≤20 words. @example Diputar perlahan saat Anda menggulir. */
+  subheadline?: string;
+  /** An uploaded MP4 (e.g. a Blender turntable, exported with every frame a keyframe: ffmpeg -g 1, about 1280 px wide, 30 fps). It plays forward and back as the visitor scrolls. Without it the photo zooms gently instead. @example /r2/s/turntable.mp4 */
+  videoUrl?: string;
+  /** [0] the photo: the video's poster, or the hero photo when there is no video. @example [{"url":"/r2/s/produk.jpg"}] */
+  images?: Array<{ url: string; alt?: string }>;
+  /** Fallback photo carried over from another hero design; used when images is empty. @example /r2/s/produk.jpg */
+  imageUrl?: string;
+  ctaText?: string;
+  ctaUrl?: string;
+}
+
+const { headline, subheadline, videoUrl = "", images = [], imageUrl = "", ctaText = "Pesan", ctaUrl = "#" } = Astro.props;
+const v = video(videoUrl);
+const photo = img(images[0]?.url || imageUrl, 1600);
+const scrub = v.kind === "file";
+---
+<section class={scrub ? "relative h-[250vh] bg-foreground text-background" : "relative overflow-hidden bg-foreground text-background"}>
+  <div class={scrub ? "sticky top-0 flex h-screen items-end overflow-hidden" : "relative flex min-h-[85vh] items-end overflow-hidden"}>
+    {scrub ? (
+      <video data-scrub muted playsinline preload="auto" poster={photo} src={v.src} class="absolute inset-0 h-full w-full object-cover"></video>
+    ) : photo ? (
+      <img data-zoom src={photo} alt={images[0]?.alt ?? ""} data-edit-image="images.0.url" class="absolute inset-0 h-full w-full object-cover" />
+    ) : (
+      <div data-edit-image="images.0.url" class="absolute inset-0 bg-muted"></div>
+    )}
+    <div class="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent" aria-hidden="true"></div>
+    <div class="relative z-10 mx-auto w-full max-w-6xl px-6 pb-16 sm:pb-24">
+      <h1 class="max-w-3xl font-bold tracking-tight" data-edit-field="headline">{headline}</h1>
+      {subheadline && <p data-edit-field="subheadline" class="mt-5 max-w-xl text-lg opacity-90">{subheadline}</p>}
+      {ctaText && (
+        <Button href={url(ctaUrl)} size="lg" class="relative mt-8">
+          <span data-edit-field="ctaText">{ctaText}</span>
+          <EditUrlPill field="ctaUrl" value={ctaUrl} />
+        </Button>
+      )}
+    </div>
+  </div>
+</section>
+
+<script is:inline data-uses="gsap scroll-trigger">
+  const vid = root.querySelector("[data-scrub]");
+  const pic = root.querySelector("[data-zoom]");
+  gsap.context(() => {
+    if (vid) {
+      // One seek at a time: a new position waits for "seeked" instead of piling up.
+      let want = 0;
+      let busy = false;
+      const seek = () => {
+        if (busy || !vid.duration || Math.abs(vid.currentTime - want) < 0.02) return;
+        busy = true;
+        vid.currentTime = want;
+      };
+      vid.addEventListener("seeked", () => { busy = false; seek(); });
+      ScrollTrigger.create({
+        trigger: root,
+        start: "top top",
+        end: "bottom bottom",
+        scrub: true,
+        onUpdate: (st) => {
+          want = st.progress * (vid.duration || 0);
+          seek();
+        },
+      });
+    } else if (pic) {
+      gsap.fromTo(pic, { scale: 1.05, yPercent: 0 }, { scale: 1.25, yPercent: 8, ease: "none", scrollTrigger: { trigger: root, start: "top top", end: "bottom top", scrub: true } });
+    }
+  }, root);
+</script>

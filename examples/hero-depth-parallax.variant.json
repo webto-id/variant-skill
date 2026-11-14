@@ -1,0 +1,7 @@
+{
+  "sectionType": "hero",
+  "name": "Hero Depth Parallax",
+  "description": "Full-bleed photo or 3D render that shifts in depth with the pointer and a slow drift (WebGL, uses a Blender depth map when given), headline and CTA at the bottom left over a dark gradient.",
+  "mood": ["bold", "editorial"],
+  "fits": "short headline + one product render (and its depth map) or a centred product photo"
+}

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.66 — 2026-11-14
+
+- **3D from Blender** (`references/webgl.md`, new examples `examples/hero-scroll-video.*` and `examples/hero-depth-parallax.*`; `variant-check` ≥ 0.1.61). A real 3D model cannot be loaded (no glTF loader, no fetching, 8 KB script cap), so render the 3D work and let the page play with it: a **scroll-scrubbed MP4** (GSAP ScrollTrigger moves `video.currentTime`, one seek at a time) or a **depth-map parallax** (an OGL shader shifts the render by its depth map with the pointer and a slow drift). The MP4 must be all-keyframe (`ffmpeg … -g 1`): a normal export stutters (measured median seek 155 ms → 5 ms after re-encoding). Both examples degrade to an ordinary hero without their special asset (photo from `images[0]`, else `imageUrl`). A callback parameter named `self` fails `script-forbidden`; call it `st`.
+
 ## 0.1.65 — 2026-11-12
 
 - **WebGL with OGL** (new `references/webgl.md`, example `examples/hero-webgl-ripple.*`; `variant-check` ≥ 0.1.61): `data-uses="ogl"` hands the script the platform's OGL 1.0.11 build as `OGL`, for an image ripple, a shader gradient, particles. `OGL` is `null` in the editor, thumbnails, for reduced motion, without WebGL and past 4 canvases per page, so `if (!OGL) return;` is required (`ogl-no-fallback`) and a real poster `<img>` with `data-edit-image` must carry the design. The build has no loaders: textures come from the variant's own `<img>` (`crossorigin="anonymous"` for a photo on another host, now accepted on `<img>`/`<video>`). The platform caps the pixel ratio at 1.5 and pauses frames while the section is off screen. New lint codes: `ogl-undeclared`, `ogl-no-fallback`.
