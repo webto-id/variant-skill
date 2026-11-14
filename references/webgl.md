@@ -53,38 +53,9 @@ Everything in `wvf.md` §4 (the script rules) still applies; this page adds what
 - **With GSAP in the same script** (`data-uses="gsap ogl"`): the GSAP rules read every `.set(…)`/`.to(…)` call as a tween, so OGL's `vec.set(x, y)` fails `gsap-vars` there. Write the components (`v.x = a; v.y = b;`) or `v.copy(other)` instead. With `data-uses="ogl"` alone, `.set(x, y)` is fine.
 - Init idempotently like any variant (`wvf.md` §4): `if (root.dataset.wvInit) return; root.dataset.wvInit = "1";` before creating the renderer.
 
-## 3D from Blender (or any 3D tool)
+## 3D effects
 
-A real 3D model cannot come along: there is no glTF loader, a variant cannot fetch a file, and a script is capped at 8 KB, far too small for a model's vertices. What does work is to **render** the 3D work and let the page play with the result. Two recipes, both checked on a live site:
-
-| Recipe | You render | The page does | Example |
-|---|---|---|---|
-| Scroll-scrubbed video | a turntable or exploded-view animation, as an MP4 | GSAP ScrollTrigger moves `video.currentTime` with the scroll: the product turns as the visitor scrolls, and back | `examples/hero-scroll-video.*` |
-| Depth parallax | one still render **and** its depth map (same size, same framing) | an OGL shader shifts each pixel by its depth with the pointer and a slow drift: the picture gains depth | `examples/hero-depth-parallax.*` |
-
-**Both must degrade to an ordinary hero.** The owner fills the section later and will often have no MP4 or no depth map, or switches to your variant from another hero whose photo sits in `imageUrl`. So: read the photo from `images[0]`, falling back to `imageUrl`; without a video, show that photo (the example zooms it gently on scroll); without a depth map, assume the subject is centred (a soft radial depth). A variant that shows nothing without its special asset is broken.
-
-### Scroll-scrubbed video
-
-- **The MP4 must have every frame as a keyframe.** A normal export (from Blender, a phone or an editor) has one keyframe every few seconds; every scroll step then decodes up to a few hundred frames and the video stutters badly. Measured on a 1080p50 file with a keyframe every 3 s: median seek 155 ms; the same video re-encoded: 5 ms. Tell the owner to re-encode, or do it for them:
-
-  ```
-  ffmpeg -i input.mp4 -vf "scale=1280:-2,fps=30" -c:v libx264 -preset slow -crf 26 \
-    -g 1 -keyint_min 1 -pix_fmt yuv420p -an -movflags +faststart output.mp4
-  ```
-
-  1280 px at 30 fps is enough for a full-screen scrub and usually comes out smaller than the original; 3–8 seconds is plenty.
-- Markup: `<video data-scrub muted playsinline preload="auto" poster={photo} src={v.src}>` from `video(videoUrl)` (`wvf.md` §5), inside a `sticky top-0 h-screen` box in a section 2–3 screens tall (`h-[250vh]`). Only when there is a video; otherwise a normal-height section with the photo.
-- Script (`data-uses="gsap scroll-trigger"`): one `ScrollTrigger` with `scrub: true` whose `onUpdate` computes the target time, and **one seek at a time**: set `currentTime` only when the previous seek has fired `seeked`, keeping the latest target. Piling up seeks is what makes slow phones jerk. The example has the ten lines.
-- **Do not name a callback parameter `self`** (`onUpdate: (self) => …`, as in GSAP's own docs): `self` is a window alias and fails `script-forbidden`. Call it `st`.
-- In the editor, thumbnails and for reduced motion GSAP is off, so the video stays on its poster: the poster must be a good picture on its own.
-- Test on an iPhone before you promise it: iOS Safari may not load a muted video's frames until it has played once.
-
-### Depth parallax
-
-- From Blender: render the colour image, then the **Mist** or **Z** pass as a grayscale image (white = near, black = far) at the same resolution and camera. Normalise it so the subject is light and the background dark.
-- Markup: the colour render as the poster `<img data-gl-poster crossorigin="anonymous" data-edit-image="images.0.url">`; the depth map, only when there is one, as a second `<img data-gl-depth crossorigin="anonymous" data-edit-image="images.1.url" class="hidden">`. Document `images` so the owner knows `[1]` is the depth map.
-- Shader: `uv + (pointer + drift) * (depth - 0.35) * 0.045`, with `object-cover` UVs (`uCover`). Keep the shift small (≤ 0.05): more tears the edges. Add a slow `uTime` drift so phones, which have no pointer, still see it move.
+A real 3D model cannot be loaded (no glTF loader, no fetching, 8 KB script cap). Product turns, depth and other 3D looks are done by rendering the 3D work and letting the page play with it: that is the companion skill **webto-3d-effects** (scroll-scrubbed MP4, depth-map parallax, a flat label wrapped around a jar), which builds on the contract above.
 
 ## Lint codes
 

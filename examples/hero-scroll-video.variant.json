@@ -1,7 +1,0 @@
-{
-  "sectionType": "hero",
-  "name": "Hero Scroll Video",
-  "description": "Full-screen hero whose video (a 3D product turntable) plays forward and back as the visitor scrolls, headline and CTA at the bottom left; without a video the photo zooms gently on scroll.",
-  "mood": ["bold", "editorial"],
-  "fits": "short headline + an all-keyframe MP4 of the product turning (or one strong photo)"
-}

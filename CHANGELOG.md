@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.67 — 2026-11-14
+
+- **3D effects moved to their own skill, webto-3d-effects** (repo `webto-id/3d-effects-skill`). The "3D from Blender" section of `references/webgl.md` and the examples `hero-scroll-video.*` and `hero-depth-parallax.*` (added in 0.1.66) now live there, together with a third recipe: a jar label that wraps round the jar and turns on scroll. This skill keeps the OGL contract in `webgl.md` and points to the companion skill for product turns, depth and other 3D looks.
+
 ## 0.1.66 — 2026-11-14
 
 - **3D from Blender** (`references/webgl.md`, new examples `examples/hero-scroll-video.*` and `examples/hero-depth-parallax.*`; `variant-check` ≥ 0.1.61). A real 3D model cannot be loaded (no glTF loader, no fetching, 8 KB script cap), so render the 3D work and let the page play with it: a **scroll-scrubbed MP4** (GSAP ScrollTrigger moves `video.currentTime`, one seek at a time) or a **depth-map parallax** (an OGL shader shifts the render by its depth map with the pointer and a slow drift). The MP4 must be all-keyframe (`ffmpeg … -g 1`): a normal export stutters (measured median seek 155 ms → 5 ms after re-encoding). Both examples degrade to an ordinary hero without their special asset (photo from `images[0]`, else `imageUrl`). A callback parameter named `self` fails `script-forbidden`; call it `st`.
