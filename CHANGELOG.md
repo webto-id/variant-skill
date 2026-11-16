@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.68 — 2026-11-16
+
+- **Doc and example fixes from an end-to-end test** (a fresh agent built a whole template with the public skills): `examples/navbar-dropdown.astro` marks its mobile CTA text with `data-edit-field` (a second visible copy needs the marker too); `wvf.md` says `position: fixed` is refused for a WVF navbar/banner as well (the platform makes the wrapper sticky), the bundle limit in the manifest check is 24 variants (12 before 0.1.59), and the anchor example uses a real type; `schema.md` says how to print `text-block` markdown (no renderer in WVF: `whitespace-pre-line`, or an array of paragraphs); `tailwind.md` lists `text-primary-text`; `SKILL.md` notes that `preview.html` must be served over HTTP when images carry `crossorigin="anonymous"` (WebGL variants).
+
 ## 0.1.67 — 2026-11-14
 
 - **3D effects moved to their own skill, webto-3d-effects** (repo `webto-id/3d-effects-skill`). The "3D from Blender" section of `references/webgl.md` and the examples `hero-scroll-video.*` and `hero-depth-parallax.*` (added in 0.1.66) now live there, together with a third recipe: a jar label that wraps round the jar and turns on scroll. This skill keeps the OGL contract in `webgl.md` and points to the companion skill for product turns, depth and other 3D looks.

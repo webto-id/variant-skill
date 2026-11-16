@@ -121,7 +121,7 @@ Two modes, two mechanisms: forced `dark` has no `data-theme` attribute to key of
 
 **before-after** — `heading`, `subheading`, `pairs: { beforeImage; afterImage; beforeLabel?; afterLabel?; caption? }[]`.
 
-**text-block** — `heading`, `content` (markdown), `alignment: "left"|"center"`.
+**text-block** — `heading`, `content` (markdown), `alignment: "left"|"center"`. A WVF variant has no markdown renderer: print `content` with `whitespace-pre-line` (blank lines become paragraph breaks) and keep the sample free of markdown syntax (`**`, `#`, lists), or design the section with an extension array of paragraphs instead.
 
 (Exact shapes, bounds and defaults: the generated reference above. When in doubt run the CLI — a mismatch is reported as `props-type-mismatch`.)
 

@@ -9,6 +9,7 @@ The site owner controls **colors, fonts and corner radius** through their theme.
 | Page background / text | `bg-background` `text-foreground` | `var(--color-background)` `var(--color-foreground)` |
 | Cards / panels | `bg-card` `text-card-foreground` | `var(--color-card)` |
 | Primary accent (buttons, highlights) | `bg-primary` `text-primary` `text-primary-foreground` `border-primary` `ring-primary` | `var(--color-primary)` `var(--color-primary-foreground)` |
+| Text in the primary colour on the page background (a coloured headline or link) | `text-primary-text` — `text-primary` keeps the raw brand colour, which can be too light to read | `var(--color-primary-text)` |
 | Secondary accent | `bg-secondary` `text-secondary-foreground` | `var(--color-secondary)` |
 | Muted surfaces / captions | `bg-muted` `text-muted-foreground` | `var(--color-muted)` `var(--color-muted-foreground)` |
 | Accent (warm highlight) | `bg-accent` `text-accent-foreground` | `var(--color-accent)` |
