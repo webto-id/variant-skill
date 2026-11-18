@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.69 — 2026-11-18
+
+- **`asset:` can carry a 3D variant's media.** `catalog.md`: besides images (PNG/WebP/JPG ≤ 2 MB), a variant may ship a `.glb` model (≤ 10 MB, `data-uses="three"`) and an `.mp4` (≤ 15 MB), ≤ 30 MB of both, referenced from `sample.json` as `asset:<filename>`; the webto-3d-effects skill has the recipes.
+
 ## 0.1.68 — 2026-11-16
 
 - **Doc and example fixes from an end-to-end test** (a fresh agent built a whole template with the public skills): `examples/navbar-dropdown.astro` marks its mobile CTA text with `data-edit-field` (a second visible copy needs the marker too); `wvf.md` says `position: fixed` is refused for a WVF navbar/banner as well (the platform makes the wrapper sticky), the bundle limit in the manifest check is 24 variants (12 before 0.1.59), and the anchor example uses a real type; `schema.md` says how to print `text-block` markdown (no renderer in WVF: `whitespace-pre-line`, or an array of paragraphs); `tailwind.md` lists `text-primary-text`; `SKILL.md` notes that `preview.html` must be served over HTTP when images carry `crossorigin="anonymous"` (WebGL variants).
