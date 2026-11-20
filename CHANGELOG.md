@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.70 — 2026-11-20
+
+- **`design.md` §5 no longer contradicts §5b.** Its first paragraph said to fade things in with your own `IntersectionObserver`; it now says `data-wv-effect`, as `wvf.md` §5b does: the platform's runtime already handles reduced motion, the editor and thumbnails, and two runtimes fight. Your own CSS animations (a marquee, a pulse) still need the `prefers-reduced-motion` query.
+
 ## 0.1.69 — 2026-11-18
 
 - **`asset:` can carry a 3D variant's media.** `catalog.md`: besides images (PNG/WebP/JPG ≤ 2 MB), a variant may ship a `.glb` model (≤ 10 MB, `data-uses="three"`) and an `.mp4` (≤ 15 MB), ≤ 30 MB of both, referenced from `sample.json` as `asset:<filename>`; the webto-3d-effects skill has the recipes.
