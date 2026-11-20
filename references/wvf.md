@@ -15,7 +15,7 @@ One `.astro` file: a `---` frontmatter block containing `interface Props`, then 
 
 ### 1.1 Imports
 
-Canonical: `import { t, img, url, video, Container, Button, EditUrlPill, ViewMoreLink, AddImageButton } from "webto/variant";` — import only what you use (`FormFields` and the `Product*` blocks come from the same module, §5c and §4d). Legacy aliases also accepted: `sanitizeUrl` (= `url`), `withUnsplashWidth` (= `img`), `resolveVideoSource` (= `video`), `sectionT`. Relative platform paths (`../lib/sanitize`, `../ui/Button.astro`, …) are tolerated. Any other module → `error` `import`. Unknown name → `error` `import`. `import type` is ignored.
+Canonical: `import { t, img, url, video, Container, Button, EditUrlPill, ViewMoreLink, AddImageButton } from "webto/variant";` — import only what you use (`FormFields`, `MapEmbed` and the `Product*` blocks come from the same module, §5c, §5d and §4d). Legacy aliases also accepted: `sanitizeUrl` (= `url`), `withUnsplashWidth` (= `img`), `resolveVideoSource` (= `video`), `sectionT`. Relative platform paths (`../lib/sanitize`, `../ui/Button.astro`, …) are tolerated. Any other module → `error` `import`. Unknown name → `error` `import`. `import type` is ignored.
 
 ### 1.2 `interface Props`
 
@@ -126,7 +126,7 @@ HTML: `a abbr address article aside b bdi bdo blockquote br button caption cite 
 
 SVG: `svg path circle rect line polyline polygon g defs linearGradient radialGradient stop clipPath mask text tspan ellipse symbol pattern filter feGaussianBlur feOffset feBlend feColorMatrix feMerge feMergeNode title desc`
 
-Everything else → `error` `tag` — including `iframe form input select textarea object embed link meta base template noscript canvas dialog`. `<Fragment>`/`<>` flatten. Capitalized tags must be one of the macros of §5 (`component` error otherwise). `<style>` and `<script>` are raw blocks (cannot be self-closing). A form section still gets a real form: place `<FormFields />` (§5c) inside your layout and the platform renders the form tags for you — the ban is on AUTHORING them, not on having one.
+Everything else → `error` `tag` — including `iframe form input select textarea object embed link meta base template noscript canvas dialog`. `<Fragment>`/`<>` flatten. Capitalized tags must be one of the macros of §5 (`component` error otherwise). `<style>` and `<script>` are raw blocks (cannot be self-closing). A form section still gets a real form: place `<FormFields />` (§5c) inside your layout and the platform renders the form tags for you — the ban is on AUTHORING them, not on having one. The same goes for a map: `<iframe>` stays banned, and `<MapEmbed />` (§5d) puts the platform's Google map inside your layout.
 
 ### 2.2 Attributes
 
@@ -369,7 +369,7 @@ Do not try to clone the platform's `VideoLightbox` — four separate rules close
 
 | It uses | WVF status |
 |---|---|
-| `<iframe>` | `error` `tag`, never emitted even if present in the IR, and `createElement('iframe')` is rejected too |
+| `<iframe>` | `error` `tag`, never emitted even if present in the IR, and `createElement('iframe')` is rejected too (the one platform-owned frame is a map, `<MapEmbed />` §5d) |
 | `position: fixed` for the overlay | `error` `fixed`, everywhere, CSS and utilities alike |
 | `define:vars` | `error` `script-define-vars` |
 | `<dialog>` / `showModal()` | both on the reject list |
@@ -769,6 +769,7 @@ Params: `data-wv-delay` = whole steps of 100ms, 0-10; `data-wv-duration` = ms, 1
 - `<ViewMoreLink url={viewMoreUrl} text={viewMoreText} style="outline|link|solid" align="left|center|right" />` → renders nothing when `url` is empty; emits an editable label + pill + `data-track="cta"`.
 - `<AddImageButton path={`images.${images.length}.url`} visible={images.length < 20} label? mode="inline|floating" />` → the editor's "Tambah Gambar" pill for an image list; renders nothing on the live site. Put it at the list's bottom seam (after the grid, before `<ViewMoreLink>`); `path` is the **next** index of the list, `visible` gates on the list's max. `floating` pins it bottom-right of a full-bleed section, which then needs `class="relative"`. Every list of pictures with `data-edit-image` items should have one — a gallery without it has no way to add a photo in the editor (the platform appends a fallback pill at the section's end when a variant has none, but that placement is a guess).
 - `<FormFields class? fieldClass? labelClass? submitClass? wrapClass? successClass? />` → the platform's whole form block (§5c), for `form` sections only.
+- `<MapEmbed class? />` → the platform's Google map of the section's own `address` / `mapEmbedUrl` (§5d); once per variant.
 - `<ProductBuyBox />` `<ProductGallery />` `<ProductDescription />` `<ProductCurriculum />` `<ProductAttributes group? />` → the platform's product blocks (§4d), for `product-detail` variants only.
 - `t(key)` → localized fixed UI label (30 languages) — for chrome words only, never for content. **`key` is a CLOSED enum of platform term keys, never display text** — `t("Alamat")` is wrong (lint `t-unknown`, fails --strict; it used to crash the section at render, and the preview's identity `t` will not catch it for you). The ones sections typically need: `address` `email` `phone` `hours` `operatingHours` `today` `closed` `menu` `readMore` `contactUs` `price` `all` `close` `noResults` `openInMaps` `locationLabel` `customerReviews` `specialOffer` `freeLabel` `soldOut` `days` `minutes` `seconds` `minRead` `nextPage` `prevPage` `download` `questions` (the CLI validates the full list). A visible label with no matching term key is NOT a t() call — make it an optional content field with a default (`socialHeading = "Sosial"` + `data-edit-field`).
 - `img(url, width = 960)` → sanitizes and sizes Unsplash/Pexels URLs (`w=`), passes other hosts through, returns `undefined` for empty input (attribute omitted). Use 480 for thumbnails, 960 for split images, 1600 for full-bleed backgrounds.
@@ -821,6 +822,46 @@ const { heading = "Ceritakan proyek Anda", fields = [], submitText = "Kirim", su
 - `select` and multi-option `product` fields render the **platform's own dropdown** (invisible native `<select>` for value/validation + a styled trigger and listbox); `fieldClass` goes on the trigger, so it matches your inputs. Its stylesheet and runtime are loaded once by the site layout and by every preview — from `variant-check` 0.1.25 / compiler 0.1.17. A single-option `product` renders the product card with a hidden ref, exactly like the platform.
 - No multi-step, no sidebar-info blocks — those are layouts, and layout is now yours to build around the macro.
 - The marketplace preview and `--out` render the block with the dropdown working, but carry no SUBMIT runtime; submit is swallowed there. That is expected.
+
+### 5d. `<MapEmbed />` — a map that follows your design
+
+A location section used to be the one place an all-WVF site had to fall back to a platform `map` section, because a map is an `<iframe>` and `<iframe>` is banned (§2.1). `<MapEmbed />` is the same trust shape as `<FormFields />`: the platform writes the frame, your variant writes the layout around it. Needs `variant-check` ≥ 0.1.65.
+
+```astro
+---
+import { Container, MapEmbed, t } from "webto/variant";
+
+interface Props {
+  heading?: string;
+  address?: string;
+  mapEmbedUrl?: string;
+  hours?: string;
+}
+const { heading = "Kunjungi kami", address = "", mapEmbedUrl = "", hours = "" } = Astro.props;
+---
+<section class="bg-background py-20 text-foreground">
+  <Container class="grid gap-10 md:grid-cols-[2fr_3fr] md:items-center">
+    <div>
+      <h2 class="font-black"><span data-edit-field="heading">{heading}</span></h2>
+      {address && <p class="mt-4"><span class="font-bold">{t("address")}:</span> <span data-edit-field="address">{address}</span></p>}
+      {hours && <p class="mt-2" data-edit-field="hours">{hours}</p>}
+    </div>
+    <MapEmbed class="aspect-[4/3] overflow-hidden rounded-lg border-2 border-foreground shadow-[6px_6px_0_0_var(--foreground)]" />
+  </Container>
+</section>
+```
+
+**Where the map comes from.** Only the section's content: `mapEmbedUrl` (a pasted Google Maps embed URL, `<iframe>` snippet or place URL) wins, else `address` (Google's keyless embed of that address — at least two words and 10 characters, so "Jakarta" alone draws no map). Both keys are read from the stored content, never from your destructured local: a default you give `address` or `mapEmbedUrl` shows as text but does not draw a map. The URL goes through the same helper as the platform's own map sections, which frames only Google's embed forms (`https://www.google.com/maps/embed?pb=…`, `https://{www,maps}.google.com/maps?…&output=embed`); any other URL falls back to the address. The macro takes **no** source of its own: any prop other than `class` is `error` `map-embed-prop`, so a variant can never choose what the page frames.
+
+**What you style.** `class` goes on the wrapper `<div data-wv-map>`: give it a size (`aspect-video`, `h-80`, `min-h-[320px]`), corners and a frame (`overflow-hidden rounded-lg border`). The iframe fills it. Without `class` the wrapper is a full-width 16:9 box. `title` (heading, else address), `loading="lazy"` and `referrerpolicy` are set by the platform.
+
+**Which sections.** Any type, provided the variant declares `address` and/or `mapEmbedUrl` in `Props` (lint `map-embed-no-source` otherwise; an error under `--strict`). In `map` both are base fields. In `contact` `address` is a base field. In `footer` or any other type they are your own extension fields: document them like any other (§1.2), and the owner gets the panel fields to fill.
+
+**Behaviour.**
+- No usable source → nothing on the live site (like the platform map sections); in the editor a dashed hint box in your wrapper tells the owner to fill the address in the panel. The owner edits the address in the panel, never by clicking the map.
+- Once per variant, never inside a loop (`error` `map-embed-count`; only the first one renders). For a different position per breakpoint, place one map and move it with CSS (`order-*`, grid areas).
+- Marketplace preview, thumbnail and editor show the real map. `variant-check --out` shows a box with the address instead, so the local preview works offline.
+- Show the address as text as well. The map loads lazily and some visitors block it.
 
 ## 6. Tailwind at upload
 
@@ -894,6 +935,8 @@ The predicate itself stays as narrow as it was: full-strength surfaces only (`bg
 | `content-required` | error | `--content` lacks a top-level field the section type requires AND this variant renders (hidden fields are exempt) — §9 |
 | `form-fields-type` | error | `<FormFields />` outside a `form` section — §5c |
 | `form-fields-no-fields` | warning | `<FormFields />` used but `fields` is not read from `Astro.props` — §5c |
+| `map-embed-no-source`* | warning | (≥ 0.1.65) `<MapEmbed />` used but neither `address` nor `mapEmbedUrl` is declared in `Props` — §5d |
+| `map-embed-prop` `map-embed-count` | error | (≥ 0.1.65) a prop other than `class` on `<MapEmbed />`; the macro written twice or inside a loop — §5d |
 | `product-buybox-missing` `product-block-multiple` `product-block-type` | error | (≥ 0.1.45) a `product-detail` variant without `<ProductBuyBox />`; BuyBox/Gallery written twice; a product macro (incl. `<ProductAttributes />`, ≥ 0.1.46) outside `product-detail` — §4d |
 | `product-h1-missing` `product-detail-field-nontext` | warning | (≥ 0.1.45) product layout without `<h1>`; a product-layout field that is not text — §4d |
 | `product-cart-not-button` | error | (≥ 0.1.50) `data-pd-add` on anything but a `<button>` — §4d |

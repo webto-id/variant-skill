@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.71 — 2026-11-20
+
+- **`<MapEmbed />`: a Google map inside your own variant** (`wvf.md` §5d, `variant-check` ≥ 0.1.65). `<iframe>` stays banned; the macro is the one platform-owned frame, like `<FormFields />`. It draws the section's own `mapEmbedUrl` or `address` (read from the stored content, never from your defaults), frames only Google's embed URLs, takes no prop but `class`, and is allowed once per variant in any section that declares `address`/`mapEmbedUrl` (`map`, `contact`, a footer). New lint codes `map-embed-prop`, `map-embed-count`, `map-embed-no-source`. `schema.md` says how `map` and `contact` variants use it.
+
 ## 0.1.70 — 2026-11-20
 
 - **`design.md` §5 no longer contradicts §5b.** Its first paragraph said to fade things in with your own `IntersectionObserver`; it now says `data-wv-effect`, as `wvf.md` §5b does: the platform's runtime already handles reduced motion, the editor and thumbnails, and two runtimes fight. Your own CSS animations (a marquee, a pulse) still need the `prefers-reduced-motion` query.

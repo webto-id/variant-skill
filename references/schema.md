@@ -25,7 +25,7 @@ What the upload dry-run insists on at the top level of a section's `content` -- 
 | `gallery` | `heading`, `images` |
 | `hero` | `headline` |
 | `logo-cloud` | `logos` |
-| `map` | — |
+| `map` | — and the map itself is `<MapEmbed />` (`wvf.md` §5d), never an `<iframe>` |
 | `navbar` | — (but it must render `logoUrl` — see the chrome section below) |
 | `pricing` | `heading`, `plans` |
 | `products` | `heading` |
@@ -111,9 +111,9 @@ Two modes, two mechanisms: forced `dark` has no `data-theme` attribute to key of
 
 **logo-cloud** — `heading`, `subheading`, `logos: { name; image; url? }[]`.
 
-**contact** — `heading`, `description`, `email`, `phone`, `address`, `whatsappUrl`.
+**contact** — `heading`, `description`, `email`, `phone`, `address`, `whatsappUrl`. A map here: declare `address` (base) and optionally `mapEmbedUrl` (your own field), then place `<MapEmbed />` (`wvf.md` §5d).
 
-**map** — `heading`, `description`, `address`, `mapEmbedUrl`, `phone`, `email`, `hours`.
+**map** — `heading`, `description`, `address`, `mapEmbedUrl`, `phone`, `email`, `hours`. Render the map with `<MapEmbed class="…" />` (`wvf.md` §5d): it frames `mapEmbedUrl`, else `address`; you style the box, the platform owns the iframe. Show `address` as text too.
 
 **video** — `heading`, `description`, `videoUrl`, `aspectRatio: "16:9"|"4:3"|"1:1"`.
 

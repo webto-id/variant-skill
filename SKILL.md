@@ -82,7 +82,7 @@ const cols = n >= 3 ? "md:grid-cols-3" : n === 2 ? "md:grid-cols-2" : "max-w-md 
 - `interface Props` required; every field optional; only `string | number | boolean | "a"|"b" | Array<…> | {…}`.
 - Only `import … from "webto/variant"`; no other imports, no `Astro.*` except `Astro.props`.
 - Frontmatter = `const` expressions only (no statements, loops, `await`, casts).
-- Tags/attributes from the allowlist; no `on*`, `set:html`, `iframe`, `form`, `input` (a `form` section places `<FormFields />` instead — `wvf.md` §5c), external `src`.
+- Tags/attributes from the allowlist; no `on*`, `set:html`, `iframe`, `form`, `input` (a `form` section places `<FormFields />` instead — `wvf.md` §5c; a map is `<MapEmbed />` — §5d), external `src`.
 - Every visible word editable or `t()`; every `<img>` has `alt`; no hardcoded colors/fonts/radius.
 - One `<script is:inline>` ≤ 8 KB obeying the reject list; a script (or a hardcoded off-platform link) gets an automatic security check that approves it or hands it to an admin (`wvf.md` §4 "Review rule").
 - Run `variant-check --strict` and get `0 error(s)` before handing over.
