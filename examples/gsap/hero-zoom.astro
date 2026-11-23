@@ -1,0 +1,40 @@
+---
+import { img, url, Container, Button, EditUrlPill } from "webto/variant";
+
+interface Props {
+  headline?: string;
+  subheadline?: string;
+  ctaText?: string;
+  ctaUrl?: string;
+  images?: Array<{ url: string; alt?: string }>;
+}
+
+const { headline = "Rumah tropis yang dibangun untuk iklim kita", subheadline = "", ctaText = "Lihat proyek", ctaUrl = "#", images = [] } = Astro.props;
+const photo = images[0];
+---
+<section class="pt-24 sm:pt-32 pb-16 bg-background text-foreground">
+  <Container>
+    <div class="max-w-3xl mx-auto text-center">
+      <h1 class="font-bold tracking-tight"><span data-edit-field="headline">{headline}</span></h1>
+      {subheadline && <p data-edit-field="subheadline" class="mt-5 text-lg text-muted-foreground">{subheadline}</p>}
+      <div class="mt-8"><Button href={url(ctaUrl)} size="lg" class="relative"><span data-edit-field="ctaText">{ctaText}</span><EditUrlPill field="ctaUrl" value={ctaUrl} /></Button></div>
+    </div>
+  </Container>
+  {photo && (
+    <div data-frame class="mt-14 mx-auto w-full overflow-hidden rounded-xl" style="transform-origin: 50% 0%;">
+      <img data-photo src={img(photo.url, 1920)} data-edit-image="images.0.url" alt={photo.alt ?? ""} fetchpriority="high" class="w-full h-[70vh] object-cover" />
+    </div>
+  )}
+</section>
+
+<script is:inline data-uses="gsap scroll-trigger">
+  gsap.context(() => {
+    const frame = root.querySelector("[data-frame]");
+    if (!frame) return;
+    const tl = gsap.timeline({
+      scrollTrigger: { trigger: frame, start: "top 85%", end: "top 15%", scrub: true },
+    });
+    tl.fromTo(frame, { scale: 0.82 }, { scale: 1, ease: "none" })
+      .fromTo(root.querySelector("[data-photo]"), { scale: 1.25 }, { scale: 1, ease: "none" }, 0);
+  }, root);
+</script>

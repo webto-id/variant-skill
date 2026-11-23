@@ -1,0 +1,66 @@
+---
+import { img, Container } from "webto/variant";
+
+interface Props {
+  heading?: string;
+  subheading?: string;
+  steps?: Array<{ title: string; description: string; image?: string }>;
+}
+
+const { heading = "Dari sketsa sampai serah kunci", subheading = "", steps = [] } = Astro.props;
+---
+<section class="py-20 sm:py-28 bg-background text-foreground">
+  <Container>
+    <div class="max-w-2xl mb-12">
+      <h2 class="font-bold tracking-tight"><span data-edit-field="heading">{heading}</span></h2>
+      {subheading && <p data-edit-field="subheading" class="mt-4 text-lg text-muted-foreground">{subheading}</p>}
+    </div>
+    <div class="grid gap-10 md:grid-cols-2">
+      <div class="hidden md:block">
+        <div class="sticky top-24 aspect-[4/5] overflow-hidden rounded-xl bg-muted">
+          {steps.map((s, i) => s.image && (
+            <img data-shot src={img(s.image, 1000)} data-edit-image={`steps.${i}.image`} alt={s.title} loading="lazy" class:list={["shot absolute inset-0 w-full h-full object-cover", i === 0 && "is-on"]} />
+          ))}
+        </div>
+      </div>
+      <ol class="space-y-[30vh] md:py-[20vh]">
+        {steps.map((s, i) => (
+          <li data-step class:list={["step", i === 0 && "is-on"]}>
+            <span aria-hidden="true" class="font-mono text-sm text-primary-text">{String(i + 1).padStart(2, "0")}</span>
+            <h3 data-edit-field={`steps.${i}.title`} class="mt-2 font-semibold">{s.title}</h3>
+            <p data-edit-field={`steps.${i}.description`} class="mt-3 text-muted-foreground">{s.description}</p>
+            {s.image && <img src={img(s.image, 800)} data-edit-image={`steps.${i}.image`} alt={s.title} loading="lazy" class="md:hidden mt-5 w-full aspect-[4/3] object-cover rounded-lg" />}
+          </li>
+        ))}
+      </ol>
+    </div>
+  </Container>
+</section>
+
+<style>
+  .shot { opacity: 0; transition: opacity 0.6s ease; }
+  .shot.is-on { opacity: 1; }
+  .step { transition: opacity 0.4s ease; }
+  @media (min-width: 768px) {
+    .step:not(.is-on) { opacity: 0.35; }
+  }
+</style>
+
+<script is:inline data-uses="gsap scroll-trigger">
+  gsap.context(() => {
+    const steps = root.querySelectorAll("[data-step]");
+    const shots = root.querySelectorAll("[data-shot]");
+    const show = (n) => {
+      steps.forEach((el, i) => el.classList.toggle("is-on", i === n));
+      shots.forEach((el, i) => el.classList.toggle("is-on", i === n));
+    };
+    steps.forEach((step, i) => {
+      ScrollTrigger.create({
+        trigger: step,
+        start: "top center",
+        end: "bottom center",
+        onToggle: (st) => { if (st.isActive) show(i); },
+      });
+    });
+  }, root);
+</script>

@@ -1,0 +1,42 @@
+---
+import { Container } from "webto/variant";
+
+interface Props {
+  heading?: string;
+  subheading?: string;
+  features?: Array<{ title: string; description: string }>;
+}
+
+const { heading = "Kenapa kami", subheading = "", features = [] } = Astro.props;
+---
+<section data-tone class="tone py-24 sm:py-32">
+  <Container>
+    <div class="max-w-2xl mb-14">
+      <h2 class="font-bold tracking-tight"><span data-edit-field="heading">{heading}</span></h2>
+      {subheading && <p data-edit-field="subheading" class="mt-4 text-lg tone-muted">{subheading}</p>}
+    </div>
+    <div class="grid gap-10 md:grid-cols-3">
+      {features.map((f, i) => (
+        <div class="border-t tone-line pt-6">
+          <h3 data-edit-field={`features.${i}.title`} class="font-semibold">{f.title}</h3>
+          <p data-edit-field={`features.${i}.description`} class="mt-3 tone-muted">{f.description}</p>
+        </div>
+      ))}
+    </div>
+  </Container>
+</section>
+
+<style>
+  .tone { background: var(--color-background); color: var(--color-foreground); transition: background-color 0.7s ease, color 0.7s ease; }
+  .tone-muted { color: var(--color-muted-foreground); transition: color 0.7s ease; }
+  .tone-line { border-color: var(--color-border); transition: border-color 0.7s ease; }
+  .tone.is-dark { background: var(--color-foreground); color: var(--color-background); }
+  .tone.is-dark .tone-muted { color: color-mix(in oklab, var(--color-background) 70%, transparent); }
+  .tone.is-dark .tone-line { border-color: color-mix(in oklab, var(--color-background) 20%, transparent); }
+</style>
+
+<script is:inline data-uses="gsap scroll-trigger">
+  gsap.context(() => {
+    ScrollTrigger.create({ trigger: root, start: "top 55%", end: "bottom 45%", toggleClass: { targets: root.querySelector("[data-tone]"), className: "is-dark" } });
+  }, root);
+</script>

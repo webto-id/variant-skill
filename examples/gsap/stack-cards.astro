@@ -1,0 +1,52 @@
+---
+import { img, Container } from "webto/variant";
+
+interface Props {
+  heading?: string;
+  subheading?: string;
+  features?: Array<{ title: string; description: string; image?: string }>;
+}
+
+const { heading = "Cara kami bekerja", subheading = "", features = [] } = Astro.props;
+---
+<section class="py-20 sm:py-28 bg-background text-foreground">
+  <Container>
+    <div class="max-w-2xl mb-12">
+      <h2 class="font-bold tracking-tight"><span data-edit-field="heading">{heading}</span></h2>
+      {subheading && <p data-edit-field="subheading" class="mt-4 text-lg text-muted-foreground">{subheading}</p>}
+    </div>
+    <div class="stack">
+      {features.map((f, i) => (
+        <article data-card class="stack-card grid gap-6 md:grid-cols-2 items-center rounded-xl border border-border bg-card text-card-foreground p-6 sm:p-10 shadow-xl" style={`--i: ${i}`}>
+          <div>
+            <span aria-hidden="true" class="text-sm font-mono text-primary-text">{String(i + 1).padStart(2, "0")}</span>
+            <h3 data-edit-field={`features.${i}.title`} class="mt-3 font-semibold">{f.title}</h3>
+            <p data-edit-field={`features.${i}.description`} class="mt-3 text-muted-foreground">{f.description}</p>
+          </div>
+          {f.image && <img src={img(f.image, 800)} data-edit-image={`features.${i}.image`} alt={f.title} loading="lazy" class="w-full aspect-[4/3] object-cover rounded-lg" />}
+        </article>
+      ))}
+    </div>
+  </Container>
+</section>
+
+<style>
+  .stack { display: grid; gap: 2rem; }
+  .stack-card { position: sticky; top: calc(5rem + var(--i) * 1.25rem); transform-origin: 50% 0%; }
+</style>
+
+<script is:inline data-uses="gsap scroll-trigger">
+  gsap.context(() => {
+    const cards = root.querySelectorAll("[data-card]");
+    cards.forEach((card, i) => {
+      const next = cards[i + 1];
+      if (!next) return;
+      gsap.fromTo(card, { scale: 1, filter: "brightness(1)" }, {
+        scale: 0.92,
+        filter: "brightness(0.9)",
+        ease: "none",
+        scrollTrigger: { trigger: next, start: "top bottom", end: "top 20%", scrub: true },
+      });
+    });
+  }, root);
+</script>

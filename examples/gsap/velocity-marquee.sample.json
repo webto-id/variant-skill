@@ -1,0 +1,30 @@
+{
+  "heading": "Dipercaya oleh",
+  "subheading": "",
+  "logos": [
+    {
+      "name": "Satu",
+      "image": "https://placehold.co/240x80/png?text=Satu"
+    },
+    {
+      "name": "Dua",
+      "image": "https://placehold.co/240x80/png?text=Dua"
+    },
+    {
+      "name": "Tiga",
+      "image": "https://placehold.co/240x80/png?text=Tiga"
+    },
+    {
+      "name": "Empat",
+      "image": "https://placehold.co/240x80/png?text=Empat"
+    },
+    {
+      "name": "Lima",
+      "image": "https://placehold.co/240x80/png?text=Lima"
+    },
+    {
+      "name": "Enam",
+      "image": "https://placehold.co/240x80/png?text=Enam"
+    }
+  ]
+}

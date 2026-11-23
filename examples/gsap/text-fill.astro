@@ -1,0 +1,40 @@
+---
+import { Container } from "webto/variant";
+
+interface Props {
+  heading?: string;
+  content?: string;
+}
+
+const { heading = "", content = "Kami percaya rumah yang baik dibangun pelan-pelan, dengan bahan yang jujur dan tukang yang dikenal namanya." } = Astro.props;
+---
+<section class="py-24 sm:py-36 bg-background text-foreground">
+  <Container>
+    <div class="max-w-4xl">
+      {heading && <p class="text-sm font-semibold uppercase tracking-widest text-primary-text mb-6"><span data-edit-field="heading">{heading}</span></p>}
+      <p class="text-3xl sm:text-5xl font-semibold leading-tight tracking-tight">
+        <span data-fill data-edit-field="content" class="fill">{content}</span>
+      </p>
+    </div>
+  </Container>
+</section>
+
+<style>
+  .fill {
+    --fill: 100%;
+    background-image: linear-gradient(90deg, var(--color-foreground) var(--fill), color-mix(in oklab, var(--color-foreground) 28%, transparent) var(--fill));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+</style>
+
+<script is:inline data-uses="gsap scroll-trigger">
+  gsap.context(() => {
+    gsap.fromTo(root.querySelector("[data-fill]"), { "--fill": "0%" }, {
+      "--fill": "100%",
+      ease: "none",
+      scrollTrigger: { trigger: root.querySelector("[data-fill]"), start: "top 80%", end: "bottom 35%", scrub: true },
+    });
+  }, root);
+</script>

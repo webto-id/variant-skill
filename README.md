@@ -39,7 +39,10 @@ npx @webto-id/variant-check my-variant.astro --type features-grid --strict --con
 | `references/schema.md` | Section types and their base content fields; how `interface Props` is classified |
 | `references/tailwind.md` | Theme tokens and which Tailwind classes compile |
 | `references/design.md` | What makes a variant good (and what gets it rejected in review) |
-| `examples/` | Two complete variants that pass `--strict`, each with a `sample.json` |
+| `references/catalog.md` | The `variant.json` manifest: mood enum, description rules |
+| `references/webgl.md` | WebGL with the platform's OGL: poster-first, what the platform caps |
+| `references/gsap-recipes.md` | Webflow/Framer scroll effects (stacking cards, text fill on scroll, horizontal gallery, magnetic button…) as tested recipes |
+| `examples/` | Complete variants that pass `--strict`, each with a `sample.json` and `variant.json`; `examples/gsap/` holds the GSAP recipes |
 
 ## Docs
 

@@ -1,0 +1,40 @@
+---
+import { img } from "webto/variant";
+
+interface Props {
+  heading?: string;
+  logos?: Array<{ name: string; image: string; url?: string }>;
+}
+
+const { heading = "Dipercaya oleh", logos = [] } = Astro.props;
+---
+<section class="py-16 bg-background text-foreground overflow-hidden">
+  <p class="text-center text-sm uppercase tracking-widest text-muted-foreground mb-10"><span data-edit-field="heading">{heading}</span></p>
+  <div data-rail class="flex w-max">
+    {[0, 1].map((copy) => (
+      <ul class="flex shrink-0 items-center gap-16 pr-16" aria-hidden={copy === 1 ? "true" : undefined}>
+        {logos.map((l, i) => (
+          <li class="shrink-0">
+            <img src={img(l.image, 320)} data-edit-image={`logos.${i}.image`} alt={l.name} loading="lazy" class="h-10 w-auto opacity-70" />
+          </li>
+        ))}
+      </ul>
+    ))}
+  </div>
+</section>
+
+<script is:inline data-uses="gsap scroll-trigger">
+  gsap.context(() => {
+    const loop = gsap.to(root.querySelector("[data-rail]"), { xPercent: -50, duration: 30, ease: "none", repeat: -1 });
+    ScrollTrigger.create({
+      trigger: root,
+      start: "top bottom",
+      end: "bottom top",
+      onUpdate: (st) => {
+        const boost = Math.min(4, 1 + Math.abs(st.getVelocity()) / 400);
+        loop.timeScale(boost * st.direction);
+        gsap.to(loop, { timeScale: st.direction, duration: 0.8, ease: "power2.out", overwrite: true });
+      },
+    });
+  }, root);
+</script>

@@ -1,0 +1,10 @@
+{
+  "sectionType": "text-block",
+  "name": "Text Fill",
+  "description": "One large statement paragraph that fills from a faint tone to full colour, line by line, as the visitor scrolls past it.",
+  "mood": [
+    "editorial",
+    "minimal"
+  ],
+  "fits": "one statement of 15 to 45 words, a mission or philosophy"
+}

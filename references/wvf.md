@@ -485,7 +485,7 @@ The platform hosts **GSAP 3.15** (core + ScrollTrigger) and loads it **only for 
 
 `data-uses` takes `gsap` and/or `scroll-trigger` (`scroll-trigger` implies `gsap`); anything else is `uses-unknown`. Other plugins (SplitText, Flip, Draggable…) are not available. `gsap` and `ScrollTrigger` are then in scope as plain names — never load GSAP yourself, never `gsap.registerPlugin` (the platform registers ScrollTrigger). Without the attribute, naming `gsap`/`ScrollTrigger` is `gsap-undeclared`. A page without a GSAP variant downloads nothing.
 
-**Use `data-wv-effect` first** (§5b). Reveal, fade, stagger, counter and soft parallax need no script, no review and no library. Reach for GSAP only for what the effect library cannot do: a sequenced hero timeline, scroll storytelling, pin + scrub, horizontal scroll sections, pointer-follow (`gsap.quickTo`).
+**Use `data-wv-effect` first** (§5b). Reveal, fade, stagger, counter and soft parallax need no script, no review and no library. Reach for GSAP only for what the effect library cannot do: a sequenced hero timeline, scroll storytelling, pin + scrub, horizontal scroll sections, pointer-follow (`gsap.quickTo`). Tested recipes for the common ones (stacking cards, text fill on scroll, horizontal gallery, image zoom, clip reveal, sticky steps, velocity marquee, colour change, magnetic button): `references/gsap-recipes.md` and `examples/gsap/`.
 
 **Rules for authors**
 

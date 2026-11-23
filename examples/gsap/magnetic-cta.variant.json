@@ -1,0 +1,10 @@
+{
+  "sectionType": "cta",
+  "name": "Magnetic Cta",
+  "description": "Centered call to action with a large round button that leans toward the pointer and springs back when the pointer leaves.",
+  "mood": [
+    "playful",
+    "bold"
+  ],
+  "fits": "a short heading and a 1 to 3 word button label"
+}

@@ -1,0 +1,10 @@
+{
+  "sectionType": "hero",
+  "name": "Hero Zoom",
+  "description": "Centered headline and button above one wide photo that starts inset and grows to full width while the page scrolls.",
+  "mood": [
+    "airy",
+    "luxurious"
+  ],
+  "fits": "short headline + one strong landscape photo"
+}

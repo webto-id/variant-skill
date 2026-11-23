@@ -1,0 +1,52 @@
+---
+import { img, Container, AddImageButton } from "webto/variant";
+
+interface Props {
+  heading?: string;
+  subheading?: string;
+  images?: Array<{ url: string; alt?: string; caption?: string }>;
+}
+
+const { heading = "Proyek terbaru", subheading = "", images = [] } = Astro.props;
+---
+<section class="py-20 sm:py-28 bg-background text-foreground overflow-hidden">
+  <div data-pin class="md:h-screen md:flex md:flex-col md:justify-center">
+    <Container>
+      <div class="max-w-2xl mb-10">
+        <h2 class="font-bold tracking-tight"><span data-edit-field="heading">{heading}</span></h2>
+        {subheading && <p data-edit-field="subheading" class="mt-4 text-lg text-muted-foreground">{subheading}</p>}
+      </div>
+    </Container>
+    <div data-track class="track flex gap-6 px-4 sm:px-8 scroll-px-4 sm:scroll-px-8 overflow-x-auto snap-x snap-mandatory md:overflow-visible md:w-max">
+      {images.map((im, i) => (
+        <figure class="shrink-0 w-[80vw] sm:w-[60vw] md:w-[38vw] snap-start">
+          <img src={img(im.url, 1200)} data-edit-image={`images.${i}.url`} alt={im.alt ?? ""} loading="lazy" class="w-full aspect-[4/3] object-cover rounded-xl" />
+          {im.caption && <figcaption data-edit-field={`images.${i}.caption`} class="mt-3 text-sm text-muted-foreground">{im.caption}</figcaption>}
+        </figure>
+      ))}
+    </div>
+    <Container><AddImageButton path={`images.${images.length}.url`} visible={images.length < 20} /></Container>
+  </div>
+</section>
+
+<script is:inline data-uses="gsap scroll-trigger">
+  gsap.context(() => {
+    const track = root.querySelector("[data-track]");
+    const mm = gsap.matchMedia();
+    mm.add("(min-width: 768px)", () => {
+      const distance = () => Math.max(0, track.scrollWidth - root.clientWidth);
+      gsap.to(track, {
+        x: () => -distance(),
+        ease: "none",
+        scrollTrigger: {
+          trigger: root.querySelector("[data-pin]"),
+          start: "top top",
+          end: () => "+=" + distance(),
+          pin: true,
+          scrub: 0.6,
+          invalidateOnRefresh: true,
+        },
+      });
+    });
+  }, root);
+</script>

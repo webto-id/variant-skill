@@ -1,0 +1,10 @@
+{
+  "sectionType": "gallery",
+  "name": "Horizontal Gallery",
+  "description": "Photo gallery that pins on desktop and slides its row of large landscape photos sideways while the visitor scrolls; a swipeable row on phones.",
+  "mood": [
+    "editorial",
+    "bold"
+  ],
+  "fits": "4 to 10 landscape photos with short captions"
+}

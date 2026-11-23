@@ -1,0 +1,10 @@
+{
+  "sectionType": "gallery",
+  "name": "Clip Reveal",
+  "description": "Two-column photo grid whose photos wipe in from the bottom with a slow zoom-out as each one enters the screen.",
+  "mood": [
+    "editorial",
+    "luxurious"
+  ],
+  "fits": "2 to 8 portrait photos"
+}

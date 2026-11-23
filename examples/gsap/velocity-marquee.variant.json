@@ -1,0 +1,10 @@
+{
+  "sectionType": "logo-cloud",
+  "name": "Velocity Marquee",
+  "description": "Single endless row of client logos that drifts sideways and speeds up, or reverses, with the visitor's scrolling.",
+  "mood": [
+    "bold",
+    "playful"
+  ],
+  "fits": "5 or more logos"
+}

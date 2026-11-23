@@ -1,0 +1,10 @@
+{
+  "sectionType": "features-grid",
+  "name": "Invert On Scroll",
+  "description": "Three-column feature list whose section swaps to the dark foreground colour while it is in the middle of the screen, and back when it leaves.",
+  "mood": [
+    "bold",
+    "dark"
+  ],
+  "fits": "3 to 6 features with short descriptions, no images"
+}

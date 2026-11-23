@@ -1,0 +1,10 @@
+{
+  "sectionType": "features-grid",
+  "name": "Stack Cards",
+  "description": "Full-width feature cards that stick near the top of the screen one after another; each card shrinks and dims slightly as the next one slides over it.",
+  "mood": [
+    "bold",
+    "editorial"
+  ],
+  "fits": "3 to 6 steps or features, each with a title, a short description and a photo"
+}

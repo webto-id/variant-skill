@@ -1,0 +1,10 @@
+{
+  "sectionType": "steps",
+  "name": "Sticky Steps",
+  "description": "Process steps in one column beside a sticky photo that changes to the current step's photo while the visitor scrolls; photos sit under each step on phones.",
+  "mood": [
+    "editorial",
+    "calm"
+  ],
+  "fits": "3 to 6 steps, each with a photo"
+}

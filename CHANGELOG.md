@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.72 — 2026-11-23
+
+- **GSAP recipes for the effects people name from Webflow and Framer** (`references/gsap-recipes.md`, `examples/gsap/`). Nine complete variants, each passing `variant-check --strict` and run in a browser at 1280 and 390 px: stacking cards ("scroll to stack"), text that fills with colour on scroll (one editable text node, so power-word markers survive), a pinned horizontal gallery that becomes a swipe row on phones, a hero photo that grows on scroll, a clip-path photo reveal, a sticky photo beside scrolling steps, a logo marquee that speeds up with scroll velocity, a section that turns dark while centred, and a magnetic button. The page also lists what the lint refuses along the way (`self` as a parameter name, `rect.top`, `&nbsp;` between split words) and two things only the browser shows (opacity on stacked cards, a `filter` tween starting from `none`).
+
 ## 0.1.71 — 2026-11-20
 
 - **`<MapEmbed />`: a Google map inside your own variant** (`wvf.md` §5d, `variant-check` ≥ 0.1.65). `<iframe>` stays banned; the macro is the one platform-owned frame, like `<FormFields />`. It draws the section's own `mapEmbedUrl` or `address` (read from the stored content, never from your defaults), frames only Google's embed URLs, takes no prop but `class`, and is allowed once per variant in any section that declares `address`/`mapEmbedUrl` (`map`, `contact`, a footer). New lint codes `map-embed-prop`, `map-embed-count`, `map-embed-no-source`. `schema.md` says how `map` and `contact` variants use it.

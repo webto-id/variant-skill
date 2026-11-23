@@ -1,0 +1,45 @@
+---
+import { url, Container, EditUrlPill } from "webto/variant";
+
+interface Props {
+  heading?: string;
+  description?: string;
+  buttonText?: string;
+  buttonUrl?: string;
+}
+
+const { heading = "Siap mulai?", description = "", buttonText = "Hubungi kami", buttonUrl = "#" } = Astro.props;
+---
+<section class="py-24 sm:py-32 bg-background text-foreground">
+  <Container>
+    <div class="text-center max-w-2xl mx-auto">
+      <h2 class="font-bold tracking-tight"><span data-edit-field="heading">{heading}</span></h2>
+      {description && <p data-edit-field="description" class="mt-4 text-lg text-muted-foreground">{description}</p>}
+      <div class="mt-12 flex justify-center">
+        <a data-magnet href={url(buttonUrl)} class="relative inline-flex h-36 w-36 items-center justify-center rounded-full bg-primary text-primary-foreground font-semibold shadow-xl">
+          <span data-magnet-label data-edit-field="buttonText" class="px-4 text-center">{buttonText}</span>
+          <EditUrlPill field="buttonUrl" value={buttonUrl} />
+        </a>
+      </div>
+    </div>
+  </Container>
+</section>
+
+<script is:inline data-uses="gsap">
+  gsap.context(() => {
+    if (!window.matchMedia("(pointer: fine)").matches) return;
+    const btn = root.querySelector("[data-magnet]");
+    const label = root.querySelector("[data-magnet-label]");
+    const bx = gsap.quickTo(btn, "x", { duration: 0.5, ease: "power3.out" });
+    const by = gsap.quickTo(btn, "y", { duration: 0.5, ease: "power3.out" });
+    const lx = gsap.quickTo(label, "x", { duration: 0.5, ease: "power3.out" });
+    const ly = gsap.quickTo(label, "y", { duration: 0.5, ease: "power3.out" });
+    btn.addEventListener("pointermove", (e) => {
+      const r = btn.getBoundingClientRect();
+      const dx = e.clientX - (r.x + r.width / 2);
+      const dy = e.clientY - (r.y + r.height / 2);
+      bx(dx * 0.35); by(dy * 0.35); lx(dx * 0.15); ly(dy * 0.15);
+    });
+    btn.addEventListener("pointerleave", () => { bx(0); by(0); lx(0); ly(0); });
+  }, root);
+</script>
