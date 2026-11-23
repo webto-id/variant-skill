@@ -39,6 +39,8 @@ Before calling it done, render it with:
 
 Decide, per variant, what happens under 640 px: stack, hide decoration, reduce type scale (`text-3xl sm:text-5xl`), turn a 4-up grid into a 1-up or a horizontal scroll (`overflow-x-auto snap-x`). Tap targets ≥ 44 px. Test at 390 px width in the preview.
 
+A horizontal scroll is a phone answer. On a desktop it draws a real scrollbar under the row, and a row of four cards that would fit as a grid instead shows three and a sliver; neither shows in a headless screenshot or in the page's own overflow, which stays 0. So a strip that scrolls on a phone becomes a grid from `lg` up (`lg:grid lg:grid-cols-4 lg:overflow-visible`, columns from the item count as in §2), and stays a strip there only when the items really outnumber the width (12 logos, a long gallery). Where it stays, hide the bar (`[scrollbar-width:none] [&::-webkit-scrollbar]:hidden`) and give a visible way across: arrows, or the next item cut at the edge. A 4-card demo strip shipped with the bar on a 1280 px screen (2026-11-23).
+
 A WVF navbar takes its own space above the first section, at every width: the platform pins its wrapper as a solid bar in the page flow (`wvf.md` §4b), never over the hero. So a hero needs no top padding to clear it. Padding sized for an overlaid navbar (`pt-24`, `pt-28`) leaves an empty band under the header on phones, and the preview does not show it, because a preview has no navbar. Keep the hero's top padding about the same as the other sections' (`pt-10`, `pt-12`); a clinic demo shipped with `pt-28 sm:pt-10` and a 112 px gap on phones (2026-11-23).
 
 ## 4. Typography

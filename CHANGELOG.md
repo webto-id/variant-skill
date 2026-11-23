@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.74 — 2026-11-23
+
+- **A sideways strip is a phone layout** (`design.md` §3). On a desktop a row that scrolls inside itself draws a real scrollbar and shows three cards and a sliver of a fourth; a headless screenshot draws no scrollbar and the page's own overflow stays 0, so neither check sees it. A strip becomes a grid from `lg` up, unless the items really outnumber the width; where it stays, hide the bar and give a visible way across.
+
 ## 0.1.73 — 2026-11-23
 
 - **A hero needs no top padding for the navbar** (`design.md` §3). A WVF navbar is a solid bar in the page flow, so padding sized for an overlaid one (`pt-24`, `pt-28`) leaves an empty band under the header on phones, which the preview cannot show.
